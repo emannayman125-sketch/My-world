@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-paper text-ink dark:bg-night dark:text-moon transition-colors duration-300;
+}
+
+/* تركيز واضح لمستخدمي لوحة المفاتيح */
+:focus-visible {
+  outline: 2px solid theme("colors.lantern.DEFAULT");
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+button {
+  @apply active:scale-[0.97] transition-transform duration-150;
+}
+
+.card {
+  @apply bg-paper-card dark:bg-night-card rounded-soft border border-black/5 dark:border-white/5
+         shadow-card dark:shadow-cardDark transition-shadow duration-300;
+}
+
+.card-hover {
+  @apply hover:shadow-glow dark:hover:shadow-duskGlow transition-all duration-300;
+}
+
+.glass {
+  @apply backdrop-blur-xl bg-white/60 dark:bg-white/[0.04] border border-white/40 dark:border-white/10;
+}
+
+.aurora-bg {
+  @apply bg-aurora;
+}
+
+/* شريط تمرير رفيع ومتناسق مع الهوية */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: theme("colors.dusk.soft");
+  border-radius: 999px;
+}
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ============================================================
+   Trading Desk — شخصية بصرية منفصلة: طرفية بيانات هادية دايمًا
+   غامقة (زي محطة تداول حقيقية)، بغض النظر عن وضع الموقع العام.
+   ============================================================ */
+.desk-shell {
+  @apply bg-[#0b0d12] text-[#e7e9ee] min-h-screen;
+}
+
+.desk-card {
+  @apply bg-[#12151c] border border-white/[0.06] rounded-lg;
+}
+
+.desk-card-hover {
+  @apply hover:border-white/[0.14] transition-colors duration-200;
+}
+
+.desk-mono {
+  font-variant-numeric: tabular-nums;
+  @apply font-mono tracking-tight;
+}
+
+.desk-muted {
+  @apply text-[#8b93a3];
+}
+
+.desk-accent {
+  @apply text-sky-400;
+}
+
+/* ============================================================
+   Business Hub — شخصية بصرية منفصلة: طابع تنفيذي/رسمي (executive),
+   مش نفس دفء بقية الموقع. حواف أقل استدارة، شريط نحاسي جانبي
+   زي غلاف ملف رسمي، وليبل صغير بالحروف الكبيرة فوق كل قسم.
+   ============================================================ */
+.exec-card {
+  @apply bg-paper-card dark:bg-night-card rounded-md border border-black/[0.06] dark:border-white/[0.08]
+         border-s-[3px] border-s-[#B46F4D] shadow-none transition-colors duration-200;
+}
+
+.exec-card-hover {
+  @apply hover:border-black/[0.12] dark:hover:border-white/[0.16] transition-colors duration-200;
+}
+
+.exec-label {
+  @apply text-[10px] tracking-[0.14em] text-[#B46F4D] dark:text-[#D8C6AF] font-medium;
+}
+
+.exec-accent {
+  @apply text-[#B46F4D] dark:text-[#D8C6AF];
+}
+
+.exec-accent-bg {
+  background-color: rgba(180, 111, 77, 0.12);
+  @apply text-[#7a4a33] dark:text-[#D8C6AF];
+}
+
+/* ============================================================
+   Supply Chain — شخصية بصرية منفصلة: مركز عمليات صناعي/دقيق.
+   حواف حادة تقريبًا، شريط علوي فولاذي زي لوحة تحكم، وليبلز
+   بخط Monospace زي قراءة أجهزة القياس.
+   ============================================================ */
+.ops-card {
+  @apply bg-paper-card dark:bg-night-card rounded-sm border border-black/[0.06] dark:border-white/[0.08]
+         border-t-2 border-t-sky-600 shadow-none transition-colors duration-200;
+}
+
+.ops-card-hover {
+  @apply hover:border-sky-500/30 transition-colors duration-200;
+}
+
+.ops-label {
+  @apply font-mono text-[10px] tracking-[0.12em] text-sky-600 dark:text-sky-400 uppercase;
+}
+
+/* ============================================================
+   Creator Studio — شخصية بصرية منفصلة: استوديو إبداعي، خفيف
+   وحيوي، حواف أوسع استدارة من الموقع العادي، ولمسة بنفسجية.
+   ============================================================ */
+.studio-card {
+  @apply bg-paper-card dark:bg-night-card rounded-2xl border border-violet-500/10 dark:border-violet-400/10
+         shadow-sm transition-all duration-300;
+}
+
+.studio-card-hover {
+  @apply hover:border-violet-500/30 hover:shadow-md transition-all duration-300;
+}
+
+.studio-label {
+  @apply text-[10px] tracking-[0.14em] text-violet-500 font-medium;
+}
