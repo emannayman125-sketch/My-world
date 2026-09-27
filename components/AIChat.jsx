@@ -37,7 +37,12 @@ export default function AIChat({ strings, locale, userId }) {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error === "no_api_key" ? ai.errorNoKey : ai.errorGeneric);
+        if (data.error === "no_api_key") {
+          setError(ai.errorNoKey);
+        } else {
+          const detail = data.detail ? ` (${data.error}: ${String(data.detail).slice(0, 200)})` : ` (${data.error})`;
+          setError(ai.errorGeneric + detail);
+        }
         setLoading(false);
         return;
       }
