@@ -109,18 +109,26 @@ export default async function DashboardPage() {
           )}
 
           <FadeIn>
-            <div className="card card-hover p-6 flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-4">
+            <div className="card card-hover p-8 flex items-center justify-between flex-wrap gap-6 relative overflow-hidden">
+              <div className="absolute inset-0 bg-aurora pointer-events-none" />
+              <div className="flex items-center gap-4 relative">
                 {profile?.avatar_url && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={profile.avatar_url}
                     alt={name}
-                    className="w-14 h-14 rounded-full object-cover shrink-0"
+                    className="w-16 h-16 rounded-full object-cover shrink-0 ring-2 ring-lantern/20"
                   />
                 )}
                 <div>
-                  <h1 className="font-display text-3xl">
+                  <p className="text-xs text-lantern font-medium tracking-wide mb-1">
+                    {now.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+                      weekday: "long",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
+                  <h1 className="font-display text-4xl">
                     {greeting}, {name} ☀️
                   </h1>
                   <p className="text-ink-muted dark:text-moon-muted mt-1">{d.subtitle}</p>
@@ -129,7 +137,9 @@ export default async function DashboardPage() {
                   </div>
                 </div>
               </div>
-              <ProgressRing percent={progressPercent} label={d.progressToday} />
+              <div className="relative">
+                <ProgressRing percent={progressPercent} label={d.progressToday} size={116} stroke={10} />
+              </div>
             </div>
           </FadeIn>
 
