@@ -59,6 +59,7 @@ Hard rules:
   const result = await callGemini(systemPrompt, messages);
 
   if (result.error) {
+    console.error("Hamzawi/Gemini error:", result.error, result.detail);
     return NextResponse.json({ error: result.error, detail: result.detail }, { status: 502 });
   }
 
