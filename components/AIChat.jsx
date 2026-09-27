@@ -48,8 +48,8 @@ export default function AIChat({ strings, locale, userId }) {
       }
 
       setMessages((list) => [...list, { role: "assistant", content: data.reply }]);
-    } catch {
-      setError(ai.errorGeneric);
+    } catch (err) {
+      setError(ai.errorGeneric + ` (client_exception: ${String(err?.message || err).slice(0, 200)})`);
     }
     setLoading(false);
   }
