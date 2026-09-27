@@ -32,7 +32,7 @@ export default async function BusinessOpsHubPage() {
 
         <div className="grid sm:grid-cols-2 gap-4">
           <Link href="/business" className="exec-card exec-card-hover p-5 flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#B46F4D]/15 text-[#7a4a33] dark:text-[#D8C6AF] shrink-0">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#B46F4D]/25 text-[#8a5339] dark:text-[#D8C6AF] shrink-0">
               <Building2 size={18} strokeWidth={2} />
             </span>
             <div className="flex-1">
@@ -44,7 +44,7 @@ export default async function BusinessOpsHubPage() {
           </Link>
 
           <Link href="/supply-chain" className="ops-card ops-card-hover p-5 flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-400 shrink-0">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/25 text-sky-700 dark:text-sky-400 shrink-0">
               <Truck size={18} strokeWidth={2} />
             </span>
             <div className="flex-1">

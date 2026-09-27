@@ -44,7 +44,7 @@ export default async function LearningHubPage() {
             <Link key={c.href} href={c.href} className="card card-hover p-5 flex items-center gap-3">
               <span
                 className="flex h-10 w-10 items-center justify-center rounded-full shrink-0"
-                style={{ backgroundColor: `${c.accent}22`, color: c.accent }}
+                style={{ backgroundColor: `${c.accent}30`, color: c.accent }}
               >
                 <c.icon size={18} strokeWidth={2} />
               </span>

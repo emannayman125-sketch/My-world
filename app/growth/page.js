@@ -22,9 +22,9 @@ export default async function GrowthHubPage() {
   ]);
 
   const cards = [
-    { href: "/goals", icon: Trophy, title: g.goals, desc: g.goalsDesc, count: (goals || []).length },
-    { href: "/habits", icon: Flame, title: g.habits, desc: g.habitsDesc, count: (habits || []).length },
-    { href: "/review", icon: BarChart3, title: g.review, desc: g.reviewDesc, count: null },
+    { href: "/goals", icon: Trophy, accent: "#B46F4D", title: g.goals, desc: g.goalsDesc, count: (goals || []).length },
+    { href: "/habits", icon: Flame, accent: "#6E8558", title: g.habits, desc: g.habitsDesc, count: (habits || []).length },
+    { href: "/review", icon: BarChart3, accent: "#68788A", title: g.review, desc: g.reviewDesc, count: null },
   ];
 
   return (
@@ -39,7 +39,10 @@ export default async function GrowthHubPage() {
         <div className="grid sm:grid-cols-3 gap-4">
           {cards.map((c) => (
             <Link key={c.href} href={c.href} className="card card-hover p-5 flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sage/20 text-sage shrink-0">
+              <span
+                className="flex h-10 w-10 items-center justify-center rounded-full shrink-0"
+                style={{ backgroundColor: `${c.accent}30`, color: c.accent }}
+              >
                 <c.icon size={18} strokeWidth={2} />
               </span>
               <div className="flex-1">
