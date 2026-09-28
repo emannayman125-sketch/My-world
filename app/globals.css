@@ -45,13 +45,22 @@ button {
   @apply bg-aurora;
 }
 
-/* شريط تمرير رفيع ومتناسق مع الهوية */
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb {
-  background: theme("colors.sage.soft");
-  border-radius: 999px;
-}
+/* شريط تمرير رفيع وهادي (مش سميك وأخضر زي قبل) */
+* { scrollbar-width: thin; scrollbar-color: rgba(23, 40, 31, 0.18) transparent; }
+.dark * { scrollbar-color: rgba(247, 239, 221, 0.2) transparent; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: rgba(23, 40, 31, 0.18); border-radius: 999px; }
+.dark ::-webkit-scrollbar-thumb { background: rgba(247, 239, 221, 0.2); }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* شرائط التابات الأفقية: من غير شريط تمرير ظاهر خالص (بتتسحب بالإصبع) */
+.overflow-x-auto { scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.overflow-x-auto::-webkit-scrollbar { display: none; }
+
+/* على الموبايل: سيبي مكان للـ Bottom Navigation وللـ safe-area */
+@media (max-width: 1023px) {
+  main { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px)) !important; }
+}
 
 /* ============================================================
    Trading Desk — شخصية بصرية منفصلة: طرفية بيانات هادية دايمًا

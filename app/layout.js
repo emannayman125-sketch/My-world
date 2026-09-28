@@ -43,6 +43,7 @@ export const metadata = {
 
 export const viewport = {
   themeColor: "#C6832A",
+  viewportFit: "cover", // lets the PWA use the full screen; safe-area padding keeps content clear
 };
 
 export default function RootLayout({ children }) {

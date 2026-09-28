@@ -138,7 +138,7 @@ export default function TasksManager({ userId, initialTasks, strings }) {
             key={key}
             onClick={() => setFilter(key)}
             className={`rounded-full px-3 py-1 transition
-              ${filter === key ? "bg-dusk text-white" : "bg-black/5 dark:bg-white/5"}`}
+              ${filter === key ? "bg-ink text-paper dark:bg-moon dark:text-night" : "bg-black/5 dark:bg-white/5"}`}
           >
             {label}
           </button>
