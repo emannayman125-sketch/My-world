@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { Sparkles, Flame, CalendarDays, Headphones } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabaseServer";
@@ -17,6 +18,7 @@ import HabitsToday from "@/components/HabitsToday";
 import QuoteOfTheDay from "@/components/QuoteOfTheDay";
 import GettingStarted from "@/components/GettingStarted";
 import DailyBrief from "@/components/DailyBrief";
+import OnboardingPrompt from "@/components/OnboardingPrompt";
 import { pickQuote } from "@/lib/quotes/pickQuote";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
@@ -52,6 +54,7 @@ export default async function DashboardPage({ searchParams }) {
     { data: anyTask },
     { data: anyMemory },
     { data: anyWorldItem },
+    { data: anyGoal },
     dueMessage,
   ] = await Promise.all([
     supabase.from("top3_tasks").select("*").eq("user_id", user.id).eq("for_date", today).order("created_at", { ascending: true }),
@@ -65,6 +68,7 @@ export default async function DashboardPage({ searchParams }) {
     supabase.from("tasks").select("id").eq("user_id", user.id).limit(1),
     supabase.from("memories").select("id").eq("user_id", user.id).limit(1),
     supabase.from("world_items").select("id").eq("user_id", user.id).limit(1),
+    supabase.from("goals").select("id").eq("user_id", user.id).limit(1),
     getDueHiddenMessage(supabase, user),
   ]);
 
@@ -96,6 +100,14 @@ export default async function DashboardPage({ searchParams }) {
     })
     .sort((a, b) => (a.kind === "treasure" ? -1 : 1) - (b.kind === "treasure" ? -1 : 1));
 
+  // Offer Hamzawi's setup while the world is still empty (never forced: "Not now" sets a cookie).
+  const setupDone = cookies().get("onboarding_done")?.value === "1";
+  const worldIsEmpty =
+    (anyTask || []).length === 0 &&
+    (habits || []).length === 0 &&
+    (anyGoal || []).length === 0;
+  const needsSetup = !setupDone && worldIsEmpty;
+
   const greeting = cairo.hour < 12 ? d.greetingMorning : d.greetingEvening;
 
   // ---- derived values for the Lantern Night layout ------------------------
@@ -125,7 +137,7 @@ export default async function DashboardPage({ searchParams }) {
     <div className="min-h-screen bg-paper dark:bg-night lg:ps-64">
       <AppHeader />
       <ReminderNotifier todayEvents={todayEvents || []} strings={strings} />
-      {isBirthdayToday && <BirthdayCelebration userId={user.id} name={name} year={currentYear} strings={strings} preview={previewBirthday} />}
+      {isBirthdayToday && <BirthdayCelebration userId={user.id} name={name} year={currentYear} strings={strings} preview={previewBirthday} nextHref={needsSetup || previewBirthday ? "/onboarding" : undefined} />}
 
       <main className="max-w-2xl mx-auto px-6 pt-4 lg:pt-10 pb-20 space-y-8">
         {dueMessage && (
@@ -169,6 +181,12 @@ export default async function DashboardPage({ searchParams }) {
             strings={strings}
           />
         </FadeIn>
+
+        {needsSetup && (
+          <FadeIn delay={0.015}>
+            <OnboardingPrompt strings={d.onboardingPrompt} />
+          </FadeIn>
+        )}
 
         {/* 1b — Hamzawi's daily brief: suggests, never adds anything by itself */}
         <FadeIn delay={0.02}>

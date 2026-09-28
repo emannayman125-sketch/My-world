@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient";
 
 const COLORS = ["#C6832A", "#6256A8", "#F0EDE6", "#9086C0", "#E8A83C"];
 
-export default function BirthdayCelebration({ userId, name, year, strings, preview = false }) {
+export default function BirthdayCelebration({ userId, name, year, strings, preview = false, nextHref }) {
+  const router = useRouter();
   const tr = strings.dashboard.birthday;
   const canvasRef = useRef(null);
   const [visible, setVisible] = useState(true);
@@ -86,6 +88,8 @@ export default function BirthdayCelebration({ userId, name, year, strings, previ
       await supabase.from("profiles").update({ last_birthday_shown_year: year }).eq("id", userId);
     }
     setVisible(false);
+    // Flow: letter -> celebration -> Hamzawi's setup (if the world is still empty) -> Home.
+    if (nextHref) router.push(nextHref);
   }
 
   if (!visible) return null;
