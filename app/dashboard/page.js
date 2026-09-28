@@ -16,6 +16,7 @@ import MoodCheckin from "@/components/MoodCheckin";
 import HabitsToday from "@/components/HabitsToday";
 import QuoteOfTheDay from "@/components/QuoteOfTheDay";
 import GettingStarted from "@/components/GettingStarted";
+import DailyBrief from "@/components/DailyBrief";
 import { pickQuote } from "@/lib/quotes/pickQuote";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
@@ -164,6 +165,16 @@ export default async function DashboardPage() {
             hasMemory={(anyMemory || []).length > 0}
             hasWorldItem={(anyWorldItem || []).length > 0}
             strings={strings}
+          />
+        </FadeIn>
+
+        {/* 1b — Hamzawi's daily brief: suggests, never adds anything by itself */}
+        <FadeIn delay={0.02}>
+          <DailyBrief
+            locale={locale}
+            strings={d.brief}
+            top3Titles={top3List.map((x) => x.title)}
+            top3Count={top3List.length}
           />
         </FadeIn>
 

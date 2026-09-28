@@ -7,6 +7,7 @@ import Confetti from "./Confetti";
 import FocusMode from "./FocusMode";
 import EmptyState from "./EmptyState";
 import { CheckSquare } from "lucide-react";
+import { todayISO } from "@/lib/time";
 
 export default function TopThree({ userId, initialTasks, strings }) {
   const tr = strings.dashboard.topThree;
@@ -23,7 +24,7 @@ export default function TopThree({ userId, initialTasks, strings }) {
 
     const { data, error } = await supabase
       .from("top3_tasks")
-      .insert({ user_id: userId, title: newTitle.trim() })
+      .insert({ user_id: userId, title: newTitle.trim(), for_date: todayISO() })
       .select()
       .single();
 
