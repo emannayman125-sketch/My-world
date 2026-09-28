@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
+import { todayISO } from "@/lib/time";
 
 const MOOD_KEYS = ["good", "okay", "tired", "energized", "rough"];
 const MOOD_EMOJI = { good: "🙂", okay: "😐", tired: "😴", energized: "🔥", rough: "😔" };
@@ -16,7 +17,7 @@ export default function MoodCheckin({ userId, initialMood, strings }) {
     await supabase
       .from("daily_moods")
       .upsert(
-        { user_id: userId, mood_date: new Date().toISOString().slice(0, 10), mood: key },
+        { user_id: userId, mood_date: todayISO(), mood: key },
         { onConflict: "user_id,mood_date" }
       );
   }

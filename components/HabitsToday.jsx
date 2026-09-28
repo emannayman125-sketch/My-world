@@ -3,10 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { recomputeAndSaveStreak } from "@/lib/streaks";
-
-function todayISO() {
-  return new Date().toISOString().slice(0, 10);
-}
+import { todayISO } from "@/lib/time";
 
 export default function HabitsToday({ userId, habits, initialLogsToday, strings }) {
   const supabase = createClient();

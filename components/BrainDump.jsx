@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
-import { Sparkles, CheckSquare, Lightbulb } from "lucide-react";
+import { Sparkles, CheckSquare, Lightbulb, Mic, Square } from "lucide-react";
+import { useVoice } from "@/lib/useVoice";
 
 const PRIORITY_MAP = { high: "high", medium: "important", low: "normal" };
 
@@ -16,6 +17,12 @@ export default function BrainDump({ userId, strings, locale }) {
   const [notes, setNotes] = useState(null);
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState("");
+
+  // Dictation: speak instead of typing; each finished phrase is appended to the text box.
+  const voice = useVoice({
+    locale,
+    onFinalTranscript: (t) => setText((prev) => (prev ? prev.trimEnd() + " " : "") + t),
+  });
 
   async function extract() {
     if (!text.trim()) return;
@@ -98,6 +105,32 @@ export default function BrainDump({ userId, strings, locale }) {
   return (
     <div className="space-y-4">
       <div className="card p-4 space-y-3">
+        {voice.canListen && (
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={voice.listening ? voice.stopListening : voice.startListening}
+              aria-label={voice.listening ? ai.voice.stop : ai.voice.mic}
+              aria-pressed={voice.listening}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm transition ${
+                voice.listening
+                  ? "bg-sage text-white animate-pulse"
+                  : "bg-sage/15 text-sage dark:text-sage-soft hover:bg-sage/25"
+              }`}
+            >
+              {voice.listening ? <Square size={14} /> : <Mic size={14} />}
+              {voice.listening ? ai.voice.stop : ai.voice.mic}
+            </button>
+            {voice.listening && (
+              <span className="text-xs text-ink-muted dark:text-moon-muted truncate">
+                {voice.interim || ai.voice.listening}
+              </span>
+            )}
+          </div>
+        )}
+        {voice.error === "not-allowed" && (
+          <p className="text-xs text-red-500">{ai.voice.errNotAllowed}</p>
+        )}
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}

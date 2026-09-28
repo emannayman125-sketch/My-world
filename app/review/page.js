@@ -5,13 +5,7 @@ import AppHeader from "@/components/AppHeader";
 import ReviewTabs from "@/components/ReviewTabs";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
-
-function weekStartISO() {
-  const d = new Date();
-  const day = d.getDay();
-  d.setDate(d.getDate() - day);
-  return d.toISOString().slice(0, 10);
-}
+import { todayISO, weekStartISO } from "@/lib/time";
 
 export default async function ReviewPage() {
   const locale = getLocale();
@@ -20,7 +14,7 @@ export default async function ReviewPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
 
   const { data: todayReview } = await supabase
     .from("evening_reviews")

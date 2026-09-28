@@ -19,6 +19,7 @@ import GettingStarted from "@/components/GettingStarted";
 import { pickQuote } from "@/lib/quotes/pickQuote";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
+import { todayISO, cairoNow } from "@/lib/time";
 
 export default async function DashboardPage() {
   const locale = getLocale();
@@ -36,7 +37,7 @@ export default async function DashboardPage() {
 
   if (!profile?.has_seen_welcome) redirect("/welcome");
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
 
   const [
     { data: top3 },
@@ -71,11 +72,11 @@ export default async function DashboardPage() {
   const doneCount = (top3 || []).filter((t) => t.is_done).length;
   const progressPercent = top3 && top3.length > 0 ? Math.round((doneCount / top3.length) * 100) : 0;
 
-  const now = new Date();
-  const currentYear = now.getFullYear();
+  const cairo = cairoNow();
+  const currentYear = cairo.year;
   const isBirthdayToday =
-    profile?.birthday_month === now.getMonth() + 1 &&
-    profile?.birthday_day === now.getDate() &&
+    profile?.birthday_month === cairo.month &&
+    profile?.birthday_day === cairo.day &&
     profile?.last_birthday_shown_year !== currentYear;
 
   const personalThoughts = (customQuotes || []).map((q) => q.content).filter(Boolean);
@@ -87,12 +88,12 @@ export default async function DashboardPage() {
 
   const onThisDay = (journalEntries || [])
     .filter((n) => {
-      const dt = new Date(n.created_at);
-      return dt.getMonth() === now.getMonth() && dt.getDate() === now.getDate() && dt.getFullYear() !== currentYear;
+      const c = cairoNow(new Date(n.created_at));
+      return c.month === cairo.month && c.day === cairo.day && c.year !== currentYear;
     })
     .sort((a, b) => (a.kind === "treasure" ? -1 : 1) - (b.kind === "treasure" ? -1 : 1));
 
-  const greeting = now.getHours() < 12 ? d.greetingMorning : d.greetingEvening;
+  const greeting = cairo.hour < 12 ? d.greetingMorning : d.greetingEvening;
 
   // ---- derived values for the Lantern Night layout ------------------------
   const top3List = top3 || [];
@@ -143,7 +144,8 @@ export default async function DashboardPage() {
             )}
             <div>
               <p className="text-sm text-ink-muted dark:text-moon-muted">
-                {now.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+                {new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+                  timeZone: "Africa/Cairo",
                   weekday: "long",
                   month: "long",
                   day: "numeric",

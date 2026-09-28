@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
 import EmptyState from "./EmptyState";
 import { Plus, Trash2, Package } from "lucide-react";
+import { todayISO } from "@/lib/time";
 
 const STATUS_ORDER = ["draft", "placed", "confirmed", "prepared", "shipped", "in_transit", "arrived", "delivered"];
 const STATUS_COLOR = {
@@ -43,7 +44,7 @@ export default function OrdersManager({ userId, initialOrders, suppliers, string
         quantity: form.quantity.trim() || null,
         supplier_id: form.supplier_id || null,
         expected_delivery: form.expected_delivery || null,
-        order_date: new Date().toISOString().slice(0, 10),
+        order_date: todayISO(),
       })
       .select()
       .single();

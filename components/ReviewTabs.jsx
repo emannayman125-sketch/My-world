@@ -2,17 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
-
-function todayISO() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function weekStartISO() {
-  const d = new Date();
-  const day = d.getDay(); // 0 = Sunday
-  d.setDate(d.getDate() - day);
-  return d.toISOString().slice(0, 10);
-}
+import { todayISO, weekStartISO } from "@/lib/time";
 
 export default function ReviewTabs({ userId, todayReview, weekReview, strings }) {
   const g = strings.growthHub;

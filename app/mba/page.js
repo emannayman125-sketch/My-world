@@ -5,6 +5,7 @@ import { createServerSupabase } from "@/lib/supabaseServer";
 import AppHeader from "@/components/AppHeader";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
+import { todayISO } from "@/lib/time";
 
 export default async function MbaHubPage() {
   const locale = getLocale();
@@ -16,7 +17,7 @@ export default async function MbaHubPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
 
   const [{ data: courses }, { data: assignments }, { data: research }] = await Promise.all([
     supabase.from("mba_courses").select("id, name").eq("user_id", user.id),

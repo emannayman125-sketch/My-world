@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { todayISO as todayCairo, addDaysISO } from "@/lib/time";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import AppHeader from "@/components/AppHeader";
 import ProductivityHubTabs from "@/components/ProductivityHubTabs";
@@ -15,11 +16,8 @@ export default async function TasksPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const todayISO = today.toISOString().slice(0, 10);
-  const yesterdayISO = yesterday.toISOString().slice(0, 10);
+  const todayISO = todayCairo();
+  const yesterdayISO = addDaysISO(-1);
 
   const [
     tasksRes,
