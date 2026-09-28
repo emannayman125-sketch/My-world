@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabaseClient";
 
 const COLORS = ["#C6832A", "#6256A8", "#F0EDE6", "#9086C0", "#E8A83C"];
 
-export default function BirthdayCelebration({ userId, name, year, strings }) {
+export default function BirthdayCelebration({ userId, name, year, strings, preview = false }) {
   const tr = strings.dashboard.birthday;
   const canvasRef = useRef(null);
   const [visible, setVisible] = useState(true);
@@ -15,6 +15,8 @@ export default function BirthdayCelebration({ userId, name, year, strings }) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    // Reduced motion: keep the message, skip the fireworks.
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
     const ctx = canvas.getContext("2d");
     let width, height;
     let particles = [];
@@ -80,14 +82,16 @@ export default function BirthdayCelebration({ userId, name, year, strings }) {
   }, []);
 
   async function dismiss() {
-    await supabase.from("profiles").update({ last_birthday_shown_year: year }).eq("id", userId);
+    if (!preview) {
+      await supabase.from("profiles").update({ last_birthday_shown_year: year }).eq("id", userId);
+    }
     setVisible(false);
   }
 
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-night flex items-center justify-center">
+    <div role="dialog" aria-modal="true" aria-label="Happy Birthday" className="fixed inset-0 z-[100] bg-night flex items-center justify-center">
       <canvas ref={canvasRef} className="absolute inset-0" />
 
       <motion.div

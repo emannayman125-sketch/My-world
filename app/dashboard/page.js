@@ -22,7 +22,7 @@ import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
 import { todayISO, cairoNow } from "@/lib/time";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }) {
   const locale = getLocale();
   const strings = t(locale);
   const d = strings.dashboard;
@@ -75,10 +75,12 @@ export default async function DashboardPage() {
 
   const cairo = cairoNow();
   const currentYear = cairo.year;
+  const previewBirthday = searchParams?.previewBirthday === "1";
   const isBirthdayToday =
-    profile?.birthday_month === cairo.month &&
-    profile?.birthday_day === cairo.day &&
-    profile?.last_birthday_shown_year !== currentYear;
+    previewBirthday ||
+    (profile?.birthday_month === cairo.month &&
+      profile?.birthday_day === cairo.day &&
+      profile?.last_birthday_shown_year !== currentYear);
 
   const personalThoughts = (customQuotes || []).map((q) => q.content).filter(Boolean);
   const quote = pickQuote({
@@ -123,7 +125,7 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-paper dark:bg-night lg:ps-64">
       <AppHeader />
       <ReminderNotifier todayEvents={todayEvents || []} strings={strings} />
-      {isBirthdayToday && <BirthdayCelebration userId={user.id} name={name} year={currentYear} strings={strings} />}
+      {isBirthdayToday && <BirthdayCelebration userId={user.id} name={name} year={currentYear} strings={strings} preview={previewBirthday} />}
 
       <main className="max-w-2xl mx-auto px-6 pt-4 lg:pt-10 pb-20 space-y-8">
         {dueMessage && (
