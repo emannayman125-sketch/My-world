@@ -12,7 +12,7 @@ export default function SharedProgress({ myName, partnerName, myItems, partnerIt
               <span className="text-ink-muted dark:text-moon-muted">{g.progress ?? g.is_done ? 100 : g.progress}%</span>
             </div>
             <div className="h-2 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
-              <div className="h-full bg-lantern" style={{ width: `${g.progress ?? (g.is_done ? 100 : 0)}%` }} />
+              <div className="h-full bg-sage" style={{ width: `${g.progress ?? (g.is_done ? 100 : 0)}%` }} />
             </div>
           </div>
         ))}

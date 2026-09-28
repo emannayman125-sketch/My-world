@@ -9,7 +9,7 @@ import { Plus, Trash2, ClipboardList } from "lucide-react";
 const STATUS_ORDER = ["not_started", "in_progress", "submitted", "completed"];
 const STATUS_COLOR = {
   not_started: "bg-black/5 dark:bg-white/10 text-ink-muted dark:text-moon-muted",
-  in_progress: "bg-lantern/20 text-lantern",
+  in_progress: "bg-sage/20 text-sage dark:text-sage-soft",
   submitted: "bg-dusk/20 text-dusk",
   completed: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
 };
@@ -76,7 +76,7 @@ export default function AssignmentsManager({ userId, initialAssignments, courses
         <button
           onClick={() => setOpen(true)}
           className="w-full card card-hover p-4 flex items-center justify-center gap-2 text-sm
-                     text-ink-muted dark:text-moon-muted hover:text-lantern transition"
+                     text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon transition"
         >
           <Plus size={15} strokeWidth={2} />
           {m.addAssignment}
@@ -89,14 +89,14 @@ export default function AssignmentsManager({ userId, initialAssignments, courses
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder={m.assignmentTitle}
             className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                       px-3 py-2 text-sm outline-none focus:border-lantern"
+                       px-3 py-2 text-sm outline-none focus:border-sage"
           />
           <div className="flex gap-2 flex-wrap">
             <select
               value={form.course_id}
               onChange={(e) => setForm({ ...form, course_id: e.target.value })}
               className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                         px-3 py-2 text-sm outline-none focus:border-lantern"
+                         px-3 py-2 text-sm outline-none focus:border-sage"
             >
               <option value="">{m.noCourse}</option>
               {courses.map((c) => (
@@ -108,7 +108,7 @@ export default function AssignmentsManager({ userId, initialAssignments, courses
               value={form.due_date}
               onChange={(e) => setForm({ ...form, due_date: e.target.value })}
               className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                         px-3 py-2 text-sm outline-none focus:border-lantern"
+                         px-3 py-2 text-sm outline-none focus:border-sage"
             />
           </div>
           <div className="flex items-center gap-2">

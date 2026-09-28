@@ -76,7 +76,7 @@ export default function WorldManager({ userId, initialItems, strings }) {
             }}
             className={`rounded-full px-4 py-2 text-sm transition
               ${activeKind === k
-                ? "bg-lantern text-night"
+                ? "bg-ink text-paper dark:bg-moon dark:text-night"
                 : "bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"}`}
           >
             {KIND_META[k].emoji} {tr.kinds[k].label}
@@ -90,7 +90,7 @@ export default function WorldManager({ userId, initialItems, strings }) {
             value={form.status}
             onChange={(e) => setForm({ ...form, status: e.target.value })}
             className="rounded-soft border border-black/10 dark:border-white/10
-                       bg-transparent px-2 py-2 text-sm outline-none focus:border-lantern"
+                       bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
           >
             {currentMeta.statusKeys.map((sk) => (
               <option key={sk} value={sk}>{tr.kinds[activeKind].statuses[sk]}</option>
@@ -101,14 +101,14 @@ export default function WorldManager({ userId, initialItems, strings }) {
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder={tr.title}
             className="flex-1 min-w-[120px] rounded-soft border border-black/10 dark:border-white/10
-                       bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+                       bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
           />
           <input
             value={form.subtitle}
             onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
             placeholder={tr.subtitle}
             className="flex-1 min-w-[120px] rounded-soft border border-black/10 dark:border-white/10
-                       bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+                       bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
           />
           <button
             type="submit"
@@ -122,7 +122,7 @@ export default function WorldManager({ userId, initialItems, strings }) {
           onChange={(e) => setForm({ ...form, link_url: e.target.value })}
           placeholder={tr.linkPlaceholder}
           className="w-full rounded-soft border border-black/10 dark:border-white/10
-                     bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+                     bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
         />
         <label className="flex items-center gap-1.5 text-xs text-ink-muted dark:text-moon-muted">
           <input

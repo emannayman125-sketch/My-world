@@ -13,7 +13,7 @@ export default function AIPageTabs({ userId, strings, locale }) {
         <button
           onClick={() => setTab("chat")}
           className={`px-3 py-2 text-sm border-b-2 -mb-px transition ${
-            tab === "chat" ? "border-lantern text-ink dark:text-moon font-medium" : "border-transparent text-ink-muted dark:text-moon-muted"
+            tab === "chat" ? "border-ink dark:border-moon text-ink dark:text-moon font-medium" : "border-transparent text-ink-muted dark:text-moon-muted"
           }`}
         >
           {strings.ai.chatTab}
@@ -21,7 +21,7 @@ export default function AIPageTabs({ userId, strings, locale }) {
         <button
           onClick={() => setTab("braindump")}
           className={`px-3 py-2 text-sm border-b-2 -mb-px transition ${
-            tab === "braindump" ? "border-lantern text-ink dark:text-moon font-medium" : "border-transparent text-ink-muted dark:text-moon-muted"
+            tab === "braindump" ? "border-ink dark:border-moon text-ink dark:text-moon font-medium" : "border-transparent text-ink-muted dark:text-moon-muted"
           }`}
         >
           {strings.ai.brainDumpTab}

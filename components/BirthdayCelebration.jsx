@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabaseClient";
 
-const COLORS = ["#B46F4D", "#6256A8", "#F0EDE6", "#9086C0", "#D8C6AF"];
+const COLORS = ["#C6832A", "#6256A8", "#F0EDE6", "#9086C0", "#E8A83C"];
 
 export default function BirthdayCelebration({ userId, name, year, strings }) {
   const tr = strings.dashboard.birthday;

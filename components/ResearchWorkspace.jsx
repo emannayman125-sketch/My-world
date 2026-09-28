@@ -9,7 +9,7 @@ import { Plus, Trash2, ChevronDown, ChevronUp, ExternalLink, FlaskConical } from
 const STATUS_ORDER = ["idea", "researching", "draft", "reviewing", "finished"];
 const STATUS_COLOR = {
   idea: "bg-black/5 dark:bg-white/10 text-ink-muted dark:text-moon-muted",
-  researching: "bg-lantern/20 text-lantern",
+  researching: "bg-sage/20 text-sage dark:text-sage-soft",
   draft: "bg-dusk/20 text-dusk",
   reviewing: "bg-violet-500/15 text-violet-600 dark:text-violet-400",
   finished: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
@@ -83,7 +83,7 @@ export default function ResearchWorkspace({ userId, initialResearch, initialNote
         <button
           onClick={() => setOpen(true)}
           className="w-full card card-hover p-4 flex items-center justify-center gap-2 text-sm
-                     text-ink-muted dark:text-moon-muted hover:text-lantern transition"
+                     text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon transition"
         >
           <Plus size={15} strokeWidth={2} />
           {m.addResearch}
@@ -96,21 +96,21 @@ export default function ResearchWorkspace({ userId, initialResearch, initialNote
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder={m.researchTitle}
             className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                       px-3 py-2 text-sm outline-none focus:border-lantern"
+                       px-3 py-2 text-sm outline-none focus:border-sage"
           />
           <input
             value={form.question}
             onChange={(e) => setForm({ ...form, question: e.target.value })}
             placeholder={m.researchQuestion}
             className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                       px-3 py-2 text-sm outline-none focus:border-lantern"
+                       px-3 py-2 text-sm outline-none focus:border-sage"
           />
           <div className="flex gap-2 flex-wrap">
             <select
               value={form.course_id}
               onChange={(e) => setForm({ ...form, course_id: e.target.value })}
               className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                         px-3 py-2 text-sm outline-none focus:border-lantern"
+                         px-3 py-2 text-sm outline-none focus:border-sage"
             >
               <option value="">{m.noCourse}</option>
               {courses.map((c) => (
@@ -122,7 +122,7 @@ export default function ResearchWorkspace({ userId, initialResearch, initialNote
               value={form.deadline}
               onChange={(e) => setForm({ ...form, deadline: e.target.value })}
               className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                         px-3 py-2 text-sm outline-none focus:border-lantern"
+                         px-3 py-2 text-sm outline-none focus:border-sage"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -251,14 +251,14 @@ function ResearchNotes({ researchId, userId, notes, onChange, strings }) {
           placeholder={m.noteContent}
           rows={2}
           className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                     px-3 py-2 text-sm outline-none focus:border-lantern resize-none"
+                     px-3 py-2 text-sm outline-none focus:border-sage resize-none"
         />
         <div className="flex gap-2 flex-wrap items-center">
           <select
             value={kind}
             onChange={(e) => setKind(e.target.value)}
             className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                       px-2 py-1.5 text-xs outline-none focus:border-lantern"
+                       px-2 py-1.5 text-xs outline-none focus:border-sage"
           >
             {Object.entries(m.noteKind).map(([k, label]) => (
               <option key={k} value={k}>{label}</option>
@@ -269,7 +269,7 @@ function ResearchNotes({ researchId, userId, notes, onChange, strings }) {
             onChange={(e) => setUrl(e.target.value)}
             placeholder={m.noteUrl}
             className="flex-1 min-w-[120px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                       px-2 py-1.5 text-xs outline-none focus:border-lantern"
+                       px-2 py-1.5 text-xs outline-none focus:border-sage"
           />
           <button
             type="submit"
@@ -291,7 +291,7 @@ function ResearchNotes({ researchId, userId, notes, onChange, strings }) {
               </span>
               <p className="flex-1 leading-6">{n.content}</p>
               {n.url && (
-                <a href={n.url} target="_blank" rel="noreferrer" className="shrink-0 text-lantern">
+                <a href={n.url} target="_blank" rel="noreferrer" className="shrink-0 text-sage dark:text-sage-soft">
                   <ExternalLink size={13} strokeWidth={2} />
                 </a>
               )}

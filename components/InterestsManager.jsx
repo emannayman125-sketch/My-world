@@ -56,7 +56,7 @@ export default function InterestsManager({ userId, initialInterests, strings }) 
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           className="rounded-soft border border-black/10 dark:border-white/10
-                     bg-transparent px-2 py-2 text-sm outline-none focus:border-lantern"
+                     bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
         >
           {CATEGORY_KEYS.map((k) => (
             <option key={k} value={k}>{CATEGORY_EMOJI[k]} {tr.categories[k]}</option>
@@ -67,7 +67,7 @@ export default function InterestsManager({ userId, initialInterests, strings }) 
           onChange={(e) => setValue(e.target.value)}
           placeholder={tr.addPlaceholder}
           className="flex-1 min-w-[150px] rounded-soft border border-black/10 dark:border-white/10
-                     bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+                     bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
         />
         <button
           type="submit"

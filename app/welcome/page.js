@@ -29,7 +29,7 @@ export default async function WelcomePage() {
       <div className="relative w-full max-w-xl animate-fade-up">
         {/* Envelope-style card */}
         <div className="card rounded-full_card px-8 py-10 sm:px-14 sm:py-14 text-center">
-          <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-lantern/15 text-2xl mb-6">
+          <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-sage/15 text-2xl mb-6">
             💌
           </span>
 

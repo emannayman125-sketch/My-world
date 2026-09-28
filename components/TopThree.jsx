@@ -88,7 +88,7 @@ export default function TopThree({ userId, initialTasks, strings }) {
                 <span
                   className={`w-5 h-5 rounded-full border flex items-center justify-center text-xs shrink-0
                     ${task.is_done
-                      ? "bg-lantern border-lantern text-night"
+                      ? "bg-sage border-sage text-white"
                       : "border-ink-muted dark:border-moon-muted"}`}
                 >
                   {task.is_done ? "✓" : ""}
@@ -120,7 +120,7 @@ export default function TopThree({ userId, initialTasks, strings }) {
             onChange={(e) => setNewTitle(e.target.value)}
             placeholder={tr.addPlaceholder}
             className="flex-1 rounded-soft border border-black/10 dark:border-white/10
-                       bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+                       bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
           />
           <button
             type="submit"

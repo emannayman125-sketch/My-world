@@ -52,7 +52,7 @@ export default function ResetPasswordForm({ strings, locale }) {
               onChange={(e) => setPassword(e.target.value)}
               placeholder={a.newPasswordPlaceholder}
               className="w-full rounded-soft border border-black/10 dark:border-white/10
-                         bg-transparent px-4 py-3 outline-none focus:border-lantern"
+                         bg-transparent px-4 py-3 outline-none focus:border-sage"
             />
 
             {status && <p className="text-sm text-red-500">{status}</p>}

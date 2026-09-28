@@ -4,8 +4,8 @@
   "description": "مساحة شخصية صُنعت بحب.",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#F7F5EF",
-  "theme_color": "#B46F4D",
+  "background_color": "#F7F3E8",
+  "theme_color": "#C6832A",
   "dir": "rtl",
   "lang": "ar",
   "icons": [

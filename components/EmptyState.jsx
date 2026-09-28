@@ -5,12 +5,12 @@ import Link from "next/link";
 // act on it right there.
 export default function EmptyState({ icon: Icon, title, hint, actionLabel, actionHref, onAction, tone = "lantern" }) {
   const toneClasses = {
-    lantern: "bg-lantern/12 text-lantern",
+    lantern: "bg-sage/12 text-sage dark:text-sage-soft",
     dusk: "bg-dusk/12 text-dusk",
     sky: "bg-sky-500/12 text-sky-600 dark:text-sky-400",
     violet: "bg-violet-500/12 text-violet-500",
-    copper: "bg-[#B46F4D]/12 text-[#7a4a33] dark:text-[#D8C6AF]",
-  }[tone] || "bg-lantern/12 text-lantern";
+    copper: "bg-[#B5624A]/12 text-[#8F4A36] dark:text-[#C97D60]",
+  }[tone] || "bg-sage/12 text-sage dark:text-sage-soft";
 
   return (
     <div className="flex flex-col items-center justify-center text-center py-12 px-6 gap-3">

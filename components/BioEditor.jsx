@@ -22,7 +22,7 @@ export default function BioEditor({ userId, initialBio }) {
         rows={6}
         placeholder="اكتب هنا نبذة عنك: شغلك، اهتماماتك، أهدافك، أي حاجة تحب إنها تكون هنا..."
         className="w-full rounded-soft border border-black/10 dark:border-white/10
-                   bg-transparent px-4 py-3 text-sm outline-none focus:border-lantern leading-7"
+                   bg-transparent px-4 py-3 text-sm outline-none focus:border-sage leading-7"
       />
       <div className="flex justify-end mt-3">
         <button

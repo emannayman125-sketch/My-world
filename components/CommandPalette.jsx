@@ -72,7 +72,7 @@ export default function CommandPalette({ variant = "compact", strings }) {
           aria-label={strings.searchPlaceholder}
           className="flex items-center gap-2.5 w-full rounded-soft border border-black/10 dark:border-white/10
                      bg-black/[0.02] dark:bg-white/[0.03] px-3 py-2.5 text-sm text-ink-muted dark:text-moon-muted
-                     hover:border-lantern/50 hover:text-ink dark:hover:text-moon transition"
+                     hover:border-sage/50 hover:text-ink dark:hover:text-moon transition"
         >
           <Search size={16} strokeWidth={2} />
           <span className="flex-1 text-right">{strings.searchPlaceholder}</span>
@@ -83,7 +83,7 @@ export default function CommandPalette({ variant = "compact", strings }) {
           onClick={() => setOpen(true)}
           aria-label={strings.searchPlaceholder}
           className="flex items-center gap-2 rounded-full border border-black/10 dark:border-white/10
-                     px-3 py-2 text-xs text-ink-muted dark:text-moon-muted hover:border-lantern transition"
+                     px-3 py-2 text-xs text-ink-muted dark:text-moon-muted hover:border-sage transition"
         >
           <Search size={14} strokeWidth={2} />
           <span className="hidden sm:inline">{strings.searchPlaceholder}</span>
@@ -130,7 +130,7 @@ export default function CommandPalette({ variant = "compact", strings }) {
                         key={a.href + a.label}
                         onClick={() => go(a.href)}
                         className="w-full flex items-center gap-3 text-right rounded-soft px-3 py-2.5 text-sm
-                                   hover:bg-lantern/15 transition"
+                                   hover:bg-sage/15 transition"
                       >
                         <a.icon size={16} strokeWidth={2} className="text-ink-muted dark:text-moon-muted" />
                         <span>{a.label}</span>
@@ -145,7 +145,7 @@ export default function CommandPalette({ variant = "compact", strings }) {
                     key={s.href}
                     onClick={() => go(s.href)}
                     className="w-full flex items-center gap-3 text-right rounded-soft px-3 py-2.5 text-sm
-                               hover:bg-lantern/15 transition"
+                               hover:bg-sage/15 transition"
                   >
                     <s.icon size={16} strokeWidth={2} className="text-ink-muted dark:text-moon-muted" />
                     <span>{s.label}</span>
@@ -155,7 +155,7 @@ export default function CommandPalette({ variant = "compact", strings }) {
                 {filtered.length === 0 && filteredActions.length === 0 && (
                   <button
                     onClick={searchQuery}
-                    className="w-full flex items-center gap-3 text-right rounded-soft px-3 py-2.5 text-sm hover:bg-lantern/15 transition"
+                    className="w-full flex items-center gap-3 text-right rounded-soft px-3 py-2.5 text-sm hover:bg-sage/15 transition"
                   >
                     <Search size={16} strokeWidth={2} />
                     <span>{strings.searchNoResults.replace("{query}", query)}</span>

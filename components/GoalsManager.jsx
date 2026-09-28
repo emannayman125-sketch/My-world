@@ -65,7 +65,7 @@ export default function GoalsManager({ userId, initialGoals, strings }) {
                 </button>
               </div>
               <div className="h-2 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
-                <div className="h-full bg-lantern transition-all" style={{ width: `${goal.progress}%` }} />
+                <div className="h-full bg-sage transition-all" style={{ width: `${goal.progress}%` }} />
               </div>
               <input
                 type="range"
@@ -91,12 +91,12 @@ export default function GoalsManager({ userId, initialGoals, strings }) {
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder={tr.newGoal}
-            className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+            className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
           />
           <select
             value={form.period}
             onChange={(e) => setForm({ ...form, period: e.target.value })}
-            className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-lantern"
+            className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
           >
             <option value="weekly">{tr.weekly}</option>
             <option value="monthly">{tr.monthly}</option>
@@ -117,7 +117,7 @@ export default function GoalsManager({ userId, initialGoals, strings }) {
           value={form.link_url}
           onChange={(e) => setForm({ ...form, link_url: e.target.value })}
           placeholder={tr.linkPlaceholder}
-          className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+          className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
         />
       </form>
 

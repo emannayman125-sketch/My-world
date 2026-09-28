@@ -37,7 +37,7 @@ export default async function SupplyChainHubPage() {
       <main className="max-w-4xl mx-auto px-6 pb-16 space-y-6">
         <div>
           <p className="ops-label mb-1">SUPPLY CHAIN — OPS</p>
-          <Link href="/business-operations" className="text-xs text-ink-muted dark:text-moon-muted hover:text-lantern inline-flex items-center gap-1 mb-1">‹ {strings.nav.businessOps}</Link>
+          <Link href="/business-operations" className="text-xs text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon inline-flex items-center gap-1 mb-1">‹ {strings.nav.businessOps}</Link>
           <h1 className="font-display text-3xl">{s.title}</h1>
           <p className="text-ink-muted dark:text-moon-muted mt-1">{s.subtitle}</p>
         </div>

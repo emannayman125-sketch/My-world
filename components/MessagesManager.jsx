@@ -51,7 +51,7 @@ export default function MessagesManager({ userId, initialMessages, strings }) {
           <select
             value={form.trigger_type}
             onChange={(e) => setForm({ ...form, trigger_type: e.target.value, trigger_value: "" })}
-            className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-lantern"
+            className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
           >
             {Object.entries(TRIGGERS).map(([key, { label }]) => (
               <option key={key} value={key}>{label}</option>
@@ -62,7 +62,7 @@ export default function MessagesManager({ userId, initialMessages, strings }) {
               value={form.trigger_value}
               onChange={(e) => setForm({ ...form, trigger_value: e.target.value })}
               placeholder={TRIGGERS[form.trigger_type].placeholder}
-              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern w-40"
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage w-40"
             />
           )}
         </div>
@@ -71,7 +71,7 @@ export default function MessagesManager({ userId, initialMessages, strings }) {
           value={form.content}
           onChange={(e) => setForm({ ...form, content: e.target.value })}
           placeholder={tr.contentPlaceholder}
-          className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+          className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
         />
         <div className="flex justify-end">
           <button type="submit" className="rounded-soft bg-lantern text-night text-sm px-5 py-2 hover:brightness-105">

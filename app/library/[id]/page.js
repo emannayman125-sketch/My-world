@@ -37,7 +37,7 @@ export default async function BookReaderPage({ params }) {
     <div className="min-h-screen bg-paper dark:bg-night lg:ps-64">
       <AppHeader />
       <main className="max-w-4xl mx-auto px-6 pb-16 space-y-4">
-        <Link href="/library" className="inline-flex items-center gap-1.5 text-sm text-ink-muted dark:text-moon-muted hover:text-lantern">
+        <Link href="/library" className="inline-flex items-center gap-1.5 text-sm text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon">
           <Arrow size={14} strokeWidth={2} />
           {strings.library.back}
         </Link>

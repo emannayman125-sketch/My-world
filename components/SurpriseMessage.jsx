@@ -16,7 +16,7 @@ export default function SurpriseMessage({ message, strings }) {
   if (!visible) return null;
 
   return (
-    <div className="card p-6 border-lantern/40 bg-lantern/10 relative">
+    <div className="card p-6 border-sage/40 bg-sage/10 relative">
       <button
         onClick={dismiss}
         aria-label={tr.close}
@@ -24,7 +24,7 @@ export default function SurpriseMessage({ message, strings }) {
       >
         ×
       </button>
-      <p className="text-xs text-lantern mb-2">{tr.label}</p>
+      <p className="text-xs text-sage dark:text-sage-soft mb-2">{tr.label}</p>
       <p className="leading-8 whitespace-pre-wrap pe-6">{message.content}</p>
     </div>
   );

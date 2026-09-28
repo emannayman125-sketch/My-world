@@ -32,7 +32,7 @@ export default function WorldHubTabs({ userId, strings, data }) {
             onClick={() => setTab(t.key)}
             className={`shrink-0 px-3 py-2 text-sm border-b-2 -mb-px transition whitespace-nowrap ${
               tab === t.key
-                ? "border-lantern text-ink dark:text-moon font-medium"
+                ? "border-ink dark:border-moon text-ink dark:text-moon font-medium"
                 : "border-transparent text-ink-muted dark:text-moon-muted"
             }`}
           >

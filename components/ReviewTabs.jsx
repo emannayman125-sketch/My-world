@@ -57,13 +57,13 @@ export default function ReviewTabs({ userId, todayReview, weekReview, strings })
       <div className="flex gap-2 text-sm">
         <button
           onClick={() => setTab("evening")}
-          className={`rounded-full px-4 py-2 ${tab === "evening" ? "bg-lantern text-night" : "bg-black/5 dark:bg-white/5"}`}
+          className={`rounded-full px-4 py-2 ${tab === "evening" ? "bg-ink text-paper dark:bg-moon dark:text-night" : "bg-black/5 dark:bg-white/5"}`}
         >
           {g.eveningTab}
         </button>
         <button
           onClick={() => setTab("weekly")}
-          className={`rounded-full px-4 py-2 ${tab === "weekly" ? "bg-lantern text-night" : "bg-black/5 dark:bg-white/5"}`}
+          className={`rounded-full px-4 py-2 ${tab === "weekly" ? "bg-ink text-paper dark:bg-moon dark:text-night" : "bg-black/5 dark:bg-white/5"}`}
         >
           {g.weeklyTab}
         </button>
@@ -80,7 +80,7 @@ export default function ReviewTabs({ userId, todayReview, weekReview, strings })
               rows={3}
               value={accomplished}
               onChange={(e) => { setAccomplished(e.target.value); setSavedEvening(false); }}
-              className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+              className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
             />
           </div>
           <div>
@@ -91,7 +91,7 @@ export default function ReviewTabs({ userId, todayReview, weekReview, strings })
               rows={3}
               value={proudOf}
               onChange={(e) => { setProudOf(e.target.value); setSavedEvening(false); }}
-              className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+              className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
             />
           </div>
           <div className="flex justify-end">
@@ -116,7 +116,7 @@ export default function ReviewTabs({ userId, todayReview, weekReview, strings })
                 type="number" min="0"
                 value={tasksCompleted}
                 onChange={(e) => { setTasksCompleted(Number(e.target.value)); setSavedWeekly(false); }}
-                className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+                className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
               />
             </div>
             <div>
@@ -125,7 +125,7 @@ export default function ReviewTabs({ userId, todayReview, weekReview, strings })
                 type="number" min="0"
                 value={goalsAchieved}
                 onChange={(e) => { setGoalsAchieved(Number(e.target.value)); setSavedWeekly(false); }}
-                className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+                className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
               />
             </div>
           </div>
@@ -134,7 +134,7 @@ export default function ReviewTabs({ userId, todayReview, weekReview, strings })
             <input
               value={bestStreak}
               onChange={(e) => { setBestStreak(e.target.value); setSavedWeekly(false); }}
-              className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+              className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
             />
           </div>
           <div>
@@ -145,7 +145,7 @@ export default function ReviewTabs({ userId, todayReview, weekReview, strings })
               rows={3}
               value={focusNext}
               onChange={(e) => { setFocusNext(e.target.value); setSavedWeekly(false); }}
-              className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+              className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
             />
           </div>
           <div className="flex justify-end">

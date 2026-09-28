@@ -32,7 +32,7 @@ export default function AddThoughtForm({ userId, strings }) {
       <button
         onClick={() => setOpen(true)}
         className="mt-4 inline-flex items-center gap-1.5 text-xs text-ink-muted dark:text-moon-muted
-                   hover:text-lantern transition"
+                   hover:text-ink dark:hover:text-moon transition"
       >
         <Plus size={13} strokeWidth={2} />
         {q.addThought}
@@ -49,7 +49,7 @@ export default function AddThoughtForm({ userId, strings }) {
         placeholder={q.placeholder}
         rows={2}
         className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                   px-3 py-2 text-sm outline-none focus:border-lantern resize-none"
+                   px-3 py-2 text-sm outline-none focus:border-sage resize-none"
       />
       <div className="flex items-center gap-2">
         <button

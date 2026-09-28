@@ -27,7 +27,7 @@ export default function BookNotes({ bookId, initialNotes, strings }) {
         placeholder={l.notesPlaceholder}
         rows={4}
         className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                   px-3 py-2 text-sm outline-none focus:border-lantern resize-none"
+                   px-3 py-2 text-sm outline-none focus:border-sage resize-none"
       />
       <div className="flex items-center gap-2">
         <button

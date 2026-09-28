@@ -31,7 +31,7 @@ export default async function SettingsPage() {
           <p className="text-sm text-ink-muted dark:text-moon-muted">
             كل حاجة في الموقع خاصة افتراضيًا، ما عدا اللي تحددها بنفسك كـ 🌐 عام.
           </p>
-          <a href="/privacy" className="text-sm text-lantern underline">شوف التفاصيل كاملة</a>
+          <a href="/privacy" className="text-sm text-sage dark:text-sage-soft underline">شوف التفاصيل كاملة</a>
         </div>
 
         <BackupManager userId={user.id} />

@@ -89,7 +89,7 @@ export default function LibraryManager({ userId, initialBooks, strings }) {
         <button
           onClick={() => setOpen(true)}
           className="w-full card card-hover p-4 flex items-center justify-center gap-2 text-sm
-                     text-ink-muted dark:text-moon-muted hover:text-lantern transition"
+                     text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon transition"
         >
           <Plus size={15} strokeWidth={2} />
           {l.addBook}
@@ -102,7 +102,7 @@ export default function LibraryManager({ userId, initialBooks, strings }) {
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder={l.bookTitle}
             className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                       px-3 py-2 text-sm outline-none focus:border-lantern"
+                       px-3 py-2 text-sm outline-none focus:border-sage"
           />
           <div className="flex gap-2 flex-wrap">
             <input
@@ -110,13 +110,13 @@ export default function LibraryManager({ userId, initialBooks, strings }) {
               onChange={(e) => setForm({ ...form, author: e.target.value })}
               placeholder={l.author}
               className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                         px-3 py-2 text-sm outline-none focus:border-lantern"
+                         px-3 py-2 text-sm outline-none focus:border-sage"
             />
             <select
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
               className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                         px-3 py-2 text-sm outline-none focus:border-lantern"
+                         px-3 py-2 text-sm outline-none focus:border-sage"
             >
               {CATEGORY_ORDER.map((key) => (
                 <option key={key} value={key}>{l.categories[key]}</option>
@@ -162,14 +162,14 @@ export default function LibraryManager({ userId, initialBooks, strings }) {
           <div className="grid sm:grid-cols-2 gap-3">
             {group.items.map((b) => (
               <div key={b.id} className="card card-hover p-4 flex items-start gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-lantern/15 text-lantern shrink-0">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sage/15 text-sage dark:text-sage-soft shrink-0">
                   <BookOpen size={17} strokeWidth={2} />
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{b.title}</p>
                   {b.author && <p className="text-xs text-ink-muted dark:text-moon-muted">{b.author}</p>}
                   <div className="flex items-center gap-3 mt-2">
-                    <Link href={`/library/${b.id}`} className="text-xs text-lantern underline">
+                    <Link href={`/library/${b.id}`} className="text-xs text-sage dark:text-sage-soft underline">
                       {l.read}
                     </Link>
                     <button

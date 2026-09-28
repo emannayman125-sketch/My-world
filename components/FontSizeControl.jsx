@@ -29,7 +29,7 @@ export default function FontSizeControl() {
             key={opt.key}
             onClick={() => setFontSize(opt.key)}
             className={`${opt.scale} rounded-soft px-4 py-2 transition
-              ${fontSize === opt.key ? "bg-lantern text-night" : "bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"}`}
+              ${fontSize === opt.key ? "bg-ink text-paper dark:bg-moon dark:text-night" : "bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"}`}
           >
             {opt.label}
           </button>

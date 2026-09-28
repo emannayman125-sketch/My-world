@@ -73,24 +73,24 @@ export default function TimelineManager({ userId, initialMemories, strings }) {
             type="number"
             value={form.year}
             onChange={(e) => setForm({ ...form, year: Number(e.target.value) })}
-            className="w-24 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-lantern"
+            className="w-24 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
           />
           <input
             value={form.emoji}
             onChange={(e) => setForm({ ...form, emoji: e.target.value })}
-            className="w-14 text-center rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-lantern"
+            className="w-14 text-center rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
           />
           <input
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder={tr.titlePlaceholder}
-            className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+            className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
           />
           <input
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             placeholder={tr.descriptionPlaceholder}
-            className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+            className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
           />
           <button type="submit" className="rounded-soft bg-lantern text-night text-sm px-4 py-2 hover:brightness-105">
             {tr.add}
@@ -100,14 +100,14 @@ export default function TimelineManager({ userId, initialMemories, strings }) {
           value={form.link_url}
           onChange={(e) => setForm({ ...form, link_url: e.target.value })}
           placeholder={tr.linkPlaceholder}
-          className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+          className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
         />
       </form>
 
       <div className="relative border-e-2 border-black/10 dark:border-white/10 pe-6 space-y-6">
         {sorted.map((m) => (
           <div key={m.id} className="relative">
-            <span className="absolute -end-[31px] top-1 w-4 h-4 rounded-full bg-lantern" />
+            <span className="absolute -end-[31px] top-1 w-4 h-4 rounded-full bg-sage" />
             <div className="card p-4 flex items-start gap-4">
               {m.image_url ? (
                 // eslint-disable-next-line @next/next/no-img-element

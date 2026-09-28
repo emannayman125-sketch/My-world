@@ -117,11 +117,11 @@ export default async function DashboardPage() {
                   <img
                     src={profile.avatar_url}
                     alt={name}
-                    className="w-16 h-16 rounded-full object-cover shrink-0 ring-2 ring-lantern/20"
+                    className="w-16 h-16 rounded-full object-cover shrink-0 ring-2 ring-sage/20"
                   />
                 )}
                 <div>
-                  <p className="text-xs text-lantern font-medium tracking-wide mb-1">
+                  <p className="text-xs text-sage dark:text-sage-soft font-medium tracking-wide mb-1">
                     {now.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
                       weekday: "long",
                       month: "long",

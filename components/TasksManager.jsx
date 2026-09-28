@@ -79,13 +79,13 @@ export default function TasksManager({ userId, initialTasks, strings }) {
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder={tr.newTask}
             className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10
-                       bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+                       bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
           />
           <select
             value={form.priority}
             onChange={(e) => setForm({ ...form, priority: e.target.value })}
             className="rounded-soft border border-black/10 dark:border-white/10
-                       bg-transparent px-2 py-2 text-sm outline-none focus:border-lantern"
+                       bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
           >
             {Object.entries(PRIORITIES).map(([key, { emoji, label }]) => (
               <option key={key} value={key}>{emoji} {label}</option>
@@ -96,7 +96,7 @@ export default function TasksManager({ userId, initialTasks, strings }) {
             value={form.due_date}
             onChange={(e) => setForm({ ...form, due_date: e.target.value })}
             className="rounded-soft border border-black/10 dark:border-white/10
-                       bg-transparent px-2 py-2 text-sm outline-none focus:border-lantern"
+                       bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
           />
           <label className="flex items-center gap-1 text-xs text-ink-muted dark:text-moon-muted">
             <input
@@ -126,7 +126,7 @@ export default function TasksManager({ userId, initialTasks, strings }) {
             onChange={(e) => setForm({ ...form, link_url: e.target.value })}
             placeholder={tr.linkPlaceholder}
             className="w-full rounded-soft border border-black/10 dark:border-white/10
-                       bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+                       bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
           />
         )}
       </form>
@@ -161,7 +161,7 @@ export default function TasksManager({ userId, initialTasks, strings }) {
                 >
                   <span
                     className={`w-5 h-5 rounded-full border flex items-center justify-center text-xs shrink-0
-                      ${task.is_done ? "bg-lantern border-lantern text-night" : "border-ink-muted dark:border-moon-muted"}`}
+                      ${task.is_done ? "bg-sage border-sage text-white" : "border-ink-muted dark:border-moon-muted"}`}
                   >
                     {task.is_done ? "✓" : ""}
                   </span>

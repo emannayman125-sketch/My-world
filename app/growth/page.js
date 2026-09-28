@@ -22,7 +22,7 @@ export default async function GrowthHubPage() {
   ]);
 
   const cards = [
-    { href: "/goals", icon: Trophy, accent: "#B46F4D", title: g.goals, desc: g.goalsDesc, count: (goals || []).length },
+    { href: "/goals", icon: Trophy, accent: "#B5624A", title: g.goals, desc: g.goalsDesc, count: (goals || []).length },
     { href: "/habits", icon: Flame, accent: "#6E8558", title: g.habits, desc: g.habitsDesc, count: (habits || []).length },
     { href: "/review", icon: BarChart3, accent: "#68788A", title: g.review, desc: g.reviewDesc, count: null },
   ];

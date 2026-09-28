@@ -31,7 +31,7 @@ export default async function BusinessHubPage() {
         <div>
         <div>
           <p className="exec-label mb-1">BUSINESS HUB</p>
-          <Link href="/business-operations" className="text-xs text-ink-muted dark:text-moon-muted hover:text-lantern inline-flex items-center gap-1 mb-1">‹ {strings.nav.businessOps}</Link>
+          <Link href="/business-operations" className="text-xs text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon inline-flex items-center gap-1 mb-1">‹ {strings.nav.businessOps}</Link>
           <h1 className="font-display text-3xl">{b.title}</h1>
         </div>
           <p className="text-ink-muted dark:text-moon-muted mt-1">{b.subtitle}</p>

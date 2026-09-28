@@ -67,7 +67,7 @@ export default function HabitsManager({ userId, initialHabits, initialLogsToday,
         <select
           value={emoji}
           onChange={(e) => setEmoji(e.target.value)}
-          className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-lantern"
+          className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
         >
           {EMOJIS.map((em) => <option key={em} value={em}>{em}</option>)}
         </select>
@@ -75,7 +75,7 @@ export default function HabitsManager({ userId, initialHabits, initialLogsToday,
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={tr.namePlaceholder}
-          className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+          className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
         />
         <button type="submit" className="rounded-soft bg-lantern text-night text-sm px-4 py-2 hover:brightness-105">
           {tr.add}
@@ -97,7 +97,7 @@ export default function HabitsManager({ userId, initialHabits, initialLogsToday,
                 <button
                   onClick={() => toggleToday(habit)}
                   className={`rounded-full w-10 h-10 flex items-center justify-center transition
-                    ${done ? "bg-lantern text-night" : "bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"}`}
+                    ${done ? "bg-sage text-white" : "bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"}`}
                 >
                   {done ? "✓" : ""}
                 </button>

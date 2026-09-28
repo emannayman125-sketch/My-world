@@ -69,14 +69,14 @@ export default function TimeCapsuleManager({ userId, initialCapsules, strings })
           placeholder={tc.placeholder}
           rows={4}
           className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                     px-4 py-3 text-sm outline-none focus:border-lantern resize-none"
+                     px-4 py-3 text-sm outline-none focus:border-sage resize-none"
         />
         <div className="flex items-center gap-2 flex-wrap">
           <label className="text-xs text-ink-muted dark:text-moon-muted shrink-0">{tc.revealIn}</label>
           <select
             value={option}
             onChange={(e) => setOption(e.target.value)}
-            className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+            className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
           >
             {Object.entries(tc.options).map(([k, label]) => (
               <option key={k} value={k}>{label}</option>
@@ -88,7 +88,7 @@ export default function TimeCapsuleManager({ userId, initialCapsules, strings })
               min={today}
               value={customDate}
               onChange={(e) => setCustomDate(e.target.value)}
-              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
             />
           )}
         </div>
@@ -111,7 +111,7 @@ export default function TimeCapsuleManager({ userId, initialCapsules, strings })
           <div className="space-y-2">
             {revealed.map((c) => (
               <div key={c.id} className="card p-4 flex items-start gap-3">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-lantern/15 text-lantern shrink-0">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sage/15 text-sage dark:text-sage-soft shrink-0">
                   <Unlock size={15} strokeWidth={2} />
                 </span>
                 <div className="flex-1 min-w-0">

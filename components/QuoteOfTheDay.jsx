@@ -9,7 +9,7 @@ export default function QuoteOfTheDay({ quote, userId, strings }) {
   return (
     <div className="card card-hover p-6 sm:p-7">
       {quote.category && (
-        <p className="text-[10px] tracking-[0.18em] text-lantern/80 mb-4">
+        <p className="text-[10px] tracking-[0.18em] text-sage dark:text-sage-soft mb-4">
           {quote.category}
         </p>
       )}

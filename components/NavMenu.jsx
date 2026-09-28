@@ -73,7 +73,7 @@ export default function NavMenu({ strings }) {
                           onClick={() => setOpen(false)}
                           className={`flex items-center gap-3 rounded-soft px-3 py-2.5 text-sm transition
                             ${active
-                              ? "bg-lantern/15 text-ink dark:text-moon font-medium"
+                              ? "bg-sage/15 text-ink dark:text-moon font-medium"
                               : "text-ink-muted dark:text-moon-muted hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"}`}
                         >
                           <Icon size={17} strokeWidth={2} />

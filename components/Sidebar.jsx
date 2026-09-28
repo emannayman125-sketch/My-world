@@ -19,7 +19,7 @@ export default function Sidebar({ locale, strings }) {
                  bg-paper-card/70 dark:bg-night-card/40 backdrop-blur-xl"
     >
       <Link href="/dashboard" className="flex items-center gap-2.5 px-5 pt-6 pb-4 shrink-0">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-lantern/20 text-lantern">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sage/20 text-sage dark:text-sage-soft">
           🌍
         </span>
         <span className="font-display text-lg leading-none">{strings.brand}</span>
@@ -48,18 +48,18 @@ export default function Sidebar({ locale, strings }) {
                     className={`group flex items-center gap-3 rounded-soft px-3 py-2 text-sm transition
                       ${
                         active
-                          ? "bg-lantern/15 text-ink dark:text-moon font-medium"
+                          ? "bg-sage/15 text-ink dark:text-moon font-medium"
                           : "text-ink-muted dark:text-moon-muted hover:bg-black/[0.04] dark:hover:bg-white/[0.06] hover:text-ink dark:hover:text-moon"
                       }`}
                   >
                     <span
                       className={`flex h-7 w-7 items-center justify-center rounded-full shrink-0 transition
-                        ${active ? "bg-lantern/25 text-lantern" : "text-ink-muted/80 dark:text-moon-muted/80 group-hover:text-ink dark:group-hover:text-moon"}`}
+                        ${active ? "bg-sage/25 text-sage dark:text-sage-soft" : "text-ink-muted/80 dark:text-moon-muted/80 group-hover:text-ink dark:group-hover:text-moon"}`}
                     >
                       <Icon size={16} strokeWidth={2} />
                     </span>
                     <span className="truncate">{item.label}</span>
-                    {active && <span className="ms-auto h-1.5 w-1.5 rounded-full bg-lantern" />}
+                    {active && <span className="ms-auto h-1.5 w-1.5 rounded-full bg-sage" />}
                   </Link>
                 );
               })}

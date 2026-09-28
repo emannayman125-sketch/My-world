@@ -24,7 +24,7 @@ export default async function GoalsPage() {
       <AppHeader />
       <main className="max-w-3xl mx-auto px-6 pb-16 space-y-6">
         <div>
-          <Link href="/growth" className="text-xs text-ink-muted dark:text-moon-muted hover:text-lantern inline-flex items-center gap-1 mb-1">‹ {strings.nav.growth}</Link>
+          <Link href="/growth" className="text-xs text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon inline-flex items-center gap-1 mb-1">‹ {strings.nav.growth}</Link>
           <h1 className="font-display text-3xl">🏆 {strings.nav.goals}</h1>
         </div>
         <GoalsManager userId={user.id} initialGoals={goals || []} strings={strings} />

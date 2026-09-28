@@ -97,7 +97,7 @@ export default function PartnerManager({ userId, link, otherProfile }) {
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="كود شريكك"
-              className="flex-1 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+              className="flex-1 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
             />
             <button
               type="submit"

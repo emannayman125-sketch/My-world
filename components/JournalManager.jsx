@@ -69,7 +69,7 @@ export default function JournalManager({ userId, initialNotes, strings }) {
             key={key}
             onClick={() => setKind(key)}
             className={`rounded-full px-4 py-2 text-sm transition
-              ${kind === key ? "bg-lantern text-night" : "bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"}`}
+              ${kind === key ? "bg-ink text-paper dark:bg-moon dark:text-night" : "bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"}`}
           >
             {KIND_EMOJI[key]} {tr.kinds[key]}
           </button>
@@ -86,7 +86,7 @@ export default function JournalManager({ userId, initialNotes, strings }) {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder={tr.writePlaceholder.replace("{kind}", tr.kinds[kind])}
-          className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern mb-2"
+          className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage mb-2"
         />
         <div className="flex justify-end">
           <button type="submit" className="rounded-soft bg-lantern text-night text-sm px-5 py-2 hover:brightness-105">

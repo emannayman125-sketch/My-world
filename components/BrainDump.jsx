@@ -104,7 +104,7 @@ export default function BrainDump({ userId, strings, locale }) {
           placeholder={ai.brainDumpPlaceholder}
           rows={5}
           className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                     px-4 py-3 text-sm outline-none focus:border-lantern resize-none"
+                     px-4 py-3 text-sm outline-none focus:border-sage resize-none"
         />
         <button
           onClick={extract}
@@ -133,11 +133,11 @@ export default function BrainDump({ userId, strings, locale }) {
               <div className="space-y-1.5">
                 {tasks.map((t, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <input type="checkbox" checked={t.selected} onChange={() => toggleTask(i)} className="accent-lantern shrink-0" />
+                    <input type="checkbox" checked={t.selected} onChange={() => toggleTask(i)} className="accent-sage shrink-0" />
                     <input
                       value={t.title}
                       onChange={(e) => editTaskTitle(i, e.target.value)}
-                      className="flex-1 bg-transparent text-sm outline-none border-b border-transparent focus:border-lantern py-1"
+                      className="flex-1 bg-transparent text-sm outline-none border-b border-transparent focus:border-sage py-1"
                     />
                     <span className="text-[10px] shrink-0 rounded-full bg-black/5 dark:bg-white/10 px-2 py-0.5 text-ink-muted dark:text-moon-muted">
                       {ai.priority[t.priority] || ai.priority.medium}
@@ -159,11 +159,11 @@ export default function BrainDump({ userId, strings, locale }) {
               <div className="space-y-1.5">
                 {notes.map((n, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <input type="checkbox" checked={n.selected} onChange={() => toggleNote(i)} className="accent-lantern shrink-0" />
+                    <input type="checkbox" checked={n.selected} onChange={() => toggleNote(i)} className="accent-sage shrink-0" />
                     <input
                       value={n.title}
                       onChange={(e) => editNoteTitle(i, e.target.value)}
-                      className="flex-1 bg-transparent text-sm outline-none border-b border-transparent focus:border-lantern py-1"
+                      className="flex-1 bg-transparent text-sm outline-none border-b border-transparent focus:border-sage py-1"
                     />
                     <span className="text-[10px] shrink-0 rounded-full bg-black/5 dark:bg-white/10 px-2 py-0.5 text-ink-muted dark:text-moon-muted">
                       {ai.noteKindLabel[n.kind] || ai.noteKindLabel.idea}

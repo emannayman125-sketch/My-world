@@ -38,7 +38,7 @@ export default function ProfileSettings({ userId, initialProfile }) {
         <input
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+          className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
         />
       </div>
 
@@ -52,7 +52,7 @@ export default function ProfileSettings({ userId, initialProfile }) {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="mo7amed"
-            className="flex-1 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+            className="flex-1 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
           />
         </div>
       </div>

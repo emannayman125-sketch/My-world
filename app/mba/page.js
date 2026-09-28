@@ -37,14 +37,14 @@ export default async function MbaHubPage() {
       <AppHeader />
       <main className="max-w-4xl mx-auto px-6 pb-16 space-y-6">
         <div>
-          <Link href="/learning" className="text-xs text-ink-muted dark:text-moon-muted hover:text-lantern inline-flex items-center gap-1 mb-1">‹ {strings.nav.learning}</Link>
+          <Link href="/learning" className="text-xs text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon inline-flex items-center gap-1 mb-1">‹ {strings.nav.learning}</Link>
           <h1 className="font-display text-3xl">{m.title}</h1>
           <p className="text-ink-muted dark:text-moon-muted mt-1">{m.subtitle}</p>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
           <Link href="/mba/courses" className="card card-hover p-5 flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-lantern/15 text-lantern shrink-0">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sage/15 text-sage dark:text-sage-soft shrink-0">
               <GraduationCap size={18} strokeWidth={2} />
             </span>
             <div className="flex-1">

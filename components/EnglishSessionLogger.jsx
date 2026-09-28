@@ -63,7 +63,7 @@ export default function EnglishSessionLogger({ userId, messages, strings }) {
           onClick={endSession}
           disabled={summarizing}
           className="flex items-center gap-2 text-sm rounded-soft border border-black/10 dark:border-white/10
-                     px-3 py-2 text-ink-muted dark:text-moon-muted hover:border-lantern hover:text-ink dark:hover:text-moon transition disabled:opacity-50"
+                     px-3 py-2 text-ink-muted dark:text-moon-muted hover:border-sage hover:text-ink dark:hover:text-moon transition disabled:opacity-50"
         >
           <GraduationCap size={15} strokeWidth={2} />
           {summarizing ? ai.summarizing : ai.endSession}
@@ -76,7 +76,7 @@ export default function EnglishSessionLogger({ userId, messages, strings }) {
   return (
     <div className="card p-4 space-y-3">
       <h3 className="text-sm font-medium flex items-center gap-1.5">
-        <Sparkles size={14} strokeWidth={2} className="text-lantern" /> {en.sessionSummary}
+        <Sparkles size={14} strokeWidth={2} className="text-sage dark:text-sage-soft" /> {en.sessionSummary}
       </h3>
 
       <p className="text-sm"><span className="text-ink-muted dark:text-moon-muted">{en.topic}:</span> {summary.topic}</p>
@@ -114,7 +114,7 @@ export default function EnglishSessionLogger({ userId, messages, strings }) {
         <select
           value={rating}
           onChange={(e) => setRating(Number(e.target.value))}
-          className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-1 text-sm outline-none focus:border-lantern"
+          className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-1 text-sm outline-none focus:border-sage"
         >
           {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n} / 5</option>)}
         </select>

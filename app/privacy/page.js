@@ -49,7 +49,7 @@ export default async function PrivacyPage() {
         </div>
 
         <div className="card p-5 flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-lantern/15 text-lantern shrink-0">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-sage/15 text-sage dark:text-sage-soft shrink-0">
             <ShieldCheck size={17} strokeWidth={2} />
           </span>
           <p className="text-sm">{p.defaultPrivate}</p>
@@ -58,11 +58,11 @@ export default async function PrivacyPage() {
         {/* Public */}
         <div className="card p-6 space-y-3">
           <h2 className="font-display text-xl flex items-center gap-2">
-            <Globe size={18} strokeWidth={2} className="text-lantern" /> {p.publicSection}
+            <Globe size={18} strokeWidth={2} className="text-sage dark:text-sage-soft" /> {p.publicSection}
           </h2>
           <p className="text-sm text-ink-muted dark:text-moon-muted">{p.publicExplain}</p>
           {profile?.username ? (
-            <Link href={`/u/${profile.username}`} className="text-sm text-lantern underline">
+            <Link href={`/u/${profile.username}`} className="text-sm text-sage dark:text-sage-soft underline">
               {p.publicLink}: /u/{profile.username}
             </Link>
           ) : (
@@ -74,7 +74,7 @@ export default async function PrivacyPage() {
                 <span>{r.label}</span>
                 <div className="flex items-center gap-3">
                   <span className="text-ink-muted dark:text-moon-muted">{r.value}</span>
-                  {r.href && <Link href={r.href} className="text-xs text-lantern underline">{p.manage}</Link>}
+                  {r.href && <Link href={r.href} className="text-xs text-sage dark:text-sage-soft underline">{p.manage}</Link>}
                 </div>
               </div>
             ))}
@@ -90,7 +90,7 @@ export default async function PrivacyPage() {
           <div className="divide-y divide-black/5 dark:divide-white/10">
             <div className="flex items-center justify-between py-2 text-sm">
               <span>{partnerStatus}</span>
-              <Link href="/partner" className="text-xs text-lantern underline">{p.manage}</Link>
+              <Link href="/partner" className="text-xs text-sage dark:text-sage-soft underline">{p.manage}</Link>
             </div>
             <div className="flex items-center justify-between py-2 text-sm">
               <span>{p.sharedTasks}</span>

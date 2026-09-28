@@ -85,7 +85,7 @@ export default function AIChat({ strings, locale, userId }) {
           <select
             value={context}
             onChange={(e) => setContext(e.target.value)}
-            className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-1.5 text-sm outline-none focus:border-lantern"
+            className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-1.5 text-sm outline-none focus:border-sage"
           >
             {Object.entries(ai.contexts).map(([k, label]) => (
               <option key={k} value={k}>{label}</option>
@@ -97,7 +97,7 @@ export default function AIChat({ strings, locale, userId }) {
               type="checkbox"
               checked={useKnowledge}
               onChange={(e) => setUseKnowledge(e.target.checked)}
-              className="accent-lantern"
+              className="accent-sage"
             />
             {ai.useKnowledge}
           </label>
@@ -113,7 +113,7 @@ export default function AIChat({ strings, locale, userId }) {
               onClick={() => runQuickAction(qa)}
               disabled={loading}
               className="text-xs rounded-full border border-black/10 dark:border-white/10 px-3 py-1.5
-                         text-ink-muted dark:text-moon-muted hover:border-lantern hover:text-ink dark:hover:text-moon transition disabled:opacity-50"
+                         text-ink-muted dark:text-moon-muted hover:border-sage hover:text-ink dark:hover:text-moon transition disabled:opacity-50"
             >
               {qa.prompt}
             </button>
@@ -125,7 +125,7 @@ export default function AIChat({ strings, locale, userId }) {
       <div className="card p-4 min-h-[320px] max-h-[55vh] overflow-y-auto space-y-3">
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-center py-10 gap-2">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-lantern/15 text-lantern">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-sage/15 text-sage dark:text-sage-soft">
               <Sparkles size={20} strokeWidth={2} />
             </span>
             <p className="font-display text-lg">{ai.greeting}</p>
@@ -137,7 +137,7 @@ export default function AIChat({ strings, locale, userId }) {
             <div
               className={`max-w-[85%] rounded-soft px-4 py-2.5 text-sm leading-7 whitespace-pre-wrap ${
                 m.role === "user"
-                  ? "bg-lantern/20 text-ink dark:text-moon"
+                  ? "bg-sage/20 text-ink dark:text-moon"
                   : "bg-black/[0.03] dark:bg-white/[0.05] text-ink dark:text-moon"
               }`}
             >
@@ -168,7 +168,7 @@ export default function AIChat({ strings, locale, userId }) {
           onChange={(e) => setInput(e.target.value)}
           placeholder={ai.inputPlaceholder}
           className="flex-1 rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                     px-4 py-3 text-sm outline-none focus:border-lantern"
+                     px-4 py-3 text-sm outline-none focus:border-sage"
         />
         <button
           type="submit"

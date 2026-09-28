@@ -53,7 +53,7 @@ export default function LoginForm({ strings, locale }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-soft border border-black/10 dark:border-white/10
-                         bg-transparent px-4 py-3 outline-none focus:border-lantern"
+                         bg-transparent px-4 py-3 outline-none focus:border-sage"
               placeholder="example@email.com"
             />
           </div>
@@ -66,11 +66,11 @@ export default function LoginForm({ strings, locale }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-soft border border-black/10 dark:border-white/10
-                         bg-transparent px-4 py-3 outline-none focus:border-lantern"
+                         bg-transparent px-4 py-3 outline-none focus:border-sage"
               placeholder="••••••••"
             />
             <div className="text-end mt-1">
-              <Link href="/forgot-password" className="text-xs text-ink-muted dark:text-moon-muted hover:text-lantern underline">
+              <Link href="/forgot-password" className="text-xs text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon underline">
                 {a.forgotPassword}
               </Link>
             </div>
@@ -90,7 +90,7 @@ export default function LoginForm({ strings, locale }) {
 
         <p className="text-center text-sm text-ink-muted dark:text-moon-muted mt-6">
           {a.needAccount}{" "}
-          <Link href="/signup" className="text-lantern underline">
+          <Link href="/signup" className="text-sage dark:text-sage-soft underline">
             {a.createNew}
           </Link>
         </p>

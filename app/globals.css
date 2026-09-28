@@ -48,7 +48,7 @@ button {
 /* شريط تمرير رفيع ومتناسق مع الهوية */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb {
-  background: theme("colors.dusk.soft");
+  background: theme("colors.sage.soft");
   border-radius: 999px;
 }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -89,7 +89,7 @@ button {
    ============================================================ */
 .exec-card {
   @apply bg-paper-card dark:bg-night-card rounded-md border border-black/[0.06] dark:border-white/[0.08]
-         border-s-[3px] border-s-[#B46F4D] shadow-none transition-colors duration-200;
+         border-s-[3px] border-s-[#B5624A] shadow-none transition-colors duration-200;
 }
 
 .exec-card-hover {
@@ -97,16 +97,16 @@ button {
 }
 
 .exec-label {
-  @apply text-[10px] tracking-[0.14em] text-[#B46F4D] dark:text-[#D8C6AF] font-medium;
+  @apply text-[10px] tracking-[0.14em] text-[#B5624A] dark:text-[#C97D60] font-medium;
 }
 
 .exec-accent {
-  @apply text-[#B46F4D] dark:text-[#D8C6AF];
+  @apply text-[#B5624A] dark:text-[#C97D60];
 }
 
 .exec-accent-bg {
-  background-color: rgba(180, 111, 77, 0.12);
-  @apply text-[#7a4a33] dark:text-[#D8C6AF];
+  background-color: rgba(181, 98, 74, 0.12);
+  @apply text-[#8F4A36] dark:text-[#C97D60];
 }
 
 /* ============================================================

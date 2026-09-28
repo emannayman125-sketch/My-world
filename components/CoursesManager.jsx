@@ -52,7 +52,7 @@ export default function CoursesManager({ userId, initialCourses, strings }) {
         <button
           onClick={() => setOpen(true)}
           className="w-full card card-hover p-4 flex items-center justify-center gap-2 text-sm
-                     text-ink-muted dark:text-moon-muted hover:text-lantern transition"
+                     text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon transition"
         >
           <Plus size={15} strokeWidth={2} />
           {m.addCourse}
@@ -65,7 +65,7 @@ export default function CoursesManager({ userId, initialCourses, strings }) {
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             placeholder={m.courseName}
             className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                       px-3 py-2 text-sm outline-none focus:border-lantern"
+                       px-3 py-2 text-sm outline-none focus:border-sage"
           />
           <div className="flex gap-2 flex-wrap">
             <input
@@ -73,14 +73,14 @@ export default function CoursesManager({ userId, initialCourses, strings }) {
               onChange={(e) => setForm({ ...form, professor: e.target.value })}
               placeholder={m.professor}
               className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                         px-3 py-2 text-sm outline-none focus:border-lantern"
+                         px-3 py-2 text-sm outline-none focus:border-sage"
             />
             <input
               value={form.schedule}
               onChange={(e) => setForm({ ...form, schedule: e.target.value })}
               placeholder={m.schedule}
               className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                         px-3 py-2 text-sm outline-none focus:border-lantern"
+                         px-3 py-2 text-sm outline-none focus:border-sage"
             />
           </div>
           <textarea
@@ -89,7 +89,7 @@ export default function CoursesManager({ userId, initialCourses, strings }) {
             placeholder={m.description}
             rows={2}
             className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                       px-3 py-2 text-sm outline-none focus:border-lantern resize-none"
+                       px-3 py-2 text-sm outline-none focus:border-sage resize-none"
           />
           <div className="flex items-center gap-2">
             <button
@@ -120,7 +120,7 @@ export default function CoursesManager({ userId, initialCourses, strings }) {
           <div key={c.id} className="card card-hover p-4">
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-lantern/15 text-lantern shrink-0">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sage/15 text-sage dark:text-sage-soft shrink-0">
                   <GraduationCap size={15} strokeWidth={2} />
                 </span>
                 <div>

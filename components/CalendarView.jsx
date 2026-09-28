@@ -159,7 +159,7 @@ export default function CalendarView({ userId, initialEvents, strings, locale })
                 key={idx}
                 onClick={() => setSelectedDate(iso)}
                 className={`aspect-square rounded-soft text-sm flex flex-col items-center justify-center gap-0.5 relative
-                  ${isSelected ? "bg-lantern text-night" : isToday ? "bg-dusk/20" : "hover:bg-black/5 dark:hover:bg-white/5"}`}
+                  ${isSelected ? "bg-ink text-paper dark:bg-moon dark:text-night" : isToday ? "bg-dusk/20" : "hover:bg-black/5 dark:hover:bg-white/5"}`}
               >
                 <span>{day.getDate()}</span>
                 {dayEvents.length > 0 && (
@@ -200,12 +200,12 @@ export default function CalendarView({ userId, initialEvents, strings, locale })
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder={tr.titlePlaceholder}
-              className="flex-1 min-w-[120px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+              className="flex-1 min-w-[120px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
             />
             <select
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-lantern"
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
             >
               {CATEGORY_KEYS.map((cat) => (
                 <option key={cat} value={cat}>{CATEGORY_EMOJI[cat]} {tr.categories[cat]}</option>
@@ -215,7 +215,7 @@ export default function CalendarView({ userId, initialEvents, strings, locale })
               type="time"
               value={form.event_time}
               onChange={(e) => setForm({ ...form, event_time: e.target.value })}
-              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-lantern"
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
             />
             <button type="submit" className="rounded-soft bg-lantern text-night text-sm px-4 py-2 hover:brightness-105">
               {tr.add}
@@ -225,7 +225,7 @@ export default function CalendarView({ userId, initialEvents, strings, locale })
             value={form.link_url}
             onChange={(e) => setForm({ ...form, link_url: e.target.value })}
             placeholder={tr.linkPlaceholder}
-            className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+            className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
           />
         </form>
       </div>

@@ -27,7 +27,7 @@ export default function GettingStarted({ hasTasks, hasMemory, hasWorldItem, stri
           if (item.done) {
             return (
               <div key={item.key} className="flex items-center gap-2.5 rounded-soft px-3 py-2.5 text-sm text-ink-muted dark:text-moon-muted">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-lantern/20 text-lantern shrink-0">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-sage/20 text-sage dark:text-sage-soft shrink-0">
                   <Check size={13} strokeWidth={2.5} />
                 </span>
                 <span className="line-through">{item.label}</span>
@@ -39,7 +39,7 @@ export default function GettingStarted({ hasTasks, hasMemory, hasWorldItem, stri
               key={item.key}
               href={item.href}
               className="flex items-center gap-2.5 rounded-soft border border-black/10 dark:border-white/10 px-3 py-2.5 text-sm
-                         hover:border-lantern/50 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition"
+                         hover:border-sage/50 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition"
             >
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black/5 dark:bg-white/10 text-ink-muted dark:text-moon-muted shrink-0">
                 <Icon size={13} strokeWidth={2} />

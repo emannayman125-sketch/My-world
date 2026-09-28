@@ -47,7 +47,7 @@ export default function ForgotPasswordForm({ strings, locale }) {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="example@email.com"
             className="w-full rounded-soft border border-black/10 dark:border-white/10
-                       bg-transparent px-4 py-3 outline-none focus:border-lantern"
+                       bg-transparent px-4 py-3 outline-none focus:border-sage"
           />
 
           {status && <p className="text-sm text-dusk">{status}</p>}
@@ -63,7 +63,7 @@ export default function ForgotPasswordForm({ strings, locale }) {
         </form>
 
         <p className="text-center text-sm text-ink-muted dark:text-moon-muted mt-6">
-          <Link href="/login" className="text-lantern underline">{a.backToLogin}</Link>
+          <Link href="/login" className="text-sage dark:text-sage-soft underline">{a.backToLogin}</Link>
         </p>
       </div>
     </main>

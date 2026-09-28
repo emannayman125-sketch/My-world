@@ -82,7 +82,7 @@ export default function CurrentlySection({ userId, initialItems, strings }) {
           value={form.kind}
           onChange={(e) => setForm({ ...form, kind: e.target.value })}
           className="rounded-soft border border-black/10 dark:border-white/10
-                     bg-transparent px-2 py-2 text-sm outline-none focus:border-lantern"
+                     bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
         >
           {KIND_KEYS.map((kind) => (
             <option key={kind} value={kind}>{tr.kinds[kind]}</option>
@@ -93,14 +93,14 @@ export default function CurrentlySection({ userId, initialItems, strings }) {
           onChange={(e) => setForm({ ...form, title: e.target.value })}
           placeholder={tr.titlePlaceholder}
           className="flex-1 min-w-[120px] rounded-soft border border-black/10 dark:border-white/10
-                     bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+                     bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
         />
         <input
           value={form.subtitle}
           onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
           placeholder={tr.subtitlePlaceholder}
           className="flex-1 min-w-[100px] rounded-soft border border-black/10 dark:border-white/10
-                     bg-transparent px-3 py-2 text-sm outline-none focus:border-lantern"
+                     bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
         />
         <button
           type="submit"

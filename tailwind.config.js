@@ -8,41 +8,57 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // "Ahmed's World" palette — Navy Copper (approved).
-        // Same token names used everywhere in the app; only the hex
-        // values change here, so this repaints the whole product at once.
+        // "Ahmed's World" — Lantern Night.
+        // Same token names used everywhere in the app; only the values
+        // change here, so this repaints the whole product at once.
+        //
+        // THE RULE: `lantern` is the one warm accent and is reserved for
+        // the single most important thing on a screen (the main CTA, the
+        // "matters now" card, the progress ring). Everything decorative --
+        // active states, icon tints, links, focus rings, progress fills --
+        // uses `sage` (calm) or plain `ink`. That restraint is what makes
+        // ten different hubs feel like one app.
         night: {
-          DEFAULT: "#18232D", // deep navy — base dark background
-          soft: "#1E2C38",    // panel level
-          card: "#263744",    // card surfaces on dark
+          DEFAULT: "#0F2420", // page background, dark mode
+          soft: "#112622",    // panel level
+          card: "#132A26",    // raised surfaces, dark mode
         },
         paper: {
-          DEFAULT: "#F7F5EF", // warm white — base light background
-          card: "#FCFBF7",    // card surfaces on light
+          DEFAULT: "#F7F3E8", // page background, light mode
+          card: "#FFFFFF",    // raised surfaces, light mode
         },
         lantern: {
-          DEFAULT: "#B46F4D", // copper — primary accent
-          soft: "#D8C6AF",    // sand — secondary touch
+          DEFAULT: "#C6832A", // the one accent
+          soft: "#E8A83C",    // brighter tone (dark mode / glows)
+          ink: "#2B1F08",     // text placed ON a lantern fill
         },
         ember: {
-          DEFAULT: "#B46F4D", // copper — same family as lantern; kept as a
-          soft: "#D8C6AF",    // separate token for spots that want to name it
+          DEFAULT: "#C6832A", // alias of lantern
+          soft: "#E8A83C",
         },
         dusk: {
-          DEFAULT: "#6256A8", // deep indigo — secondary accent (Hamzawi / AI)
+          DEFAULT: "#6256A8", // Hamzawi's own identity
           soft: "#9086C0",
         },
         ink: {
-          DEFAULT: "#18232D", // primary text on light — deep navy
-          muted: "#7F8C83",   // sage gray
+          DEFAULT: "#17281F", // primary text on light
+          muted: "#5C6F65",   // secondary text on light
         },
         moon: {
-          DEFAULT: "#F7F5EF", // primary text on dark
-          muted: "#93A0A3",   // muted sage-gray, readable on navy
+          DEFAULT: "#F7EFDD", // primary text on dark
+          muted: "#9FB8AC",   // secondary text on dark
         },
         sage: {
-          DEFAULT: "#879786", // muted sage — Growth accent
-          soft: "#A9B4A8",
+          DEFAULT: "#4F7A63", // calm secondary: completed, growth, active
+          soft: "#8FAE9A",    // same, tuned for dark backgrounds
+        },
+        clay: {
+          DEFAULT: "#B5624A", // rare warmth touch (mood, Business hub)
+          soft: "#C97D60",
+        },
+        hairline: {
+          DEFAULT: "#E7E0D0", // borders on light
+          dark: "#1B332D",    // borders on dark
         },
       },
       fontFamily: {
@@ -51,20 +67,22 @@ module.exports = {
         letter: ["var(--font-letter)", "serif"],
       },
       borderRadius: {
+        card: "20px",  // primary cards
+        chip: "14px",  // small stat chips
         soft: "18px",
         full_card: "28px",
         xl2: "24px",
       },
       boxShadow: {
-        lantern: "0 8px 30px -10px rgba(180, 111, 77, 0.35)",
-        glow: "0 0 40px -8px rgba(180, 111, 77, 0.45)",
+        lantern: "0 8px 30px -10px rgba(198, 131, 42, 0.30)",
+        glow: "0 0 40px -8px rgba(198, 131, 42, 0.40)",
         duskGlow: "0 0 50px -12px rgba(98, 86, 168, 0.5)",
-        card: "0 1px 2px rgba(24, 35, 45, 0.04), 0 8px 24px -12px rgba(24, 35, 45, 0.08)",
+        card: "0 1px 2px rgba(23, 40, 31, 0.04), 0 8px 24px -12px rgba(23, 40, 31, 0.08)",
         cardDark: "0 1px 2px rgba(0,0,0,0.2), 0 12px 32px -12px rgba(0,0,0,0.5)",
       },
       backgroundImage: {
         aurora:
-          "radial-gradient(600px circle at 15% 0%, rgba(180,111,77,0.14), transparent 55%), radial-gradient(500px circle at 85% 10%, rgba(98,86,168,0.18), transparent 55%)",
+          "radial-gradient(600px circle at 15% 0%, rgba(198,131,42,0.12), transparent 55%), radial-gradient(500px circle at 85% 10%, rgba(79,122,99,0.14), transparent 55%)",
       },
       keyframes: {
         "fade-up": {

@@ -94,7 +94,7 @@ function TaskChip({ task, onDragStart, onDragEnd }) {
       onDragEnd={onDragEnd}
       className="flex items-center gap-1.5 rounded-soft border border-black/10 dark:border-white/10
                  bg-paper-card dark:bg-night-card px-3 py-2 text-sm cursor-grab active:cursor-grabbing shrink-0
-                 hover:border-lantern/50 transition"
+                 hover:border-sage/50 transition"
     >
       <GripVertical size={13} strokeWidth={2} className="text-ink-muted/50 shrink-0" />
       <span className="truncate max-w-[200px]">{task.title}</span>

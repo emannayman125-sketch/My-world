@@ -37,7 +37,7 @@ export default function HabitsToday({ userId, habits, initialLogsToday, strings 
               key={h.id}
               onClick={() => toggle(h)}
               className={`rounded-full px-3 py-1.5 text-sm transition
-                ${done ? "bg-lantern text-night" : "bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"}`}
+                ${done ? "bg-sage text-white" : "bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"}`}
             >
               {h.emoji} {h.name}
             </button>
