@@ -38,7 +38,7 @@ export default function ShareDayButton({ name, top3, events, strings }) {
   return (
     <button
       onClick={handleShare}
-      className="rounded-soft bg-lantern text-white text-sm px-4 py-2 hover:brightness-105 transition"
+      className="rounded-soft border border-hairline dark:border-hairline-dark text-sm px-4 py-2 text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition"
     >
       {tr.button}
     </button>

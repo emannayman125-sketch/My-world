@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Flame, CalendarDays, Headphones } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import { getDueHiddenMessage } from "@/lib/hiddenMessages";
 import AppHeader from "@/components/AppHeader";
@@ -94,139 +94,207 @@ export default async function DashboardPage() {
 
   const greeting = now.getHours() < 12 ? d.greetingMorning : d.greetingEvening;
 
+  // ---- derived values for the Lantern Night layout ------------------------
+  const top3List = top3 || [];
+  const nextPriority = top3List.find((t) => !t.is_done);
+  const habitsTotal = (habits || []).length;
+  const habitsDone = (habitLogsToday || []).length;
+  const eventsCount = (todayEvents || []).length;
+  const firstCurrently = (currentlyItems || []).find((c) => c.title);
+
+  const cardBase =
+    "bg-paper-card dark:bg-night-card rounded-card border border-hairline dark:border-hairline-dark";
+
+  // Only chips that actually have something to say -- never an empty tile.
+  const chips = [];
+  if (habitsTotal > 0) {
+    chips.push({ key: "habits", icon: Flame, value: `${habitsDone}/${habitsTotal}`, label: d.chipHabits });
+  }
+  if (eventsCount > 0) {
+    chips.push({ key: "events", icon: CalendarDays, value: String(eventsCount), label: d.chipEvents });
+  }
+  if (firstCurrently) {
+    chips.push({ key: "currently", icon: Headphones, value: firstCurrently.title, label: null });
+  }
+
   return (
     <div className="min-h-screen bg-paper dark:bg-night lg:ps-64">
-      <div className="aurora-bg">
-        <AppHeader />
-        <ReminderNotifier todayEvents={todayEvents || []} strings={strings} />
-        {isBirthdayToday && <BirthdayCelebration userId={user.id} name={name} year={currentYear} strings={strings} />}
+      <AppHeader />
+      <ReminderNotifier todayEvents={todayEvents || []} strings={strings} />
+      {isBirthdayToday && <BirthdayCelebration userId={user.id} name={name} year={currentYear} strings={strings} />}
 
-        <main className="max-w-6xl mx-auto px-6 lg:px-10 pt-4 lg:pt-8 pb-16 space-y-6">
-          {dueMessage && (
-            <FadeIn>
-              <SurpriseMessage message={dueMessage} strings={strings} />
+      <main className="max-w-2xl mx-auto px-6 pt-4 lg:pt-10 pb-20 space-y-8">
+        {dueMessage && (
+          <FadeIn>
+            <SurpriseMessage message={dueMessage} strings={strings} />
+          </FadeIn>
+        )}
+
+        {/* 1 — greeting: calm, personal, first thing on screen */}
+        <FadeIn>
+          <header className="flex items-center gap-4">
+            {profile?.avatar_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={profile.avatar_url}
+                alt={name}
+                className="w-12 h-12 rounded-full object-cover shrink-0"
+              />
+            )}
+            <div>
+              <p className="text-sm text-ink-muted dark:text-moon-muted">
+                {now.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+              <h1 className="font-display text-4xl leading-tight">
+                {greeting}{locale === "ar" ? "،" : ","} {name}
+              </h1>
+            </div>
+          </header>
+        </FadeIn>
+
+        <FadeIn delay={0.01}>
+          <GettingStarted
+            hasTasks={(anyTask || []).length > 0}
+            hasMemory={(anyMemory || []).length > 0}
+            hasWorldItem={(anyWorldItem || []).length > 0}
+            strings={strings}
+          />
+        </FadeIn>
+
+        {/* 2 — how the day is going (supporting info, not the star) */}
+        <FadeIn delay={0.03}>
+          <section className={`${cardBase} p-5 flex flex-wrap items-center gap-5`}>
+            <ProgressRing percent={progressPercent} size={76} stroke={6} />
+            <div className="min-w-0">
+              <p className="text-sm">
+                {d.doneOfTotal
+                  .replace("{done}", String(doneCount))
+                  .replace("{total}", String(top3List.length))}
+              </p>
+              <p className="mt-1 text-xs text-ink-muted dark:text-moon-muted">{d.keepGoing}</p>
+            </div>
+            <div className="ms-auto shrink-0">
+              <ShareDayButton name={name} top3={top3List} events={todayEvents || []} strings={strings} />
+            </div>
+          </section>
+        </FadeIn>
+
+        {/* 3 — the ONE thing that gets the full lantern fill */}
+        <FadeIn delay={0.05}>
+          <section>
+            <p className="mb-2 text-xs text-ink-muted dark:text-moon-muted">{d.mattersNow}</p>
+            {nextPriority ? (
+              <div className="rounded-card bg-lantern p-6 shadow-lantern">
+                <p className="font-display text-2xl leading-snug text-lantern-ink">{nextPriority.title}</p>
+              </div>
+            ) : top3List.length > 0 ? (
+              <div className={`${cardBase} p-5 text-sm text-ink-muted dark:text-moon-muted`}>
+                {d.allDoneToday}
+              </div>
+            ) : (
+              <div className="rounded-card border border-dashed border-hairline dark:border-hairline-dark p-5 text-sm text-ink-muted dark:text-moon-muted">
+                {d.noPriorityYet}
+              </div>
+            )}
+          </section>
+        </FadeIn>
+
+        {/* 4 — glanceable row, max 3, only what exists, all calm */}
+        {chips.length > 0 && (
+          <FadeIn delay={0.07}>
+            <section className="grid grid-cols-3 gap-3">
+              {chips.slice(0, 3).map((chip) => (
+                <div
+                  key={chip.key}
+                  className={`${cardBase} !rounded-chip p-4 flex flex-col items-center gap-1.5 text-center min-w-0`}
+                >
+                  <chip.icon size={18} strokeWidth={2} className="text-ink-muted dark:text-moon-muted" />
+                  <span className="text-sm font-medium truncate max-w-full">{chip.value}</span>
+                  {chip.label && (
+                    <span className="text-[11px] text-ink-muted dark:text-moon-muted">{chip.label}</span>
+                  )}
+                </div>
+              ))}
+            </section>
+          </FadeIn>
+        )}
+
+        {/* 5 — the working list: add / check off today's important things */}
+        <FadeIn delay={0.09}>
+          <TopThree userId={user.id} initialTasks={top3List} strings={strings} />
+        </FadeIn>
+
+        {/* 6 — everything else, quieter, in one calm stack */}
+        <div className="space-y-4">
+          <p className="text-xs text-ink-muted dark:text-moon-muted">{d.moreForToday}</p>
+
+          {eventsCount > 0 && (
+            <FadeIn delay={0.05}>
+              <div className={`${cardBase} p-6`}>
+                <h2 className="font-display text-xl mb-3">{d.todayEvents}</h2>
+                <ul className="space-y-1 text-sm">
+                  {todayEvents.map((ev) => (
+                    <li key={ev.id}>
+                      {ev.event_time && <span className="text-ink-muted dark:text-moon-muted">{ev.event_time} — </span>}
+                      {ev.title}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </FadeIn>
           )}
 
-          <FadeIn>
-            <div className="card card-hover p-8 flex items-center justify-between flex-wrap gap-6 relative overflow-hidden">
-              <div className="absolute inset-0 bg-aurora pointer-events-none" />
-              <div className="flex items-center gap-4 relative">
-                {profile?.avatar_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={profile.avatar_url}
-                    alt={name}
-                    className="w-16 h-16 rounded-full object-cover shrink-0 ring-2 ring-sage/20"
-                  />
-                )}
-                <div>
-                  <p className="text-xs text-sage dark:text-sage-soft font-medium tracking-wide mb-1">
-                    {now.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
-                      weekday: "long",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </p>
-                  <h1 className="font-display text-4xl">
-                    {greeting}, {name} ☀️
-                  </h1>
-                  <p className="text-ink-muted dark:text-moon-muted mt-1">{d.subtitle}</p>
-                  <div className="mt-3">
-                    <ShareDayButton name={name} top3={top3 || []} events={todayEvents || []} strings={strings} />
-                  </div>
+          <FadeIn delay={0.06}>
+            <HabitsToday userId={user.id} habits={habits || []} initialLogsToday={habitLogsToday || []} strings={strings} />
+          </FadeIn>
+
+          <FadeIn delay={0.07}>
+            <MoodCheckin userId={user.id} initialMood={todayMood?.mood} strings={strings} />
+          </FadeIn>
+
+          <FadeIn delay={0.08}>
+            <CurrentlySection userId={user.id} initialItems={currentlyItems || []} strings={strings} />
+          </FadeIn>
+
+          {onThisDay.length > 0 && (
+            <FadeIn delay={0.09}>
+              <div className={`${cardBase} p-6`}>
+                <h2 className="font-display text-xl mb-3">{d.onThisDay}</h2>
+                <div className="space-y-3">
+                  {onThisDay.map((n, i) => (
+                    <p key={i} className="text-sm leading-7">
+                      <span className="text-ink-muted dark:text-moon-muted">
+                        {n.kind === "treasure" && "⭐ "}{new Date(n.created_at).getFullYear()} —{" "}
+                      </span>
+                      {n.content}
+                    </p>
+                  ))}
                 </div>
               </div>
-              <div className="relative">
-                <ProgressRing percent={progressPercent} label={d.progressToday} size={116} stroke={10} />
-              </div>
-            </div>
+            </FadeIn>
+          )}
+
+          <FadeIn delay={0.1}>
+            <Link
+              href="/ai"
+              className={`${cardBase} p-4 flex items-center gap-3 hover:border-sage/40 transition`}
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-dusk/15 text-dusk dark:text-dusk-soft shrink-0">
+                <Sparkles size={16} strokeWidth={2} />
+              </span>
+              <span className="text-sm">{d.askHamzawi}</span>
+            </Link>
           </FadeIn>
 
-          <FadeIn delay={0.01}>
-            <GettingStarted
-              hasTasks={(anyTask || []).length > 0}
-              hasMemory={(anyMemory || []).length > 0}
-              hasWorldItem={(anyWorldItem || []).length > 0}
-              strings={strings}
-            />
+          <FadeIn delay={0.11}>
+            <QuoteOfTheDay quote={quote} userId={user.id} strings={strings} />
           </FadeIn>
-
-          <div className="lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start space-y-6 lg:space-y-0">
-            {/* Primary column — today's focus */}
-            <div className="lg:col-span-2 space-y-6">
-              <FadeIn delay={0.1}>
-                <TopThree userId={user.id} initialTasks={top3 || []} strings={strings} />
-              </FadeIn>
-
-              <FadeIn delay={0.08}>
-                <Link
-                  href="/ai"
-                  className="card card-hover p-4 flex items-center gap-3 hover:border-dusk/40 transition"
-                >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-dusk/15 text-dusk shrink-0">
-                    <Sparkles size={16} strokeWidth={2} />
-                  </span>
-                  <span className="text-sm">{d.askHamzawi}</span>
-                </Link>
-              </FadeIn>
-
-              {todayEvents && todayEvents.length > 0 && (
-                <FadeIn delay={0.05}>
-                  <div className="card card-hover p-6">
-                    <h2 className="font-display text-xl mb-3">{d.todayEvents}</h2>
-                    <ul className="space-y-1 text-sm">
-                      {todayEvents.map((ev) => (
-                        <li key={ev.id}>
-                          {ev.event_time && <span className="text-ink-muted dark:text-moon-muted">{ev.event_time} — </span>}
-                          {ev.title}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </FadeIn>
-              )}
-
-              {onThisDay.length > 0 && (
-                <FadeIn delay={0.03}>
-                  <div className="card card-hover p-6">
-                    <h2 className="font-display text-xl mb-3">{d.onThisDay}</h2>
-                    <div className="space-y-3">
-                      {onThisDay.map((n, i) => (
-                        <p key={i} className="text-sm leading-7">
-                          <span className="text-ink-muted dark:text-moon-muted">
-                            {n.kind === "treasure" && "⭐ "}{new Date(n.created_at).getFullYear()} —{" "}
-                          </span>
-                          {n.content}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                </FadeIn>
-              )}
-            </div>
-
-            {/* Secondary column — mood, habits, currently, quote */}
-            <div className="space-y-6">
-              <FadeIn delay={0.02}>
-                <MoodCheckin userId={user.id} initialMood={todayMood?.mood} strings={strings} />
-              </FadeIn>
-
-              <FadeIn delay={0.12}>
-                <HabitsToday userId={user.id} habits={habits || []} initialLogsToday={habitLogsToday || []} strings={strings} />
-              </FadeIn>
-
-              <FadeIn delay={0.15}>
-                <CurrentlySection userId={user.id} initialItems={currentlyItems || []} strings={strings} />
-              </FadeIn>
-
-              <FadeIn delay={0.2}>
-                <QuoteOfTheDay quote={quote} userId={user.id} strings={strings} />
-              </FadeIn>
-            </div>
-          </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
