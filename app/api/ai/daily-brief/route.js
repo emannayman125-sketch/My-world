@@ -50,7 +50,7 @@ async function gatherFacts(supabase, userId, today) {
     safe(
       supabase
         .from("supply_chain_orders")
-        .select("customer, items, status, expected_delivery")
+        .select("items, status, expected_delivery")
         .eq("user_id", userId)
         .not("status", "in", "(delivered,arrived,cancelled,draft)")
         .limit(30)
@@ -84,7 +84,7 @@ async function gatherFacts(supabase, userId, today) {
     habits: { total: habits.length, doneToday: habitLogs.length },
     assignmentsDueSoon: assignments.map((a) => ({ title: a.title, due: a.due_date, status: a.status })),
     delayedOrders: delayedOrders.slice(0, 5).map((o) => ({
-      what: o.items || o.customer || "order",
+      what: o.items || "order",
       expected: o.expected_delivery || null,
     })),
     delayedOrderCount: delayedOrders.length,

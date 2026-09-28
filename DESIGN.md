@@ -40,3 +40,19 @@ everything else in one quiet stack. Empty cards are never rendered.
 
 Dictionary values must be plain strings (a function value once crashed every page
 via RSC). Interpolate in the component: `d.doneOfTotal.replace("{done}", n)`.
+
+## Exceptions to the one-lantern rule
+
+- **Hamzawi** is the only thing allowed to use `dusk` (indigo). It appears in the
+  mobile bottom nav's centre button and on the Hamzawi/Daily Brief/Onboarding
+  surfaces. It never competes with `lantern` because they live in different places.
+- The welcome letter and birthday flow are one-off ceremonial screens; they use the
+  serif letter font and their own pacing instead of the normal Home hierarchy.
+
+## Privacy rules for AI features
+
+- Anything sent to Gemini is limited to task titles, event titles, habit names and
+  order item labels. Journal entries and third-party names (customers, contacts)
+  are never sent.
+- AI output is always a *suggestion*: Ahmed reviews and approves before anything is
+  saved (onboarding proposal, Daily Brief actions).
