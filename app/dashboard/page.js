@@ -69,7 +69,7 @@ export default async function DashboardPage({ searchParams }) {
     supabase.from("memories").select("id").eq("user_id", user.id).limit(1),
     supabase.from("world_items").select("id").eq("user_id", user.id).limit(1),
     supabase.from("goals").select("id").eq("user_id", user.id).limit(1),
-    getDueHiddenMessage(supabase, user),
+    getDueHiddenMessage(supabase, user, { shownToday: cookies().get("surprise_day")?.value === today }),
   ]);
 
   const name = profile?.display_name || (locale === "ar" ? "صديقي" : "friend");
