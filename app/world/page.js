@@ -18,7 +18,7 @@ export default async function WorldPage() {
   const [world, interests, journal, timeline, messages, timeCapsule] = await Promise.all([
     supabase.from("world_items").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     supabase.from("interests").select("*").eq("user_id", user.id).order("created_at", { ascending: true }),
-    supabase.from("notes").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+    supabase.from("notes").select("*").eq("user_id", user.id).neq("kind", "daily_brief").order("created_at", { ascending: false }),
     supabase.from("memories").select("*").eq("user_id", user.id).order("year", { ascending: true }),
     supabase.from("hidden_messages").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     supabase.from("time_capsules").select("*").eq("user_id", user.id).order("reveal_date", { ascending: true }),
