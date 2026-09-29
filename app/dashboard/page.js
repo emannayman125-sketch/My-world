@@ -18,6 +18,9 @@ import HabitsToday from "@/components/HabitsToday";
 import QuoteOfTheDay from "@/components/QuoteOfTheDay";
 import GettingStarted from "@/components/GettingStarted";
 import DailyBrief from "@/components/DailyBrief";
+import StreakCard from "@/components/StreakCard";
+import { getActivityDates } from "@/lib/activityDates";
+import { computeActivityStreak } from "@/lib/streaks";
 import OnboardingPrompt from "@/components/OnboardingPrompt";
 import { pickQuote } from "@/lib/quotes/pickQuote";
 import { getLocale } from "@/lib/i18n/getLocale";
@@ -76,6 +79,9 @@ export default async function DashboardPage({ searchParams }) {
 
   const doneCount = (top3 || []).filter((t) => t.is_done).length;
   const progressPercent = top3 && top3.length > 0 ? Math.round((doneCount / top3.length) * 100) : 0;
+
+  const activityDates = await getActivityDates(supabase, user.id);
+  const activityStreak = computeActivityStreak(new Set(activityDates), todayISO());
 
   const cairo = cairoNow();
   const currentYear = cairo.year;
@@ -187,6 +193,11 @@ export default async function DashboardPage({ searchParams }) {
             <OnboardingPrompt strings={d.onboardingPrompt} />
           </FadeIn>
         )}
+
+        {/* 1a — the overall daily streak: quiet, no pressure, one rest day allowed */}
+        <FadeIn delay={0.01}>
+          <StreakCard streak={activityStreak} locale={locale} strings={d.streak} />
+        </FadeIn>
 
         {/* 1b — Hamzawi's daily brief: suggests, never adds anything by itself */}
         <FadeIn delay={0.02}>

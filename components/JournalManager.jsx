@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { signMemoryPhotos, isLegacyPublicUrl } from "@/lib/memoryPhotos";
 
 const KIND_EMOJI = { journal: "📝", treasure: "⭐", note: "💡", quote: "💭", learned: "🧠" };
 const KIND_KEYS = Object.keys(KIND_EMOJI);
@@ -15,6 +16,19 @@ export default function JournalManager({ userId, initialNotes, strings }) {
   const [kind, setKind] = useState("journal");
   const [content, setContent] = useState("");
   const [uploadingFor, setUploadingFor] = useState(null);
+  const [photoUrls, setPhotoUrls] = useState({});
+
+  // Private bucket: resolve stored paths to short-lived signed links whenever the list changes.
+  useEffect(() => {
+    const withPhotos = notes.filter((n) => n.image_url && !isLegacyPublicUrl(n.image_url));
+    if (withPhotos.length === 0) return;
+    let cancelled = false;
+    signMemoryPhotos(supabase, withPhotos).then((map) => {
+      if (!cancelled) setPhotoUrls((prev) => ({ ...prev, ...map }));
+    });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notes.map((n) => n.image_url).join(",")]);
 
   async function addNote(e) {
     e.preventDefault();
@@ -44,8 +58,8 @@ export default function JournalManager({ userId, initialNotes, strings }) {
       .upload(path, file, { upsert: true });
 
     if (!uploadError) {
-      const { data: { publicUrl } } = supabase.storage.from("memory-photos").getPublicUrl(path);
-      const bustUrl = `${publicUrl}?t=${Date.now()}`;
+      // Store the storage PATH (bucket is private now, not a public URL).
+      const bustUrl = path;
       await supabase.from("notes").update({ image_url: bustUrl }).eq("id", note.id);
       setNotes((list) => list.map((n) => (n.id === note.id ? { ...n, image_url: bustUrl } : n)));
     }
@@ -110,8 +124,14 @@ export default function JournalManager({ userId, initialNotes, strings }) {
 
             {kind === "treasure" && (
               note.image_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={note.image_url} alt="" className="w-full max-w-xs rounded-soft object-cover" />
+                isLegacyPublicUrl(note.image_url) ? (
+                  <p className="text-xs text-ink-muted dark:text-moon-muted">{tr.photoUnavailable}</p>
+                ) : photoUrls[note.id] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={photoUrls[note.id]} alt="" className="w-full max-w-xs rounded-soft object-cover" />
+                ) : (
+                  <div className="w-full max-w-xs h-32 rounded-soft bg-black/5 dark:bg-white/5 animate-pulse" />
+                )
               ) : (
                 <label className="inline-block text-xs rounded-full bg-black/5 dark:bg-white/5 px-3 py-1.5 cursor-pointer hover:bg-black/10 dark:hover:bg-white/10">
                   {uploadingFor === note.id ? tr.uploading : tr.addPhoto}

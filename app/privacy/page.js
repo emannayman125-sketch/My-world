@@ -5,6 +5,7 @@ import { createServerSupabase } from "@/lib/supabaseServer";
 import AppHeader from "@/components/AppHeader";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
+import SocialLinksEditor from "@/components/SocialLinksEditor";
 
 export default async function PrivacyPage() {
   const locale = getLocale();
@@ -17,7 +18,7 @@ export default async function PrivacyPage() {
 
   const [{ data: profile }, { data: interests }, { data: currently }, { data: world }, { data: link }, { data: sharedTasks }, { data: sharedGoals }] =
     await Promise.all([
-      supabase.from("profiles").select("username, is_bio_public").eq("id", user.id).single(),
+      supabase.from("profiles").select("username, is_bio_public, social_links").eq("id", user.id).single(),
       supabase.from("interests").select("is_public").eq("user_id", user.id),
       supabase.from("currently_items").select("is_public").eq("user_id", user.id),
       supabase.from("world_items").select("is_public").eq("user_id", user.id),
@@ -62,8 +63,12 @@ export default async function PrivacyPage() {
           </h2>
           <p className="text-sm text-ink-muted dark:text-moon-muted">{p.publicExplain}</p>
           {profile?.username ? (
-            <Link href={`/u/${profile.username}`} className="text-sm text-sage dark:text-sage-soft underline">
-              {p.publicLink}: /u/{profile.username}
+            <Link
+              href={`/u/${profile.username}`}
+              target="_blank"
+              className="inline-flex items-center gap-1.5 rounded-full bg-sage/15 text-sage dark:text-sage-soft text-sm px-4 py-2 hover:bg-sage/25 transition"
+            >
+              {p.previewLink} ↗
             </Link>
           ) : (
             <p className="text-sm text-ink-muted dark:text-moon-muted">{p.noUsername}</p>
@@ -79,6 +84,14 @@ export default async function PrivacyPage() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Social links: exactly what he chooses to share, nothing else */}
+        <div className="card p-6 space-y-3">
+          <h2 className="font-display text-xl flex items-center gap-2">
+            <Globe size={18} strokeWidth={2} className="text-sage dark:text-sage-soft" /> {p.socialLinksTitle}
+          </h2>
+          <SocialLinksEditor userId={user.id} initialLinks={profile?.social_links} strings={p.socialLinks} />
         </div>
 
         {/* Shared */}

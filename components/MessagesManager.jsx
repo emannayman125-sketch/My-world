@@ -14,6 +14,7 @@ export default function MessagesManager({ userId, initialMessages, strings }) {
     first_goal_done: { label: tr.triggers.first_goal_done, placeholder: "" },
     tasks_done: { label: tr.triggers.tasks_done, placeholder: tr.tasksPlaceholder, inputType: "number", needsValue: true },
     habit_streak: { label: tr.triggers.habit_streak, placeholder: tr.streakPlaceholder, inputType: "number", needsValue: true },
+    activity_streak: { label: tr.triggers.activity_streak, placeholder: tr.streakPlaceholder, inputType: "number", needsValue: true },
     anytime: { label: tr.triggers.anytime, placeholder: "" },
     manual: { label: tr.triggers.manual, placeholder: "" },
   };
