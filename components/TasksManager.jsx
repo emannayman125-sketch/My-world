@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
 import LinkField from "./LinkField";
+import { todayISO } from "@/lib/time";
 
 const PRIORITY_EMOJI = { high: "🔥", important: "⭐", normal: "○" };
 
@@ -20,7 +21,7 @@ export default function TasksManager({ userId, initialTasks, strings }) {
   const [form, setForm] = useState({ title: "", priority: "normal", due_date: "", is_shared: false, link_url: "" });
   const [filter, setFilter] = useState("open");
   const [showLinkInput, setShowLinkInput] = useState(false);
-  const todayISO = new Date().toISOString().slice(0, 10);
+  const todayISO = todayISO();
 
   async function addTask(e) {
     e.preventDefault();
@@ -137,7 +138,7 @@ export default function TasksManager({ userId, initialTasks, strings }) {
             key={key}
             onClick={() => setFilter(key)}
             className={`rounded-full px-3 py-1 transition
-              ${filter === key ? "bg-dusk text-white" : "bg-black/5 dark:bg-white/5"}`}
+              ${filter === key ? "bg-ink text-paper dark:bg-moon dark:text-night" : "bg-black/5 dark:bg-white/5"}`}
           >
             {label}
           </button>

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, Send } from "lucide-react";
+import { Sparkles, Send, Mic, Square, Volume2, VolumeX } from "lucide-react";
 import EnglishSessionLogger from "./EnglishSessionLogger";
+import { useVoice } from "@/lib/useVoice";
 
 export default function AIChat({ strings, locale, userId }) {
   const ai = strings.ai;
@@ -14,11 +15,45 @@ export default function AIChat({ strings, locale, userId }) {
   const [error, setError] = useState("");
   const bottomRef = useRef(null);
 
+  // ---- voice ---------------------------------------------------------------
+  const v = ai.voice;
+  const [speakReplies, setSpeakReplies] = useState(false);
+  const [handsFree, setHandsFree] = useState(false);
+  const handsFreeRef = useRef(false);
+  const speakRepliesRef = useRef(false);
+  const sendRef = useRef(null);
+  handsFreeRef.current = handsFree;
+  speakRepliesRef.current = speakReplies;
+
+  const voice = useVoice({
+    locale,
+    onFinalTranscript: (t) => sendRef.current?.(t, true),
+    // Nothing heard (or mic error): leave hands-free mode instead of looping forever.
+    onEmpty: () => setHandsFree(false),
+  });
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  async function send(text) {
+  function toggleHandsFree() {
+    if (handsFree) {
+      setHandsFree(false);
+      voice.stopListening();
+      voice.stopSpeaking();
+    } else {
+      setHandsFree(true);
+      handsFreeRef.current = true;
+      voice.startListening();
+    }
+  }
+
+  function toggleSpeakReplies() {
+    if (speakReplies) voice.stopSpeaking();
+    setSpeakReplies(!speakReplies);
+  }
+
+  async function send(text, viaVoice = false) {
     const content = (text ?? input).trim();
     if (!content || loading) return;
 
@@ -32,7 +67,7 @@ export default function AIChat({ strings, locale, userId }) {
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages, context, useKnowledge, locale }),
+        body: JSON.stringify({ messages: nextMessages, context, useKnowledge, locale, voice: viaVoice || handsFreeRef.current }),
       });
       const data = await res.json();
 
@@ -48,11 +83,20 @@ export default function AIChat({ strings, locale, userId }) {
       }
 
       setMessages((list) => [...list, { role: "assistant", content: data.reply }]);
+
+      if (viaVoice || speakRepliesRef.current || handsFreeRef.current) {
+        voice.speak(data.reply, () => {
+          // Conversation mode: after Hamzawi finishes talking, listen again.
+          if (handsFreeRef.current) voice.startListening();
+        });
+      }
     } catch (err) {
       setError(ai.errorGeneric + ` (client_exception: ${String(err?.message || err).slice(0, 200)})`);
     }
     setLoading(false);
   }
+
+  sendRef.current = send;
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -162,11 +206,83 @@ export default function AIChat({ strings, locale, userId }) {
         <EnglishSessionLogger userId={userId} messages={messages} strings={strings} />
       )}
 
+      {(voice.canListen || voice.canSpeak) && (
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          {voice.canSpeak && (
+            <button
+              type="button"
+              onClick={toggleSpeakReplies}
+              aria-pressed={speakReplies}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 transition ${
+                speakReplies
+                  ? "border-sage bg-sage/15 text-ink dark:text-moon"
+                  : "border-black/10 dark:border-white/10 text-ink-muted dark:text-moon-muted"
+              }`}
+            >
+              {speakReplies ? <Volume2 size={14} /> : <VolumeX size={14} />}
+              {v.speakReplies}
+            </button>
+          )}
+          {voice.canListen && voice.canSpeak && (
+            <button
+              type="button"
+              onClick={toggleHandsFree}
+              aria-pressed={handsFree}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 transition ${
+                handsFree
+                  ? "border-sage bg-sage text-white"
+                  : "border-black/10 dark:border-white/10 text-ink-muted dark:text-moon-muted"
+              }`}
+            >
+              <Mic size={14} />
+              {handsFree ? v.handsFreeOn : v.handsFree}
+            </button>
+          )}
+          {voice.speaking && (
+            <button
+              type="button"
+              onClick={voice.stopSpeaking}
+              className="inline-flex items-center gap-1.5 rounded-full border border-black/10 dark:border-white/10 px-3 py-1.5 text-ink-muted dark:text-moon-muted"
+            >
+              <Square size={12} /> {v.stopSpeaking}
+            </button>
+          )}
+        </div>
+      )}
+      {handsFree && <p className="text-xs text-ink-muted dark:text-moon-muted">{v.handsFreeHint}</p>}
+      {!voice.canListen && (
+        <p className="text-xs text-ink-muted/80 dark:text-moon-muted/80">{v.unsupported}</p>
+      )}
+      {voice.error && (
+        <p className="text-xs text-red-500">
+          {voice.error === "not-allowed" ? v.errNotAllowed
+            : voice.error === "no-speech" ? v.errNoSpeech
+            : voice.error === "network" ? v.errNetwork
+            : v.errOther}
+        </p>
+      )}
+
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
+        {voice.canListen && (
+          <button
+            type="button"
+            onClick={voice.listening ? voice.stopListening : voice.startListening}
+            aria-label={voice.listening ? v.stop : v.mic}
+            aria-pressed={voice.listening}
+            className={`shrink-0 rounded-full p-3 transition ${
+              voice.listening
+                ? "bg-sage text-white animate-pulse"
+                : "bg-sage/15 text-sage dark:text-sage-soft hover:bg-sage/25"
+            }`}
+          >
+            {voice.listening ? <Square size={16} strokeWidth={2} /> : <Mic size={16} strokeWidth={2} />}
+          </button>
+        )}
         <input
-          value={input}
+          value={voice.listening ? voice.interim : input}
+          readOnly={voice.listening}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={ai.inputPlaceholder}
+          placeholder={voice.listening ? v.listening : ai.inputPlaceholder}
           className="flex-1 rounded-soft border border-black/10 dark:border-white/10 bg-transparent
                      px-4 py-3 text-sm outline-none focus:border-sage"
         />

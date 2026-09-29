@@ -31,7 +31,7 @@ export default async function SearchPage({ searchParams }) {
       supabase.from("tasks").select("*").eq("user_id", user.id).ilike("title", like),
       supabase.from("events").select("*").eq("user_id", user.id).ilike("title", like),
       supabase.from("interests").select("*").eq("user_id", user.id).ilike("value", like),
-      supabase.from("notes").select("*").eq("user_id", user.id).ilike("content", like),
+      supabase.from("notes").select("*").eq("user_id", user.id).ilike("content", like).neq("kind", "daily_brief"),
       supabase.from("world_items").select("*").eq("user_id", user.id).ilike("title", like),
       supabase.from("goals").select("*").eq("user_id", user.id).ilike("title", like),
       supabase.from("memories").select("*").eq("user_id", user.id).ilike("title", like),

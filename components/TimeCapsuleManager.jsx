@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
 import { Hourglass, Lock, Unlock, Trash2 } from "lucide-react";
 import EmptyState from "./EmptyState";
+import { todayISO } from "@/lib/time";
 
 function addMonths(date, months) {
   const d = new Date(date);
@@ -22,7 +23,7 @@ export default function TimeCapsuleManager({ userId, initialCapsules, strings })
   const [customDate, setCustomDate] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
 
   async function seal(e) {
     e.preventDefault();

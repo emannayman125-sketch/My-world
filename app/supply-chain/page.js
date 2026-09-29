@@ -5,6 +5,7 @@ import { createServerSupabase } from "@/lib/supabaseServer";
 import AppHeader from "@/components/AppHeader";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
+import { todayISO, addDaysISO } from "@/lib/time";
 
 export default async function SupplyChainHubPage() {
   const locale = getLocale();
@@ -16,8 +17,8 @@ export default async function SupplyChainHubPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const today = new Date().toISOString().slice(0, 10);
-  const in7Days = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+  const today = todayISO();
+  const in7Days = addDaysISO(7);
 
   const [{ data: suppliers }, { data: orders }, { data: issues }] = await Promise.all([
     supabase.from("supply_chain_suppliers").select("id, next_followup").eq("user_id", user.id),

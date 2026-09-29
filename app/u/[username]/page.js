@@ -2,6 +2,27 @@ import { notFound } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import FadeIn from "@/components/FadeIn";
 
+const SOCIAL_LABELS = {
+  instagram: { emoji: "📷", label: "Instagram" },
+  youtube: { emoji: "▶️", label: "YouTube" },
+  tiktok: { emoji: "🎵", label: "TikTok" },
+  x: { emoji: "✖️", label: "X" },
+  website: { emoji: "🔗", label: "" },
+};
+
+function toHref(platform, value) {
+  if (!value) return null;
+  if (/^https?:\/\//.test(value)) return value;
+  const bases = {
+    instagram: "https://instagram.com/",
+    youtube: "https://youtube.com/@",
+    tiktok: "https://tiktok.com/@",
+    x: "https://x.com/",
+    website: "https://",
+  };
+  return (bases[platform] || "https://") + value.replace(/^@/, "");
+}
+
 const WORLD_KIND_LABELS = {
   music: { emoji: "🎵", label: "موسيقى" },
   movie: { emoji: "🎬", label: "أفلام ومسلسلات" },
@@ -15,7 +36,7 @@ async function getProfile(username) {
   const supabase = createServerSupabase();
   const { data } = await supabase
     .from("public_profiles")
-    .select("id, display_name, bio, avatar_url")
+    .select("id, display_name, bio, avatar_url, social_links")
     .eq("username", username)
     .maybeSingle();
   return data;
@@ -78,6 +99,29 @@ export default async function PublicProfilePage({ params }) {
             <h1 className="font-display text-3xl">{profile.display_name || "صديقي"}</h1>
           </div>
         </FadeIn>
+
+        {profile.social_links && Object.keys(profile.social_links).length > 0 && (
+          <FadeIn delay={0.03}>
+            <div className="flex flex-wrap justify-center gap-2">
+              {Object.entries(profile.social_links).map(([platform, value]) => {
+                const href = toHref(platform, value);
+                if (!href) return null;
+                const meta = SOCIAL_LABELS[platform] || { emoji: "🔗", label: platform };
+                return (
+                  <a
+                    key={platform}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-black/5 dark:bg-white/5 px-3 py-1.5 text-sm hover:bg-black/10 dark:hover:bg-white/10 transition"
+                  >
+                    {meta.emoji} {meta.label}
+                  </a>
+                );
+              })}
+            </div>
+          </FadeIn>
+        )}
 
         {profile.bio && (
           <FadeIn delay={0.05}>

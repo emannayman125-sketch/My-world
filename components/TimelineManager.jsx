@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { signMemoryPhotos, isLegacyPublicUrl } from "@/lib/memoryPhotos";
 import LinkField from "./LinkField";
 
 export default function TimelineManager({ userId, initialMemories, strings }) {
@@ -12,6 +13,18 @@ export default function TimelineManager({ userId, initialMemories, strings }) {
   const [memories, setMemories] = useState(initialMemories || []);
   const [form, setForm] = useState({ year: new Date().getFullYear(), emoji: "✨", title: "", description: "", link_url: "" });
   const [uploadingFor, setUploadingFor] = useState(null);
+  const [photoUrls, setPhotoUrls] = useState({});
+
+  useEffect(() => {
+    const withPhotos = memories.filter((m) => m.image_url && !isLegacyPublicUrl(m.image_url));
+    if (withPhotos.length === 0) return;
+    let cancelled = false;
+    signMemoryPhotos(supabase, withPhotos).then((map) => {
+      if (!cancelled) setPhotoUrls((prev) => ({ ...prev, ...map }));
+    });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memories.map((m) => m.image_url).join(",")]);
 
   async function addMemory(e) {
     e.preventDefault();
@@ -48,8 +61,8 @@ export default function TimelineManager({ userId, initialMemories, strings }) {
       .upload(path, file, { upsert: true });
 
     if (!uploadError) {
-      const { data: { publicUrl } } = supabase.storage.from("memory-photos").getPublicUrl(path);
-      const bustUrl = `${publicUrl}?t=${Date.now()}`;
+      // Store the storage PATH (bucket is private now, not a public URL).
+      const bustUrl = path;
       await supabase.from("memories").update({ image_url: bustUrl }).eq("id", memory.id);
       setMemories((list) => list.map((m) => (m.id === memory.id ? { ...m, image_url: bustUrl } : m)));
     }
@@ -110,8 +123,16 @@ export default function TimelineManager({ userId, initialMemories, strings }) {
             <span className="absolute -end-[31px] top-1 w-4 h-4 rounded-full bg-sage" />
             <div className="card p-4 flex items-start gap-4">
               {m.image_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={m.image_url} alt={m.title} className="w-20 h-20 rounded-soft object-cover shrink-0" />
+                isLegacyPublicUrl(m.image_url) ? (
+                  <div className="w-20 h-20 rounded-soft bg-black/5 dark:bg-white/5 flex items-center justify-center text-[10px] text-center text-ink-muted dark:text-moon-muted shrink-0 px-1">
+                    {tr.photoUnavailable}
+                  </div>
+                ) : photoUrls[m.id] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={photoUrls[m.id]} alt={m.title} className="w-20 h-20 rounded-soft object-cover shrink-0" />
+                ) : (
+                  <div className="w-20 h-20 rounded-soft bg-black/5 dark:bg-white/5 animate-pulse shrink-0" />
+                )
               ) : (
                 <label className="w-20 h-20 rounded-soft bg-black/5 dark:bg-white/5 flex items-center justify-center text-xs text-ink-muted dark:text-moon-muted shrink-0 cursor-pointer text-center px-1">
                   {uploadingFor === m.id ? tr.uploading : tr.addPhoto}

@@ -4,12 +4,9 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
 import { recomputeAndSaveStreak } from "@/lib/streaks";
+import { todayISO } from "@/lib/time";
 
 const EMOJIS = ["📖", "🏃", "💧", "🧘", "🕌", "✍️", "🎯"];
-
-function todayISO() {
-  return new Date().toISOString().slice(0, 10);
-}
 
 export default function HabitsManager({ userId, initialHabits, initialLogsToday, strings }) {
   const tr = strings.legacy.habits;

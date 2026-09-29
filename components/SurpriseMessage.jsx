@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
+import { todayISO } from "@/lib/time";
 
 export default function SurpriseMessage({ message, strings }) {
   const tr = strings.dashboard.surprise;
@@ -10,6 +11,8 @@ export default function SurpriseMessage({ message, strings }) {
 
   async function dismiss() {
     await supabase.from("hidden_messages").update({ is_delivered: true }).eq("id", message.id);
+    // Lets the server hold back "anytime" messages for the rest of today.
+    document.cookie = `surprise_day=${todayISO()}; path=/; max-age=172800`;
     setVisible(false);
   }
 

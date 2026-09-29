@@ -6,18 +6,21 @@ import { createClient } from "@/lib/supabaseClient";
 
 // The welcome letter is always in English by design — it's a fixed,
 // personal moment, not tied to the site's language toggle.
-export default function EnterWorldButton({ userId }) {
+export default function EnterWorldButton({ userId, preview = false }) {
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
 
   async function handleEnter() {
     setLoading(true);
-    await supabase
-      .from("profiles")
-      .update({ has_seen_welcome: true })
-      .eq("id", userId);
-    router.push("/dashboard");
+    if (!preview) {
+      await supabase
+        .from("profiles")
+        .update({ has_seen_welcome: true })
+        .eq("id", userId);
+    }
+    // In preview we go on to the birthday celebration without touching any saved state.
+    router.push(preview ? "/dashboard?previewBirthday=1" : "/dashboard");
     router.refresh();
   }
 

@@ -5,6 +5,7 @@ import AppHeader from "@/components/AppHeader";
 import HabitsManager from "@/components/HabitsManager";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
+import { todayISO } from "@/lib/time";
 
 export default async function HabitsPage() {
   const locale = getLocale();
@@ -19,7 +20,7 @@ export default async function HabitsPage() {
     .eq("user_id", user.id)
     .order("created_at", { ascending: true });
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
   const { data: logsToday } = await supabase
     .from("habit_logs")
     .select("habit_id")

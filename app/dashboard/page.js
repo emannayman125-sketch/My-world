@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { Sparkles, Flame, CalendarDays, Headphones } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabaseServer";
@@ -16,11 +17,17 @@ import MoodCheckin from "@/components/MoodCheckin";
 import HabitsToday from "@/components/HabitsToday";
 import QuoteOfTheDay from "@/components/QuoteOfTheDay";
 import GettingStarted from "@/components/GettingStarted";
+import DailyBrief from "@/components/DailyBrief";
+import StreakCard from "@/components/StreakCard";
+import { getActivityDates } from "@/lib/activityDates";
+import { computeActivityStreak } from "@/lib/streaks";
+import OnboardingPrompt from "@/components/OnboardingPrompt";
 import { pickQuote } from "@/lib/quotes/pickQuote";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
+import { todayISO, cairoNow } from "@/lib/time";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }) {
   const locale = getLocale();
   const strings = t(locale);
   const d = strings.dashboard;
@@ -36,7 +43,7 @@ export default async function DashboardPage() {
 
   if (!profile?.has_seen_welcome) redirect("/welcome");
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
 
   const [
     { data: top3 },
@@ -50,6 +57,7 @@ export default async function DashboardPage() {
     { data: anyTask },
     { data: anyMemory },
     { data: anyWorldItem },
+    { data: anyGoal },
     dueMessage,
   ] = await Promise.all([
     supabase.from("top3_tasks").select("*").eq("user_id", user.id).eq("for_date", today).order("created_at", { ascending: true }),
@@ -63,7 +71,8 @@ export default async function DashboardPage() {
     supabase.from("tasks").select("id").eq("user_id", user.id).limit(1),
     supabase.from("memories").select("id").eq("user_id", user.id).limit(1),
     supabase.from("world_items").select("id").eq("user_id", user.id).limit(1),
-    getDueHiddenMessage(supabase, user),
+    supabase.from("goals").select("id").eq("user_id", user.id).limit(1),
+    getDueHiddenMessage(supabase, user, { shownToday: cookies().get("surprise_day")?.value === today }),
   ]);
 
   const name = profile?.display_name || (locale === "ar" ? "صديقي" : "friend");
@@ -71,12 +80,17 @@ export default async function DashboardPage() {
   const doneCount = (top3 || []).filter((t) => t.is_done).length;
   const progressPercent = top3 && top3.length > 0 ? Math.round((doneCount / top3.length) * 100) : 0;
 
-  const now = new Date();
-  const currentYear = now.getFullYear();
+  const activityDates = await getActivityDates(supabase, user.id);
+  const activityStreak = computeActivityStreak(new Set(activityDates), todayISO());
+
+  const cairo = cairoNow();
+  const currentYear = cairo.year;
+  const previewBirthday = searchParams?.previewBirthday === "1";
   const isBirthdayToday =
-    profile?.birthday_month === now.getMonth() + 1 &&
-    profile?.birthday_day === now.getDate() &&
-    profile?.last_birthday_shown_year !== currentYear;
+    previewBirthday ||
+    (profile?.birthday_month === cairo.month &&
+      profile?.birthday_day === cairo.day &&
+      profile?.last_birthday_shown_year !== currentYear);
 
   const personalThoughts = (customQuotes || []).map((q) => q.content).filter(Boolean);
   const quote = pickQuote({
@@ -87,12 +101,20 @@ export default async function DashboardPage() {
 
   const onThisDay = (journalEntries || [])
     .filter((n) => {
-      const dt = new Date(n.created_at);
-      return dt.getMonth() === now.getMonth() && dt.getDate() === now.getDate() && dt.getFullYear() !== currentYear;
+      const c = cairoNow(new Date(n.created_at));
+      return c.month === cairo.month && c.day === cairo.day && c.year !== currentYear;
     })
     .sort((a, b) => (a.kind === "treasure" ? -1 : 1) - (b.kind === "treasure" ? -1 : 1));
 
-  const greeting = now.getHours() < 12 ? d.greetingMorning : d.greetingEvening;
+  // Offer Hamzawi's setup while the world is still empty (never forced: "Not now" sets a cookie).
+  const setupDone = cookies().get("onboarding_done")?.value === "1";
+  const worldIsEmpty =
+    (anyTask || []).length === 0 &&
+    (habits || []).length === 0 &&
+    (anyGoal || []).length === 0;
+  const needsSetup = !setupDone && worldIsEmpty;
+
+  const greeting = cairo.hour < 12 ? d.greetingMorning : d.greetingEvening;
 
   // ---- derived values for the Lantern Night layout ------------------------
   const top3List = top3 || [];
@@ -121,7 +143,7 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-paper dark:bg-night lg:ps-64">
       <AppHeader />
       <ReminderNotifier todayEvents={todayEvents || []} strings={strings} />
-      {isBirthdayToday && <BirthdayCelebration userId={user.id} name={name} year={currentYear} strings={strings} />}
+      {isBirthdayToday && <BirthdayCelebration userId={user.id} name={name} year={currentYear} strings={strings} preview={previewBirthday} nextHref={needsSetup || previewBirthday ? "/onboarding" : undefined} />}
 
       <main className="max-w-2xl mx-auto px-6 pt-4 lg:pt-10 pb-20 space-y-8">
         {dueMessage && (
@@ -143,7 +165,8 @@ export default async function DashboardPage() {
             )}
             <div>
               <p className="text-sm text-ink-muted dark:text-moon-muted">
-                {now.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+                {new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+                  timeZone: "Africa/Cairo",
                   weekday: "long",
                   month: "long",
                   day: "numeric",
@@ -162,6 +185,27 @@ export default async function DashboardPage() {
             hasMemory={(anyMemory || []).length > 0}
             hasWorldItem={(anyWorldItem || []).length > 0}
             strings={strings}
+          />
+        </FadeIn>
+
+        {needsSetup && (
+          <FadeIn delay={0.015}>
+            <OnboardingPrompt strings={d.onboardingPrompt} />
+          </FadeIn>
+        )}
+
+        {/* 1a — the overall daily streak: quiet, no pressure, one rest day allowed */}
+        <FadeIn delay={0.01}>
+          <StreakCard streak={activityStreak} locale={locale} strings={d.streak} />
+        </FadeIn>
+
+        {/* 1b — Hamzawi's daily brief: suggests, never adds anything by itself */}
+        <FadeIn delay={0.02}>
+          <DailyBrief
+            locale={locale}
+            strings={d.brief}
+            top3Titles={top3List.map((x) => x.title)}
+            top3Count={top3List.length}
           />
         </FadeIn>
 

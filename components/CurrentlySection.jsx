@@ -104,7 +104,7 @@ export default function CurrentlySection({ userId, initialItems, strings }) {
         />
         <button
           type="submit"
-          className="rounded-soft bg-dusk text-white text-sm px-4 py-2 hover:brightness-105"
+          className="rounded-soft bg-ink text-paper dark:bg-moon dark:text-night text-sm px-4 py-2 hover:brightness-105"
         >
           {tr.update}
         </button>

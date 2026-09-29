@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabaseClient";
+import { todayISO } from "@/lib/time";
 
 export default function DailyResetManager({ userId, yesterdayTasks, todayCount, strings }) {
   const tr = strings.legacy.reset;
@@ -12,7 +13,7 @@ export default function DailyResetManager({ userId, yesterdayTasks, todayCount, 
 
   const done = yesterdayTasks.filter((t) => t.is_done);
   const undone = yesterdayTasks.filter((t) => !t.is_done);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
   const remainingSlots = Math.max(0, 3 - todayCount);
 
   async function moveUnfinished() {

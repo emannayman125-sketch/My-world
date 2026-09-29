@@ -5,17 +5,15 @@ import { createServerSupabase } from "@/lib/supabaseServer";
 import AppHeader from "@/components/AppHeader";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
+import { todayISO, addDaysISO } from "@/lib/time";
 
 function calcStreak(dateStrings) {
   const set = new Set(dateStrings);
   let streak = 0;
-  const cursor = new Date();
-  if (!set.has(cursor.toISOString().slice(0, 10))) {
-    cursor.setDate(cursor.getDate() - 1);
-  }
-  while (set.has(cursor.toISOString().slice(0, 10))) {
+  let offset = set.has(todayISO()) ? 0 : -1;
+  while (set.has(addDaysISO(offset))) {
     streak++;
-    cursor.setDate(cursor.getDate() - 1);
+    offset--;
   }
   return streak;
 }

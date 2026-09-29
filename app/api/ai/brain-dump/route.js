@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import { callGemini } from "@/lib/ai/gemini";
+import { todayISO } from "@/lib/time";
 
 // This route ONLY extracts structure from free text -- it never writes
 // to the database itself. The client shows the extracted items for
@@ -19,7 +20,7 @@ export async function POST(request) {
     return NextResponse.json({ error: "missing_text" }, { status: 400 });
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
   const lang = locale === "ar" ? "Arabic" : "English";
 
   const systemPrompt = `You extract structured items from a person's free-form brain dump text.
