@@ -13,9 +13,9 @@ export default async function MbaResearchPage() {
   if (!user) redirect("/login");
 
   const [{ data: research }, { data: notes }, { data: courses }] = await Promise.all([
-    supabase.from("research_projects").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+    supabase.from("research_projects").select("*").eq("user_id", user.id).eq("program", "mba").order("created_at", { ascending: false }),
     supabase.from("research_notes").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-    supabase.from("mba_courses").select("id, name").eq("user_id", user.id),
+    supabase.from("mba_courses").select("id, name").eq("user_id", user.id).eq("program", "mba"),
   ]);
 
   return (

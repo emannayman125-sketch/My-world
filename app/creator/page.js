@@ -27,7 +27,7 @@ export default async function CreatorStudioPage() {
           <h1 className="font-display text-3xl">{strings.creator.title}</h1>
           <p className="text-ink-muted dark:text-moon-muted mt-1">{strings.creator.subtitle}</p>
         </div>
-        <ContentManager userId={user.id} initialItems={items || []} strings={strings} />
+        <ContentManager userId={user.id} initialItems={items || []} strings={strings} locale={locale} />
       </main>
     </div>
   );

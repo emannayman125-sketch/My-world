@@ -27,6 +27,9 @@ export default async function PartnerPage() {
   let otherProfile = null;
   let myGoals = [];
   let partnerGoals = [];
+  let myCourses = [];
+  let partnerCourses = [];
+  let sharedAssignments = [];
 
   if (link) {
     const otherId = link.user_a === user.id ? link.user_b : link.user_a;
@@ -44,6 +47,25 @@ export default async function PartnerPage() {
       ]);
       myGoals = mine || [];
       partnerGoals = theirs || [];
+
+      const [{ data: myC }, { data: theirC }] = await Promise.all([
+        supabase.from("mba_courses").select("*").eq("user_id", user.id).eq("program", "institute").eq("is_shared", true),
+        supabase.from("mba_courses").select("*").eq("user_id", otherId).eq("program", "institute").eq("is_shared", true),
+      ]);
+      myCourses = myC || [];
+      partnerCourses = theirC || [];
+
+      const sharedCourseIds = [...myCourses, ...partnerCourses].map((c) => c.id);
+      if (sharedCourseIds.length > 0) {
+        const { data: assignments } = await supabase
+          .from("mba_assignments")
+          .select("*, mba_courses(name)")
+          .in("course_id", sharedCourseIds)
+          .neq("status", "completed")
+          .order("due_date", { ascending: true })
+          .limit(10);
+        sharedAssignments = assignments || [];
+      }
     }
   }
 
@@ -66,6 +88,63 @@ export default async function PartnerPage() {
               myItems={myGoals}
               partnerItems={partnerGoals}
             />
+          </div>
+        )}
+
+        {link?.status === "accepted" && otherProfile && (myCourses.length > 0 || partnerCourses.length > 0) && (
+          <div className="card p-6 space-y-4">
+            <h2 className="font-display text-xl">📖 مساحة المذاكرة المشتركة</h2>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-medium text-ink-muted dark:text-moon-muted mb-2">
+                  {profile?.display_name || "أنت"}
+                </p>
+                {myCourses.length === 0 ? (
+                  <p className="text-sm text-ink-muted dark:text-moon-muted">مفيش مواد مشتركة لسه.</p>
+                ) : (
+                  <ul className="space-y-1.5">
+                    {myCourses.map((c) => (
+                      <li key={c.id} className="text-sm">
+                        {c.name} {c.schedule && <span className="text-xs text-ink-muted dark:text-moon-muted">· {c.schedule}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div>
+                <p className="text-xs font-medium text-ink-muted dark:text-moon-muted mb-2">
+                  {otherProfile.display_name || "شريكك"}
+                </p>
+                {partnerCourses.length === 0 ? (
+                  <p className="text-sm text-ink-muted dark:text-moon-muted">مفيش مواد مشتركة لسه.</p>
+                ) : (
+                  <ul className="space-y-1.5">
+                    {partnerCourses.map((c) => (
+                      <li key={c.id} className="text-sm">
+                        {c.name} {c.schedule && <span className="text-xs text-ink-muted dark:text-moon-muted">· {c.schedule}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+
+            {sharedAssignments.length > 0 && (
+              <div className="pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
+                <p className="text-xs font-medium text-ink-muted dark:text-moon-muted mb-2">تسليمات قريبة</p>
+                <ul className="space-y-1.5">
+                  {sharedAssignments.map((a) => (
+                    <li key={a.id} className="flex items-center justify-between text-sm">
+                      <span>
+                        {a.title}{" "}
+                        <span className="text-xs text-ink-muted dark:text-moon-muted">· {a.mba_courses?.name}</span>
+                      </span>
+                      <span className="text-xs text-ink-muted dark:text-moon-muted">{a.due_date || ""}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </main>

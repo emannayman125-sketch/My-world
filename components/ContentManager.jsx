@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
 import EmptyState from "./EmptyState";
-import { Plus, Trash2, ChevronDown, ChevronUp, Mic2, ExternalLink } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronUp, Mic2, ExternalLink, Sparkles } from "lucide-react";
 
 const STAGE_ORDER = ["idea", "research", "script", "recording", "editing", "ready", "published"];
 const STAGE_COLOR = {
@@ -17,7 +17,7 @@ const STAGE_COLOR = {
   published: "bg-emerald-500/25 text-emerald-600 dark:text-emerald-400",
 };
 
-export default function ContentManager({ userId, initialItems, strings }) {
+export default function ContentManager({ userId, initialItems, strings, locale = "ar" }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
   const c = strings.creator;
@@ -27,6 +27,9 @@ export default function ContentManager({ userId, initialItems, strings }) {
   const [expanded, setExpanded] = useState(null);
   const [form, setForm] = useState({ title: "", hook: "", platform: "other" });
   const [saving, setSaving] = useState(false);
+  const [expandingId, setExpandingId] = useState(null);
+  const [proposalFor, setProposalFor] = useState(null); // { itemId, ...fields }
+  const [expandError, setExpandError] = useState(null);
 
   async function addItem(e) {
     e.preventDefault();
@@ -61,6 +64,39 @@ export default function ContentManager({ userId, initialItems, strings }) {
   async function updateField(item, field, value) {
     await supabase.from("content_items").update({ [field]: value }).eq("id", item.id);
     setItems((list) => list.map((i) => (i.id === item.id ? { ...i, [field]: value } : i)));
+  }
+
+  async function expandWithHamzawi(item) {
+    setExpandError(null);
+    setExpandingId(item.id);
+    try {
+      const res = await fetch("/api/ai/content-expand", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: item.title, hook: item.hook, platform: item.platform, locale }),
+      });
+      if (!res.ok) throw new Error("bad status");
+      const data = await res.json();
+      setProposalFor({ itemId: item.id, ...data });
+    } catch {
+      setExpandError(item.id);
+    }
+    setExpandingId(null);
+  }
+
+  async function acceptProposal() {
+    if (!proposalFor) return;
+    const { itemId, hook, outline, script, thumbnail_idea } = proposalFor;
+    const scriptWithOutline = outline ? `${outline}\n\n---\n\n${script}` : script;
+    await supabase
+      .from("content_items")
+      .update({ hook: hook || null, script: scriptWithOutline || null, thumbnail_idea: thumbnail_idea || null })
+      .eq("id", itemId);
+    setItems((list) =>
+      list.map((i) => (i.id === itemId ? { ...i, hook: hook || i.hook, script: scriptWithOutline || i.script, thumbnail_idea: thumbnail_idea || i.thumbnail_idea } : i))
+    );
+    setExpanded(itemId);
+    setProposalFor(null);
   }
 
   async function removeItem(id) {
@@ -134,6 +170,84 @@ export default function ContentManager({ userId, initialItems, strings }) {
 
             {expanded === item.id && (
               <div className="border-t border-black/[0.06] dark:border-white/[0.06] px-4 py-3 space-y-2 bg-black/[0.015] dark:bg-white/[0.02]">
+                {proposalFor?.itemId !== item.id && (
+                  <button
+                    onClick={() => expandWithHamzawi(item)}
+                    disabled={expandingId === item.id}
+                    className="w-full flex items-center justify-center gap-2 rounded-soft border border-violet-500/30 text-violet-500 text-sm px-3 py-2 hover:bg-violet-500/10 transition disabled:opacity-50"
+                  >
+                    <Sparkles size={14} />
+                    {expandingId === item.id ? c.expanding : c.expandWithHamzawi}
+                  </button>
+                )}
+                {expandError === item.id && <p className="text-xs text-red-500">{c.expandError}</p>}
+
+                {proposalFor?.itemId === item.id && (
+                  <div className="rounded-soft border border-violet-500/30 bg-violet-500/[0.04] p-3 space-y-2.5">
+                    <p className="text-xs font-medium text-violet-500 flex items-center gap-1.5">
+                      <Sparkles size={13} /> {c.proposalTitle}
+                    </p>
+
+                    <div>
+                      <label className="text-xs text-ink-muted dark:text-moon-muted">{c.hook}</label>
+                      <textarea rows={2} value={proposalFor.hook}
+                        onChange={(e) => setProposalFor({ ...proposalFor, hook: e.target.value })}
+                        className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-1.5 text-sm outline-none focus:border-violet-500 resize-none mt-0.5" />
+                    </div>
+
+                    {proposalFor.titles?.length > 0 && (
+                      <div>
+                        <label className="text-xs text-ink-muted dark:text-moon-muted">{c.titleIdeas}</label>
+                        <ul className="mt-1 space-y-1">
+                          {proposalFor.titles.map((title, i) => (
+                            <li key={i}>
+                              <button
+                                type="button"
+                                onClick={() => updateField(item, "title", title)}
+                                className="text-sm text-start hover:text-violet-500 hover:underline transition"
+                              >
+                                {title}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="text-xs text-ink-muted dark:text-moon-muted">{c.outline}</label>
+                      <textarea rows={5} value={proposalFor.outline}
+                        onChange={(e) => setProposalFor({ ...proposalFor, outline: e.target.value })}
+                        className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-1.5 text-sm outline-none focus:border-violet-500 resize-none mt-0.5" />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-ink-muted dark:text-moon-muted">{c.script}</label>
+                      <textarea rows={6} value={proposalFor.script}
+                        onChange={(e) => setProposalFor({ ...proposalFor, script: e.target.value })}
+                        className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-1.5 text-sm outline-none focus:border-violet-500 resize-none mt-0.5" />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-ink-muted dark:text-moon-muted">{c.thumbnailIdea}</label>
+                      <textarea rows={2} value={proposalFor.thumbnail_idea}
+                        onChange={(e) => setProposalFor({ ...proposalFor, thumbnail_idea: e.target.value })}
+                        className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-1.5 text-sm outline-none focus:border-violet-500 resize-none mt-0.5" />
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <button onClick={acceptProposal}
+                        className="rounded-soft bg-violet-500 text-white text-sm font-medium px-4 py-2 hover:brightness-105 transition">
+                        {c.useThis}
+                      </button>
+                      <button onClick={() => setProposalFor(null)}
+                        className="text-sm text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon">
+                        {strings.quote.cancel}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {[
                   ["script", "script"],
                   ["referencesText", "references_text"],

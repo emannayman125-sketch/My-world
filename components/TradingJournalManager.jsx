@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
-import { Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronUp, Zap } from "lucide-react";
+import { todayISO } from "@/lib/time";
 
 const RESULT_COLOR = {
   open: "bg-white/5 desk-muted",
@@ -15,8 +16,10 @@ const RESULT_COLOR = {
 const EMPTY_FORM = {
   symbol: "", trade_date: "", entry_price: "", exit_price: "", position_size: "",
   stop_loss: "", target: "", strategy: "", reason_entry: "", result: "open",
-  pnl: "", emotional_state: "", lessons_learned: "",
+  pnl: "", fees: "", direction: "", emotional_state: "", lessons_learned: "",
 };
+
+const EMPTY_QUICK = { symbol: "", direction: "long", result: "win", pnl: "", fees: "" };
 
 export default function TradingJournalManager({ userId, initialTrades, strings }) {
   const supabase = createClient();
@@ -27,6 +30,8 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [quick, setQuick] = useState(EMPTY_QUICK);
+  const [quickOpen, setQuickOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
   function num(v) {
@@ -52,7 +57,9 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
         strategy: form.strategy.trim() || null,
         reason_entry: form.reason_entry.trim() || null,
         result: form.result,
+        direction: form.direction || null,
         pnl: num(form.pnl),
+        fees: num(form.fees) || 0,
         emotional_state: form.emotional_state.trim() || null,
         lessons_learned: form.lessons_learned.trim() || null,
       })
@@ -67,6 +74,32 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
     }
   }
 
+  // The 3-tap path for scalping: symbol, direction, result — everything else
+  // stays reviewable later from the full form if he wants more detail.
+  async function addQuick(e) {
+    e.preventDefault();
+    if (!quick.symbol.trim()) return;
+    setSaving(true);
+    const { data, error } = await supabase
+      .from("trading_journal")
+      .insert({
+        user_id: userId,
+        symbol: quick.symbol.trim().toUpperCase(),
+        trade_date: todayISO(),
+        direction: quick.direction,
+        result: quick.result,
+        pnl: num(quick.pnl),
+        fees: num(quick.fees) || 0,
+      })
+      .select()
+      .single();
+    setSaving(false);
+    if (!error && data) {
+      setTrades((list) => [data, ...list]);
+      setQuick({ ...EMPTY_QUICK, direction: quick.direction }); // keep last direction, it rarely flips mid-session
+    }
+  }
+
   async function removeTrade(id) {
     if (!(await confirm(tr.confirmDeleteTrade))) return;
     await supabase.from("trading_journal").delete().eq("id", id);
@@ -77,6 +110,69 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
 
   return (
     <div className="space-y-3">
+      {!quickOpen ? (
+        <button
+          onClick={() => setQuickOpen(true)}
+          className="w-full desk-card p-3 flex items-center justify-center gap-2 text-sm text-sky-400 hover:text-sky-300 transition"
+        >
+          <Zap size={14} strokeWidth={2} />
+          {tr.quickLog}
+        </button>
+      ) : (
+        <form onSubmit={addQuick} className="desk-card p-3 flex flex-wrap items-center gap-2">
+          <input
+            autoFocus
+            value={quick.symbol}
+            onChange={(e) => setQuick({ ...quick, symbol: e.target.value })}
+            placeholder={tr.symbol}
+            className="w-24 rounded-soft border border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sky-500 uppercase"
+          />
+          <div className="flex rounded-soft border border-white/10 overflow-hidden text-xs">
+            {["long", "short"].map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => setQuick({ ...quick, direction: d })}
+                className={`px-3 py-2 transition ${quick.direction === d ? "bg-sky-600 text-white" : "desk-muted hover:text-white"}`}
+              >
+                {tr.direction[d]}
+              </button>
+            ))}
+          </div>
+          <select
+            value={quick.result}
+            onChange={(e) => setQuick({ ...quick, result: e.target.value })}
+            className="rounded-soft border border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sky-500"
+          >
+            {Object.entries(tr.resultOptions).map(([k, label]) => <option key={k} value={k}>{label}</option>)}
+          </select>
+          <input
+            type="number" step="0.01"
+            value={quick.pnl}
+            onChange={(e) => setQuick({ ...quick, pnl: e.target.value })}
+            placeholder={tr.pnl}
+            className="w-24 rounded-soft border border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sky-500"
+          />
+          <input
+            type="number" step="0.01"
+            value={quick.fees}
+            onChange={(e) => setQuick({ ...quick, fees: e.target.value })}
+            placeholder={tr.fees}
+            className="w-20 rounded-soft border border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sky-500"
+          />
+          <button
+            type="submit"
+            disabled={saving || !quick.symbol.trim()}
+            className="rounded-soft bg-sky-600 text-white text-sm font-medium px-4 py-2 hover:brightness-110 transition disabled:opacity-50"
+          >
+            {tr.log}
+          </button>
+          <button type="button" onClick={() => setQuickOpen(false)} className="text-xs desk-muted hover:text-white">
+            {strings.quote.cancel}
+          </button>
+        </form>
+      )}
+
       {!open ? (
         <button
           onClick={() => setOpen(true)}
@@ -106,6 +202,9 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
             <input type="number" step="0.01" value={form.pnl} onChange={(e) => setForm({ ...form, pnl: e.target.value })}
               placeholder={tr.pnl}
               className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500" />
+            <input type="number" step="0.01" value={form.fees} onChange={(e) => setForm({ ...form, fees: e.target.value })}
+              placeholder={tr.fees}
+              className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500" />
             <input type="number" step="0.01" value={form.stop_loss} onChange={(e) => setForm({ ...form, stop_loss: e.target.value })}
               placeholder={tr.stopLoss}
               className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500" />
@@ -123,6 +222,12 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
             <select value={form.result} onChange={(e) => setForm({ ...form, result: e.target.value })}
               className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500">
               {Object.entries(tr.resultOptions).map(([k, label]) => <option key={k} value={k}>{label}</option>)}
+            </select>
+            <select value={form.direction} onChange={(e) => setForm({ ...form, direction: e.target.value })}
+              className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500">
+              <option value="">{tr.direction.unset}</option>
+              <option value="long">{tr.direction.long}</option>
+              <option value="short">{tr.direction.short}</option>
             </select>
             <input value={form.emotional_state} onChange={(e) => setForm({ ...form, emotional_state: e.target.value })}
               placeholder={tr.emotionalState}
@@ -156,9 +261,15 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
                 {tr.resultOptions[t.result] || tr.resultOptions.open}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium">{t.symbol}</p>
+                <p className="text-sm font-medium">
+                  {t.symbol} {t.direction && <span className="text-xs desk-muted">· {tr.direction[t.direction]}</span>}
+                </p>
                 <p className="text-xs desk-muted">
-                  {t.trade_date} {t.pnl != null && `· ${t.pnl >= 0 ? "+" : ""}$${t.pnl}`}
+                  {t.trade_date}
+                  {t.pnl != null && (() => {
+                    const net = Number(t.pnl) - Number(t.fees || 0);
+                    return ` · ${net >= 0 ? "+" : ""}$${net.toFixed(2)}${t.fees ? ` ${tr.netSuffix}` : ""}`;
+                  })()}
                 </p>
               </div>
               <button onClick={() => setExpanded(expanded === t.id ? null : t.id)} className="desk-muted hover:text-white transition shrink-0">
@@ -175,6 +286,7 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
                 {t.position_size != null && <p>{tr.positionSize}: {t.position_size}</p>}
                 {t.stop_loss != null && <p>{tr.stopLoss}: {t.stop_loss}</p>}
                 {t.target != null && <p>{tr.target}: {t.target}</p>}
+                {!!t.fees && <p>{tr.fees}: {t.fees}</p>}
                 {t.strategy && <p>{tr.strategy}: {t.strategy}</p>}
                 {t.reason_entry && <p>{tr.reasonEntry}: {t.reason_entry}</p>}
                 {t.emotional_state && <p>{tr.emotionalState}: {t.emotional_state}</p>}

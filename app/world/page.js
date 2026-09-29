@@ -32,6 +32,7 @@ export default async function WorldPage() {
         <WorldHubTabs
           userId={user.id}
           strings={strings}
+          locale={locale}
           data={{
             world: world.data || [],
             interests: interests.data || [],

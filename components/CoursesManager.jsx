@@ -6,13 +6,13 @@ import { useConfirm } from "./ConfirmProvider";
 import EmptyState from "./EmptyState";
 import { Plus, Trash2, GraduationCap } from "lucide-react";
 
-export default function CoursesManager({ userId, initialCourses, strings }) {
+export default function CoursesManager({ userId, initialCourses, strings, program = "mba", partnerName = "" }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
   const m = strings.mba;
   const [courses, setCourses] = useState(initialCourses || []);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", professor: "", schedule: "", description: "" });
+  const [form, setForm] = useState({ name: "", professor: "", schedule: "", description: "", is_shared: false });
   const [saving, setSaving] = useState(false);
 
   async function addCourse(e) {
@@ -24,10 +24,12 @@ export default function CoursesManager({ userId, initialCourses, strings }) {
       .from("mba_courses")
       .insert({
         user_id: userId,
+        program,
         name: form.name.trim(),
         professor: form.professor.trim() || null,
         schedule: form.schedule.trim() || null,
         description: form.description.trim() || null,
+        is_shared: form.is_shared,
       })
       .select()
       .single();
@@ -35,9 +37,15 @@ export default function CoursesManager({ userId, initialCourses, strings }) {
     setSaving(false);
     if (!error && data) {
       setCourses((list) => [data, ...list]);
-      setForm({ name: "", professor: "", schedule: "", description: "" });
+      setForm({ name: "", professor: "", schedule: "", description: "", is_shared: false });
       setOpen(false);
     }
+  }
+
+  async function toggleShared(course) {
+    const next = !course.is_shared;
+    await supabase.from("mba_courses").update({ is_shared: next }).eq("id", course.id);
+    setCourses((list) => list.map((c) => (c.id === course.id ? { ...c, is_shared: next } : c)));
   }
 
   async function removeCourse(id) {
@@ -91,6 +99,17 @@ export default function CoursesManager({ userId, initialCourses, strings }) {
             className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent
                        px-3 py-2 text-sm outline-none focus:border-sage resize-none"
           />
+          {partnerName && (
+            <label className="flex items-center gap-2 text-sm text-ink-muted dark:text-moon-muted">
+              <input
+                type="checkbox"
+                checked={form.is_shared}
+                onChange={(e) => setForm({ ...form, is_shared: e.target.checked })}
+                className="h-4 w-4 accent-[#6256A8]"
+              />
+              {m.shareWith.replace("{name}", partnerName)}
+            </label>
+          )}
           <div className="flex items-center gap-2">
             <button
               type="submit"
@@ -138,6 +157,16 @@ export default function CoursesManager({ userId, initialCourses, strings }) {
                 <Trash2 size={14} strokeWidth={2} />
               </button>
             </div>
+            {partnerName && (
+              <button
+                onClick={() => toggleShared(c)}
+                className={`mt-2 text-xs rounded-full px-2 py-0.5 transition ${
+                  c.is_shared ? "bg-dusk/15 text-dusk" : "bg-black/5 dark:bg-white/10 text-ink-muted dark:text-moon-muted"
+                }`}
+              >
+                {c.is_shared ? m.sharedBadge.replace("{name}", partnerName) : m.shareWith.replace("{name}", partnerName)}
+              </button>
+            )}
             {c.schedule && (
               <p className="text-xs text-ink-muted dark:text-moon-muted mt-2">🕐 {c.schedule}</p>
             )}

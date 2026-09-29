@@ -14,7 +14,7 @@ export default async function MbaCoursesPage() {
   if (!user) redirect("/login");
 
   const [{ data: courses }, { data: assignments }] = await Promise.all([
-    supabase.from("mba_courses").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+    supabase.from("mba_courses").select("*").eq("user_id", user.id).eq("program", "mba").order("created_at", { ascending: false }),
     supabase.from("mba_assignments").select("*").eq("user_id", user.id),
   ]);
 
@@ -24,7 +24,7 @@ export default async function MbaCoursesPage() {
       <main className="max-w-4xl mx-auto px-6 pb-16 space-y-8">
         <h1 className="font-display text-3xl">{strings.mba.courses}</h1>
 
-        <CoursesManager userId={user.id} initialCourses={courses || []} strings={strings} />
+        <CoursesManager userId={user.id} initialCourses={courses || []} strings={strings} program="mba" />
 
         <div>
           <h2 className="font-display text-xl mb-3">{strings.mba.upcomingAssignments}</h2>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import WorldManager from "./WorldManager";
+import WorldSuggestions from "./WorldSuggestions";
 import InterestsManager from "./InterestsManager";
 import JournalManager from "./JournalManager";
 import TimelineManager from "./TimelineManager";
@@ -11,7 +12,7 @@ import TimeCapsuleManager from "./TimeCapsuleManager";
 // Consolidates what used to be six separate sidebar links (My World,
 // Interests, Journal, Memories, Messages, Time Capsule) into one hub
 // with internal tabs -- same pattern as AIPageTabs.jsx.
-export default function WorldHubTabs({ userId, strings, data }) {
+export default function WorldHubTabs({ userId, strings, data, locale = "ar" }) {
   const [tab, setTab] = useState("world");
 
   const tabs = [
@@ -42,7 +43,10 @@ export default function WorldHubTabs({ userId, strings, data }) {
       </div>
 
       {tab === "world" && (
-        <WorldManager userId={userId} initialItems={data.world} strings={strings} />
+        <div className="space-y-4">
+          <WorldSuggestions userId={userId} locale={locale} strings={strings.legacy.world.suggestions} />
+          <WorldManager userId={userId} initialItems={data.world} strings={strings} />
+        </div>
       )}
       {tab === "interests" && (
         <InterestsManager userId={userId} initialInterests={data.interests} strings={strings} />

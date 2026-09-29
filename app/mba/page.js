@@ -19,17 +19,23 @@ export default async function MbaHubPage() {
 
   const today = todayISO();
 
-  const [{ data: courses }, { data: assignments }, { data: research }] = await Promise.all([
-    supabase.from("mba_courses").select("id, name").eq("user_id", user.id),
-    supabase
-      .from("mba_assignments")
-      .select("id, title, due_date, status")
-      .eq("user_id", user.id)
-      .neq("status", "completed")
-      .order("due_date", { ascending: true })
-      .limit(5),
-    supabase.from("research_projects").select("id, status").eq("user_id", user.id),
+  const [{ data: courses }, { data: research }] = await Promise.all([
+    supabase.from("mba_courses").select("id, name").eq("user_id", user.id).eq("program", "mba"),
+    supabase.from("research_projects").select("id, status").eq("user_id", user.id).eq("program", "mba"),
   ]);
+
+  // Assignments belong to a course, so scope them to THIS program's courses only
+  // (otherwise institute assignments would leak into the MBA "upcoming" list).
+  const courseIds = (courses || []).map((c) => c.id);
+  const { data: assignments } = courseIds.length
+    ? await supabase
+        .from("mba_assignments")
+        .select("id, title, due_date, status")
+        .in("course_id", courseIds)
+        .neq("status", "completed")
+        .order("due_date", { ascending: true })
+        .limit(5)
+    : { data: [] };
 
   const activeResearchCount = (research || []).filter((r) => r.status !== "finished").length;
 
