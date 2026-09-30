@@ -9,7 +9,7 @@ import { Plus, Trash2, ChevronDown, ChevronUp, Lightbulb } from "lucide-react";
 const STAGE_ORDER = ["idea", "research", "plan", "execute"];
 const STAGE_COLOR = {
   idea: "bg-black/5 dark:bg-white/10 text-ink-muted dark:text-moon-muted",
-  research: "bg-[#B8834D]/15 text-[#9c6a35] dark:text-[#d9a366]",
+  research: "bg-clay/15 text-clay dark:text-clay-soft",
   plan: "bg-dusk/20 text-dusk",
   execute: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
 };
@@ -64,7 +64,7 @@ export default function IdeasManager({ userId, initialIdeas, strings }) {
     <div className="space-y-3">
       {!open ? (
         <button onClick={() => setOpen(true)}
-          className="w-full exec-card exec-card-hover p-4 flex items-center justify-center gap-2 text-sm text-ink-muted dark:text-moon-muted hover:text-[#B8834D] transition">
+          className="w-full exec-card exec-card-hover p-4 flex items-center justify-center gap-2 text-sm text-ink-muted dark:text-moon-muted hover:text-clay transition">
           <Plus size={15} strokeWidth={2} />
           {b.addIdea}
         </button>
@@ -72,13 +72,13 @@ export default function IdeasManager({ userId, initialIdeas, strings }) {
         <form onSubmit={addIdea} className="exec-card p-4 space-y-2">
           <input autoFocus value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder={b.ideaTitle}
-            className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-[#B8834D]" />
+            className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-clay" />
           <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
             placeholder={b.description} rows={2}
-            className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-[#B8834D] resize-none" />
+            className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-clay resize-none" />
           <div className="flex items-center gap-2">
             <button type="submit" disabled={saving || !form.title.trim()}
-              className="rounded-soft bg-[#B8834D] text-white text-sm font-medium px-4 py-2 hover:brightness-105 transition disabled:opacity-50">
+              className="rounded-soft bg-clay text-white text-sm font-medium px-4 py-2 hover:brightness-105 transition disabled:opacity-50">
               {saving ? b.saving : b.save}
             </button>
             <button type="button" onClick={() => setOpen(false)}
@@ -97,7 +97,7 @@ export default function IdeasManager({ userId, initialIdeas, strings }) {
         {ideas.map((idea) => (
           <div key={idea.id} className="exec-card overflow-hidden">
             <div className="p-4 flex items-start gap-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#B8834D]/15 text-[#9c6a35] dark:text-[#d9a366] shrink-0">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-clay/15 text-clay dark:text-clay-soft shrink-0">
                 <Lightbulb size={15} strokeWidth={2} />
               </span>
               <div className="flex-1 min-w-0">
@@ -134,7 +134,7 @@ export default function IdeasManager({ userId, initialIdeas, strings }) {
                       onBlur={(e) => updateField(idea, field, e.target.value)}
                       rows={1}
                       className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent
-                                 px-2 py-1.5 text-sm outline-none focus:border-[#B8834D] resize-none mt-0.5"
+                                 px-2 py-1.5 text-sm outline-none focus:border-clay resize-none mt-0.5"
                     />
                   </div>
                 ))}

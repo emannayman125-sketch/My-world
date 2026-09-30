@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
 import EmptyState from "./EmptyState";
@@ -8,7 +9,7 @@ import { Plus, Trash2, Building2 } from "lucide-react";
 
 const STATUS_COLOR = {
   planning: "bg-black/5 dark:bg-white/10 text-ink-muted dark:text-moon-muted",
-  active: "bg-[#B8834D]/15 text-[#9c6a35] dark:text-[#d9a366]",
+  active: "bg-clay/15 text-clay dark:text-clay-soft",
   on_hold: "bg-dusk/20 text-dusk",
   completed: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
 };
@@ -65,7 +66,7 @@ export default function ProjectsManager({ userId, initialProjects, strings }) {
     <div className="space-y-4">
       {!open ? (
         <button onClick={() => setOpen(true)}
-          className="w-full exec-card exec-card-hover p-4 flex items-center justify-center gap-2 text-sm text-ink-muted dark:text-moon-muted hover:text-[#B8834D] transition">
+          className="w-full exec-card exec-card-hover p-4 flex items-center justify-center gap-2 text-sm text-ink-muted dark:text-moon-muted hover:text-clay transition">
           <Plus size={15} strokeWidth={2} />
           {b.addProject}
         </button>
@@ -73,23 +74,23 @@ export default function ProjectsManager({ userId, initialProjects, strings }) {
         <form onSubmit={addProject} className="exec-card p-4 space-y-2">
           <input autoFocus value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
             placeholder={b.projectName}
-            className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-[#B8834D]" />
+            className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-clay" />
           <div className="flex gap-2 flex-wrap">
             <input value={form.client} onChange={(e) => setForm({ ...form, client: e.target.value })}
               placeholder={b.client}
-              className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-[#B8834D]" />
+              className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-clay" />
             <input type="date" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-[#B8834D]" />
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-clay" />
             <input type="number" value={form.budget} onChange={(e) => setForm({ ...form, budget: e.target.value })}
               placeholder={b.budget}
-              className="w-28 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-[#B8834D]" />
+              className="w-28 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-clay" />
           </div>
           <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })}
             placeholder={b.notes} rows={2}
-            className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-[#B8834D] resize-none" />
+            className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-clay resize-none" />
           <div className="flex items-center gap-2">
             <button type="submit" disabled={saving || !form.name.trim()}
-              className="rounded-soft bg-[#B8834D] text-white text-sm font-medium px-4 py-2 hover:brightness-105 transition disabled:opacity-50">
+              className="rounded-soft bg-clay text-white text-sm font-medium px-4 py-2 hover:brightness-105 transition disabled:opacity-50">
               {saving ? b.saving : b.save}
             </button>
             <button type="button" onClick={() => setOpen(false)}
@@ -106,10 +107,10 @@ export default function ProjectsManager({ userId, initialProjects, strings }) {
 
       <div className="grid sm:grid-cols-2 gap-3">
         {projects.map((p) => (
-          <div key={p.id} className="exec-card exec-card-hover p-4">
+          <Link key={p.id} href={`/business/projects/${p.id}`} className="exec-card exec-card-hover p-4 block">
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#B8834D]/15 text-[#9c6a35] dark:text-[#d9a366] shrink-0">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-clay/15 text-clay dark:text-clay-soft shrink-0">
                   <Building2 size={15} strokeWidth={2} />
                 </span>
                 <div>
@@ -117,12 +118,12 @@ export default function ProjectsManager({ userId, initialProjects, strings }) {
                   {p.client && <p className="text-xs text-ink-muted dark:text-moon-muted">{p.client}</p>}
                 </div>
               </div>
-              <button onClick={() => removeProject(p.id)} aria-label={b.delete}
+              <button onClick={(e) => { e.preventDefault(); removeProject(p.id); }} aria-label={b.delete}
                 className="text-ink-muted/60 hover:text-red-500 transition shrink-0">
                 <Trash2 size={14} strokeWidth={2} />
               </button>
             </div>
-            <button onClick={() => cycleStatus(p)}
+            <button onClick={(e) => { e.preventDefault(); cycleStatus(p); }}
               className={`mt-2 text-xs rounded-full px-2.5 py-1 font-medium transition ${STATUS_COLOR[p.status] || STATUS_COLOR.planning}`}>
               {b.status[p.status] || b.status.planning}
             </button>
@@ -132,7 +133,7 @@ export default function ProjectsManager({ userId, initialProjects, strings }) {
               </p>
             )}
             {p.notes && <p className="text-sm mt-2 leading-6">{p.notes}</p>}
-          </div>
+          </Link>
         ))}
       </div>
     </div>

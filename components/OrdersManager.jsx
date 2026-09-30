@@ -21,13 +21,13 @@ const STATUS_COLOR = {
   cancelled: "bg-black/5 dark:bg-white/10 text-ink-muted dark:text-moon-muted line-through",
 };
 
-export default function OrdersManager({ userId, initialOrders, suppliers, strings }) {
+export default function OrdersManager({ userId, initialOrders, suppliers, strings, projects = [], defaultProjectId = "" }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
   const s = strings.supplyChain;
   const [orders, setOrders] = useState(initialOrders || []);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ customer: "", items: "", quantity: "", supplier_id: "", expected_delivery: "" });
+  const [form, setForm] = useState({ customer: "", items: "", quantity: "", supplier_id: "", expected_delivery: "", project_id: defaultProjectId });
   const [saving, setSaving] = useState(false);
 
   async function addOrder(e) {
@@ -43,6 +43,7 @@ export default function OrdersManager({ userId, initialOrders, suppliers, string
         items: form.items.trim(),
         quantity: form.quantity.trim() || null,
         supplier_id: form.supplier_id || null,
+        project_id: form.project_id || null,
         expected_delivery: form.expected_delivery || null,
         order_date: todayISO(),
       })
@@ -52,7 +53,7 @@ export default function OrdersManager({ userId, initialOrders, suppliers, string
     setSaving(false);
     if (!error && data) {
       setOrders((list) => [data, ...list]);
-      setForm({ customer: "", items: "", quantity: "", supplier_id: "", expected_delivery: "" });
+      setForm({ customer: "", items: "", quantity: "", supplier_id: "", expected_delivery: "", project_id: defaultProjectId });
       setOpen(false);
     }
   }
@@ -78,6 +79,10 @@ export default function OrdersManager({ userId, initialOrders, suppliers, string
 
   function supplierName(id) {
     return suppliers.find((sp) => sp.id === id)?.name;
+  }
+
+  function projectName(id) {
+    return projects.find((p) => p.id === id)?.name;
   }
 
   return (
@@ -107,6 +112,13 @@ export default function OrdersManager({ userId, initialOrders, suppliers, string
               <option value="">{s.noSupplier}</option>
               {suppliers.map((sp) => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
             </select>
+            {projects.length > 1 && (
+              <select value={form.project_id} onChange={(e) => setForm({ ...form, project_id: e.target.value })}
+                className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500">
+                <option value="">{s.noProject}</option>
+                {projects.map((pr) => <option key={pr.id} value={pr.id}>{pr.name}</option>)}
+              </select>
+            )}
             <input type="date" value={form.expected_delivery} onChange={(e) => setForm({ ...form, expected_delivery: e.target.value })}
               className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500" />
           </div>
@@ -139,6 +151,7 @@ export default function OrdersManager({ userId, initialOrders, suppliers, string
                 <p className="text-xs text-ink-muted dark:text-moon-muted">
                   {supplierName(o.supplier_id) || s.noSupplier}
                   {o.customer && ` · ${o.customer}`}
+                  {projects.length > 1 && o.project_id && ` · 🏗️ ${projectName(o.project_id) || ""}`}
                   {o.expected_delivery && ` · ${s.expectedDelivery}: ${o.expected_delivery}`}
                 </p>
               </div>

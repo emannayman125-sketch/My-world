@@ -39,7 +39,7 @@ export default async function BusinessHubPage() {
 
         <div className="grid sm:grid-cols-3 gap-4">
           <Link href="/business/projects" className="exec-card exec-card-hover p-5 flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#B8834D]/15 text-[#9c6a35] dark:text-[#d9a366] shrink-0">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-clay/15 text-clay dark:text-clay-soft shrink-0">
               <Building2 size={18} strokeWidth={2} />
             </span>
             <div className="flex-1">

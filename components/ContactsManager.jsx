@@ -6,13 +6,13 @@ import { useConfirm } from "./ConfirmProvider";
 import EmptyState from "./EmptyState";
 import { Plus, Trash2, User } from "lucide-react";
 
-export default function ContactsManager({ userId, initialContacts, projects, strings }) {
+export default function ContactsManager({ userId, initialContacts, projects, strings, defaultProjectId = "" }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
   const b = strings.business;
   const [contacts, setContacts] = useState(initialContacts || []);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", type: "client", phone: "", email: "", project_id: "" });
+  const [form, setForm] = useState({ name: "", type: "client", phone: "", email: "", project_id: defaultProjectId });
   const [saving, setSaving] = useState(false);
 
   async function addContact(e) {
@@ -36,7 +36,7 @@ export default function ContactsManager({ userId, initialContacts, projects, str
     setSaving(false);
     if (!error && data) {
       setContacts((list) => [data, ...list]);
-      setForm({ name: "", type: "client", phone: "", email: "", project_id: "" });
+      setForm({ name: "", type: "client", phone: "", email: "", project_id: defaultProjectId });
       setOpen(false);
     }
   }
@@ -55,7 +55,7 @@ export default function ContactsManager({ userId, initialContacts, projects, str
     <div className="space-y-4">
       {!open ? (
         <button onClick={() => setOpen(true)}
-          className="w-full exec-card exec-card-hover p-4 flex items-center justify-center gap-2 text-sm text-ink-muted dark:text-moon-muted hover:text-[#B8834D] transition">
+          className="w-full exec-card exec-card-hover p-4 flex items-center justify-center gap-2 text-sm text-ink-muted dark:text-moon-muted hover:text-clay transition">
           <Plus size={15} strokeWidth={2} />
           {b.addContact}
         </button>
@@ -64,30 +64,30 @@ export default function ContactsManager({ userId, initialContacts, projects, str
           <div className="flex gap-2 flex-wrap">
             <input autoFocus value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder={b.contactName}
-              className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-[#B8834D]" />
+              className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-clay" />
             <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}
-              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-[#B8834D]">
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-clay">
               {Object.entries(b.type).map(([k, label]) => <option key={k} value={k}>{label}</option>)}
             </select>
           </div>
           <div className="flex gap-2 flex-wrap">
             <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
               placeholder={b.phone}
-              className="flex-1 min-w-[120px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-[#B8834D]" />
+              className="flex-1 min-w-[120px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-clay" />
             <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder={b.email}
-              className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-[#B8834D]" />
+              className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-clay" />
           </div>
-          {projects.length > 0 && (
+          {projects.length > 1 && (
             <select value={form.project_id} onChange={(e) => setForm({ ...form, project_id: e.target.value })}
-              className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-[#B8834D]">
+              className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-clay">
               <option value="">{b.noProject}</option>
               {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           )}
           <div className="flex items-center gap-2">
             <button type="submit" disabled={saving || !form.name.trim()}
-              className="rounded-soft bg-[#B8834D] text-white text-sm font-medium px-4 py-2 hover:brightness-105 transition disabled:opacity-50">
+              className="rounded-soft bg-clay text-white text-sm font-medium px-4 py-2 hover:brightness-105 transition disabled:opacity-50">
               {saving ? b.saving : b.save}
             </button>
             <button type="button" onClick={() => setOpen(false)}

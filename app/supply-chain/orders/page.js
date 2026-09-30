@@ -12,9 +12,10 @@ export default async function OrdersPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: orders }, { data: suppliers }] = await Promise.all([
+  const [{ data: orders }, { data: suppliers }, { data: projects }] = await Promise.all([
     supabase.from("supply_chain_orders").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     supabase.from("supply_chain_suppliers").select("id, name").eq("user_id", user.id),
+    supabase.from("business_projects").select("id, name").eq("user_id", user.id),
   ]);
 
   return (
@@ -25,7 +26,7 @@ export default async function OrdersPage() {
           <p className="ops-label mb-1">SUPPLY CHAIN — OPS</p>
           <h1 className="font-display text-3xl">{strings.supplyChain.orders}</h1>
         </div>
-        <OrdersManager userId={user.id} initialOrders={orders || []} suppliers={suppliers || []} strings={strings} />
+        <OrdersManager userId={user.id} initialOrders={orders || []} suppliers={suppliers || []} projects={projects || []} strings={strings} />
       </main>
     </div>
   );
