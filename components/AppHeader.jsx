@@ -7,12 +7,16 @@ import SignOutButton from "./SignOutButton";
 import HeaderMore from "./HeaderMore";
 import BottomNav from "./BottomNav";
 import LanguageToggle from "./LanguageToggle";
+import SuggestionsBadge from "./SuggestionsBadge";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
+import { createServerSupabase } from "@/lib/supabaseServer";
 
-export default function AppHeader() {
+export default async function AppHeader() {
   const locale = getLocale();
   const strings = t(locale);
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
 
   return (
     <>
@@ -29,6 +33,7 @@ export default function AppHeader() {
           </Link>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {user && <SuggestionsBadge userId={user.id} label={strings.suggestions.title} />}
           <CommandPalette strings={strings} />
           <HeaderMore>
             <div className="flex items-center justify-between gap-3 px-2 py-1">

@@ -4,6 +4,7 @@ import AppHeader from "@/components/AppHeader";
 import ProfileSettings from "@/components/ProfileSettings";
 import BackupManager from "@/components/BackupManager";
 import FontSizeControl from "@/components/FontSizeControl";
+import AutoAddToggle from "@/components/AutoAddToggle";
 
 export default async function SettingsPage() {
   const supabase = createServerSupabase();
@@ -12,7 +13,7 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, username, is_bio_public, bio, avatar_url")
+    .select("display_name, username, is_bio_public, bio, avatar_url, auto_add_daily_focus")
     .eq("id", user.id)
     .single();
 
@@ -25,6 +26,12 @@ export default async function SettingsPage() {
         <ProfileSettings userId={user.id} initialProfile={profile} />
 
         <FontSizeControl />
+
+        <div className="card p-6 space-y-3">
+          <h2 className="font-display text-xl">✨ اقتراحات حمزاوي</h2>
+          <AutoAddToggle userId={user.id} initialValue={profile?.auto_add_daily_focus} />
+          <a href="/suggestions" className="inline-block text-sm text-sage dark:text-sage-soft underline">شوف الاقتراحات المستنية</a>
+        </div>
 
         <div className="card p-6 space-y-2">
           <h2 className="font-display text-xl">🔐 مركز الخصوصية</h2>

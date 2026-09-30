@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Sparkles, RefreshCw, Volume2, Square, Plus, Check } from "lucide-react";
+import { Sparkles, RefreshCw, Volume2, Square, Plus, Check, X, Wand2 } from "lucide-react";
 import { createClient } from "@/lib/supabaseClient";
 import { useVoice } from "@/lib/useVoice";
 import { todayISO } from "@/lib/time";
@@ -16,6 +16,8 @@ export default function DailyBrief({ locale, strings, top3Titles = [], top3Count
   const [brief, setBrief] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [added, setAdded] = useState([]);
+  const [autoAdded, setAutoAdded] = useState([]);
+  const [dismissed, setDismissed] = useState([]);
   const [addError, setAddError] = useState(false);
   const voice = useVoice({ locale });
 
@@ -27,6 +29,7 @@ export default function DailyBrief({ locale, strings, top3Titles = [], top3Count
       if (!res.ok) throw new Error("bad status");
       const data = await res.json();
       setBrief(data.brief);
+      setAutoAdded(data.autoAdded || []);
       setState("ready");
     } catch {
       setState((s) => (s === "ready" ? s : "error"));
@@ -46,7 +49,18 @@ export default function DailyBrief({ locale, strings, top3Titles = [], top3Count
     setRefreshing(false);
   }
 
-  const slotsLeft = 3 - top3Count - added.length;
+  const slotsLeft = 3 - top3Count - added.length - autoAdded.length;
+
+  async function dismissItem(title) {
+    setDismissed((list) => [...list, title]);
+    try {
+      await fetch("/api/ai/daily-brief/dismiss", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+    } catch {}
+  }
 
   async function addToToday(item) {
     setAddError(false);
@@ -115,10 +129,11 @@ export default function DailyBrief({ locale, strings, top3Titles = [], top3Count
         <>
           <p className="font-display text-xl leading-snug">{brief.headline}</p>
 
-          {brief.focus.length > 0 && (
+          {brief.focus.filter((i) => !dismissed.includes(i.title)).length > 0 && (
             <ul className="space-y-2">
-              {brief.focus.map((item, i) => {
-                const already = top3Titles.includes(item.title) || added.includes(item.title);
+              {brief.focus.filter((i) => !dismissed.includes(i.title)).map((item, i) => {
+                const wasAutoAdded = autoAdded.includes(item.title);
+                const already = wasAutoAdded || top3Titles.includes(item.title) || added.includes(item.title);
                 const canAdd = !already && slotsLeft > 0;
                 return (
                   <li
@@ -131,20 +146,34 @@ export default function DailyBrief({ locale, strings, top3Titles = [], top3Count
                         <p className="text-xs text-ink-muted dark:text-moon-muted mt-0.5">{item.why}</p>
                       )}
                     </div>
-                    {already ? (
+                    {wasAutoAdded ? (
+                      <span className="flex items-center gap-1 text-xs text-dusk dark:text-dusk-soft shrink-0" title={b.autoAddedHint}>
+                        <Wand2 size={13} /> {b.autoAdded}
+                      </span>
+                    ) : already ? (
                       <span className="flex items-center gap-1 text-xs text-sage dark:text-sage-soft shrink-0">
                         <Check size={14} /> {b.added}
                       </span>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => addToToday(item)}
-                        disabled={!canAdd}
-                        title={canAdd ? b.addToToday : b.full}
-                        className="shrink-0 inline-flex items-center gap-1 rounded-full border border-dusk/30 px-3 py-1.5 text-xs text-dusk dark:text-dusk-soft hover:bg-dusk/10 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                      >
-                        <Plus size={13} /> {b.addToToday}
-                      </button>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => addToToday(item)}
+                          disabled={!canAdd}
+                          title={canAdd ? b.addToToday : b.full}
+                          className="inline-flex items-center gap-1 rounded-full border border-dusk/30 px-3 py-1.5 text-xs text-dusk dark:text-dusk-soft hover:bg-dusk/10 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                        >
+                          <Plus size={13} /> {b.addToToday}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => dismissItem(item.title)}
+                          aria-label={b.dismiss}
+                          className="p-1.5 rounded-full text-ink-muted dark:text-moon-muted hover:bg-black/5 dark:hover:bg-white/10 transition"
+                        >
+                          <X size={13} />
+                        </button>
+                      </div>
                     )}
                   </li>
                 );

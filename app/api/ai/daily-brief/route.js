@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import { callGemini } from "@/lib/ai/gemini";
 import { todayISO, addDaysISO } from "@/lib/time";
+import { reconcileDailyFocusSuggestions } from "@/lib/suggestionsInbox";
 
 export const dynamic = "force-dynamic";
 
@@ -204,7 +205,8 @@ export async function GET(request) {
 
   // A refresh inside 60 seconds of the last generation just returns the cached copy.
   if (cached && (!refresh || Date.now() - (cached.generatedAt || 0) < 60_000)) {
-    return NextResponse.json({ brief: cached.brief, source: cached.source, cached: true });
+    const { autoAdded } = await reconcileDailyFocusSuggestions(supabase, user.id, cached.brief.focus);
+    return NextResponse.json({ brief: cached.brief, source: cached.source, cached: true, autoAdded });
   }
 
   const facts = await gatherFacts(supabase, user.id, today);
@@ -230,5 +232,6 @@ export async function GET(request) {
       .lt("created_at", new Date(Date.now() - 3 * 86400000).toISOString());
   } catch {}
 
-  return NextResponse.json({ brief, source, cached: false });
+  const { autoAdded } = await reconcileDailyFocusSuggestions(supabase, user.id, brief.focus);
+  return NextResponse.json({ brief, source, cached: false, autoAdded });
 }
