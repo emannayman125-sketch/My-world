@@ -3,8 +3,13 @@ import { createServerSupabase } from "@/lib/supabaseServer";
 import AppHeader from "@/components/AppHeader";
 import PartnerManager from "@/components/PartnerManager";
 import SharedProgress from "@/components/SharedProgress";
+import TradingJournalManager from "@/components/TradingJournalManager";
+import { getLocale } from "@/lib/i18n/getLocale";
+import { t } from "@/lib/i18n/dictionaries";
 
 export default async function PartnerPage() {
+  const locale = getLocale();
+  const strings = t(locale);
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -30,6 +35,8 @@ export default async function PartnerPage() {
   let myCourses = [];
   let partnerCourses = [];
   let sharedAssignments = [];
+  let partnerTrades = null;
+  let partnerCanLog = false;
 
   if (link) {
     const otherId = link.user_a === user.id ? link.user_b : link.user_a;
@@ -41,6 +48,22 @@ export default async function PartnerPage() {
     otherProfile = p;
 
     if (link.status === "accepted") {
+      const { data: otherFullProfile } = await supabase
+        .from("profiles")
+        .select("trading_shared, trading_partner_can_log")
+        .eq("id", otherId)
+        .maybeSingle();
+
+      if (otherFullProfile?.trading_shared) {
+        const { data: trades } = await supabase
+          .from("trading_journal")
+          .select("*")
+          .eq("user_id", otherId)
+          .order("trade_date", { ascending: false });
+        partnerTrades = trades || [];
+        partnerCanLog = !!otherFullProfile.trading_partner_can_log;
+      }
+
       const [{ data: mine }, { data: theirs }] = await Promise.all([
         supabase.from("goals").select("*").eq("user_id", user.id).eq("is_shared", true),
         supabase.from("goals").select("*").eq("user_id", otherId).eq("is_shared", true),
@@ -145,6 +168,21 @@ export default async function PartnerPage() {
                 </ul>
               </div>
             )}
+          </div>
+        )}
+
+        {link?.status === "accepted" && otherProfile && partnerTrades !== null && (
+          <div className="desk-card p-6 space-y-4">
+            <h2 className="font-display text-xl text-white">
+              {strings.trading.journal} — {otherProfile.display_name || strings.partner?.them || ""}
+            </h2>
+            <TradingJournalManager
+              userId={link.user_a === user.id ? link.user_b : link.user_a}
+              viewerId={user.id}
+              readOnly={!partnerCanLog}
+              initialTrades={partnerTrades}
+              strings={strings}
+            />
           </div>
         )}
       </main>

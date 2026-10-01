@@ -21,7 +21,8 @@ const EMPTY_FORM = {
 
 const EMPTY_QUICK = { symbol: "", direction: "long", result: "win", pnl: "", fees: "" };
 
-export default function TradingJournalManager({ userId, initialTrades, strings }) {
+export default function TradingJournalManager({ userId, initialTrades, strings, viewerId, readOnly = false }) {
+  const loggerId = viewerId || userId; // who is actually logging this trade
   const supabase = createClient();
   const { confirm } = useConfirm();
   const tr = strings.trading;
@@ -47,6 +48,7 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
       .from("trading_journal")
       .insert({
         user_id: userId,
+        logged_by: loggerId !== userId ? loggerId : null,
         symbol: form.symbol.trim().toUpperCase(),
         trade_date: form.trade_date || null,
         entry_price: num(form.entry_price),
@@ -84,6 +86,7 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
       .from("trading_journal")
       .insert({
         user_id: userId,
+        logged_by: loggerId !== userId ? loggerId : null,
         symbol: quick.symbol.trim().toUpperCase(),
         trade_date: todayISO(),
         direction: quick.direction,
@@ -110,7 +113,10 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
 
   return (
     <div className="space-y-3">
-      {!quickOpen ? (
+      {readOnly && (
+        <p className="text-xs desk-muted">{tr.sharing.statusView}</p>
+      )}
+      {!readOnly && !quickOpen ? (
         <button
           onClick={() => setQuickOpen(true)}
           className="w-full desk-card p-3 flex items-center justify-center gap-2 text-sm text-sky-400 hover:text-sky-300 transition"
@@ -118,7 +124,7 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
           <Zap size={14} strokeWidth={2} />
           {tr.quickLog}
         </button>
-      ) : (
+      ) : !readOnly ? (
         <form onSubmit={addQuick} className="desk-card p-3 flex flex-wrap items-center gap-2">
           <input
             autoFocus
@@ -171,9 +177,9 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
             {strings.quote.cancel}
           </button>
         </form>
-      )}
+      ) : null}
 
-      {!open ? (
+      {!readOnly && !open ? (
         <button
           onClick={() => setOpen(true)}
           className="w-full card card-hover p-4 flex items-center justify-center gap-2 text-sm
@@ -182,7 +188,7 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
           <Plus size={15} strokeWidth={2} />
           {tr.addTrade}
         </button>
-      ) : (
+      ) : !readOnly ? (
         <form onSubmit={addTrade} className="desk-card p-4 space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <input value={form.symbol} onChange={(e) => setForm({ ...form, symbol: e.target.value })}
@@ -247,7 +253,7 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
             </button>
           </div>
         </form>
-      )}
+      ) : null}
 
       {sorted.length === 0 && !open && (
         <p className="text-sm desk-muted text-center py-6">{tr.noTrades}</p>
@@ -275,9 +281,11 @@ export default function TradingJournalManager({ userId, initialTrades, strings }
               <button onClick={() => setExpanded(expanded === t.id ? null : t.id)} className="desk-muted hover:text-white transition shrink-0">
                 {expanded === t.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </button>
-              <button onClick={() => removeTrade(t.id)} aria-label={tr.delete} className="text-white/30 hover:text-red-500 transition shrink-0">
-                <Trash2 size={14} strokeWidth={2} />
-              </button>
+              {loggerId === userId && (
+                <button onClick={() => removeTrade(t.id)} aria-label={tr.delete} className="text-white/30 hover:text-red-500 transition shrink-0">
+                  <Trash2 size={14} strokeWidth={2} />
+                </button>
+              )}
             </div>
             {expanded === t.id && (
               <div className="border-t border-black/[0.06] dark:border-white/[0.06] px-4 py-3 space-y-1.5 text-sm bg-black/[0.015] dark:bg-white/[0.02]">

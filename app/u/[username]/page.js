@@ -183,7 +183,7 @@ export default async function PublicProfilePage({ params }) {
         ))}
 
         <p className="text-center text-xs text-ink-muted dark:text-moon-muted">
-          صُنع بحب على Personal World 🤍
+          صُنع بحب على عالمك الخاص 🤍
         </p>
       </div>
     </main>
