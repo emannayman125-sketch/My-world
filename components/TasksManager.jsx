@@ -21,7 +21,7 @@ export default function TasksManager({ userId, initialTasks, strings }) {
   const [form, setForm] = useState({ title: "", priority: "normal", due_date: "", is_shared: false, link_url: "" });
   const [filter, setFilter] = useState("open");
   const [showLinkInput, setShowLinkInput] = useState(false);
-  const todayISO = todayISO();
+  const today = todayISO();
 
   async function addTask(e) {
     e.preventDefault();
@@ -172,12 +172,12 @@ export default function TasksManager({ userId, initialTasks, strings }) {
                   {task.due_date && (
                     <span
                       className={`text-xs px-1.5 py-0.5 rounded-full ${
-                        !task.is_done && task.due_date < todayISO
+                        !task.is_done && task.due_date < today
                           ? "bg-red-500/15 text-red-500"
                           : "text-ink-muted dark:text-moon-muted"
                       }`}
                     >
-                      {!task.is_done && task.due_date < todayISO ? `${tr.overdue} — ${task.due_date}` : task.due_date}
+                      {!task.is_done && task.due_date < today ? `${tr.overdue} — ${task.due_date}` : task.due_date}
                     </span>
                   )}
                 </button>

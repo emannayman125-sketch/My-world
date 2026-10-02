@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { Sparkles, Flame, CalendarDays, Headphones } from "lucide-react";
+import { Sparkles, Flame, CalendarDays, Headphones, MoreHorizontal } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import { getDueHiddenMessage } from "@/lib/hiddenMessages";
 import AppHeader from "@/components/AppHeader";
@@ -18,6 +18,7 @@ import HabitsToday from "@/components/HabitsToday";
 import QuoteOfTheDay from "@/components/QuoteOfTheDay";
 import GettingStarted from "@/components/GettingStarted";
 import DailyBrief from "@/components/DailyBrief";
+import Collapsible from "@/components/Collapsible";
 import StreakCard from "@/components/StreakCard";
 import { getActivityDates } from "@/lib/activityDates";
 import { computeActivityStreak } from "@/lib/streaks";
@@ -139,6 +140,16 @@ export default async function DashboardPage({ searchParams }) {
     chips.push({ key: "currently", icon: Headphones, value: firstCurrently.title, label: null });
   }
 
+  // One-line preview for the collapsed "rest of your day" section, so
+  // nothing important is invisible just because it's folded away.
+  const MOOD_EMOJI = { good: "🙂", okay: "😐", tired: "😴", energized: "🔥", rough: "😔" };
+  const restSummaryParts = [];
+  if (todayMood?.mood) restSummaryParts.push(MOOD_EMOJI[todayMood.mood] || "");
+  if (habitsTotal > 0) restSummaryParts.push(`${habitsDone}/${habitsTotal} ${d.chipHabits}`);
+  if (eventsCount > 0) restSummaryParts.push(`${eventsCount} ${d.chipEvents}`);
+  if (firstCurrently) restSummaryParts.push(firstCurrently.title);
+  const restSummary = restSummaryParts.filter(Boolean).join(" · ");
+
   return (
     <div className="min-h-screen bg-paper dark:bg-night lg:ps-64">
       <AppHeader />
@@ -179,18 +190,19 @@ export default async function DashboardPage({ searchParams }) {
           </header>
         </FadeIn>
 
-        <FadeIn delay={0.01}>
-          <GettingStarted
-            hasTasks={(anyTask || []).length > 0}
-            hasMemory={(anyMemory || []).length > 0}
-            hasWorldItem={(anyWorldItem || []).length > 0}
-            strings={strings}
-          />
-        </FadeIn>
-
-        {needsSetup && (
+        {/* Only one "let's get started" nudge at a time, never both stacked */}
+        {needsSetup ? (
           <FadeIn delay={0.015}>
             <OnboardingPrompt strings={d.onboardingPrompt} />
+          </FadeIn>
+        ) : (
+          <FadeIn delay={0.01}>
+            <GettingStarted
+              hasTasks={(anyTask || []).length > 0}
+              hasMemory={(anyMemory || []).length > 0}
+              hasWorldItem={(anyWorldItem || []).length > 0}
+              strings={strings}
+            />
           </FadeIn>
         )}
 
@@ -212,24 +224,6 @@ export default async function DashboardPage({ searchParams }) {
         {/* 1c — the day's quote, moved up front so it's seen, not buried at the bottom */}
         <FadeIn delay={0.025}>
           <QuoteOfTheDay quote={quote} userId={user.id} strings={strings} />
-        </FadeIn>
-
-        {/* 2 — how the day is going (supporting info, not the star) */}
-        <FadeIn delay={0.03}>
-          <section className={`${cardBase} p-5 flex flex-wrap items-center gap-5`}>
-            <ProgressRing percent={progressPercent} size={76} stroke={6} />
-            <div className="min-w-0">
-              <p className="text-sm">
-                {d.doneOfTotal
-                  .replace("{done}", String(doneCount))
-                  .replace("{total}", String(top3List.length))}
-              </p>
-              <p className="mt-1 text-xs text-ink-muted dark:text-moon-muted">{d.keepGoing}</p>
-            </div>
-            <div className="ms-auto shrink-0">
-              <ShareDayButton name={name} top3={top3List} events={todayEvents || []} strings={strings} />
-            </div>
-          </section>
         </FadeIn>
 
         {/* 3 — the ONE thing that gets the full lantern fill */}
@@ -277,12 +271,33 @@ export default async function DashboardPage({ searchParams }) {
           <TopThree userId={user.id} initialTasks={top3List} strings={strings} />
         </FadeIn>
 
-        {/* 6 — everything else, quieter, in one calm stack */}
-        <div className="space-y-4">
-          <p className="text-xs text-ink-muted dark:text-moon-muted">{d.moreForToday}</p>
+        {/* 6 — everything else, folded into one row instead of six stacked cards */}
+        <FadeIn delay={0.05}>
+          <Collapsible
+            title={d.moreForToday}
+            summary={restSummary}
+            icon={
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/5 dark:bg-white/10 text-ink-muted dark:text-moon-muted">
+                <MoreHorizontal size={15} />
+              </span>
+            }
+          >
+            <section className={`${cardBase} p-5 flex flex-wrap items-center gap-5`}>
+              <ProgressRing percent={progressPercent} size={64} stroke={5} />
+              <div className="min-w-0">
+                <p className="text-sm">
+                  {d.doneOfTotal
+                    .replace("{done}", String(doneCount))
+                    .replace("{total}", String(top3List.length))}
+                </p>
+                <p className="mt-1 text-xs text-ink-muted dark:text-moon-muted">{d.keepGoing}</p>
+              </div>
+              <div className="ms-auto shrink-0">
+                <ShareDayButton name={name} top3={top3List} events={todayEvents || []} strings={strings} />
+              </div>
+            </section>
 
-          {eventsCount > 0 && (
-            <FadeIn delay={0.05}>
+            {eventsCount > 0 && (
               <div className={`${cardBase} p-6`}>
                 <h2 className="font-display text-xl mb-3">{d.todayEvents}</h2>
                 <ul className="space-y-1 text-sm">
@@ -294,23 +309,13 @@ export default async function DashboardPage({ searchParams }) {
                   ))}
                 </ul>
               </div>
-            </FadeIn>
-          )}
+            )}
 
-          <FadeIn delay={0.06}>
             <HabitsToday userId={user.id} habits={habits || []} initialLogsToday={habitLogsToday || []} strings={strings} />
-          </FadeIn>
-
-          <FadeIn delay={0.07}>
             <MoodCheckin userId={user.id} initialMood={todayMood?.mood} strings={strings} />
-          </FadeIn>
-
-          <FadeIn delay={0.08}>
             <CurrentlySection userId={user.id} initialItems={currentlyItems || []} strings={strings} />
-          </FadeIn>
 
-          {onThisDay.length > 0 && (
-            <FadeIn delay={0.09}>
+            {onThisDay.length > 0 && (
               <div className={`${cardBase} p-6`}>
                 <h2 className="font-display text-xl mb-3">{d.onThisDay}</h2>
                 <div className="space-y-3">
@@ -324,10 +329,8 @@ export default async function DashboardPage({ searchParams }) {
                   ))}
                 </div>
               </div>
-            </FadeIn>
-          )}
+            )}
 
-          <FadeIn delay={0.1}>
             <Link
               href="/ai"
               className={`${cardBase} p-4 flex items-center gap-3 hover:border-sage/40 transition`}
@@ -337,8 +340,8 @@ export default async function DashboardPage({ searchParams }) {
               </span>
               <span className="text-sm">{d.askHamzawi}</span>
             </Link>
-          </FadeIn>
-        </div>
+          </Collapsible>
+        </FadeIn>
       </main>
     </div>
   );
