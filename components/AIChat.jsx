@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, Send, Mic, Square, Volume2, VolumeX } from "lucide-react";
+import { Sparkles, Send, Mic, Square, Volume2, VolumeX, Zap, Check, X as XIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import EnglishSessionLogger from "./EnglishSessionLogger";
 import { useVoice } from "@/lib/useVoice";
 
@@ -13,7 +14,9 @@ export default function AIChat({ strings, locale, userId }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [agentMode, setAgentMode] = useState(true);
   const bottomRef = useRef(null);
+  const router = useRouter();
 
   // ---- voice ---------------------------------------------------------------
   const v = ai.voice;
@@ -64,7 +67,8 @@ export default function AIChat({ strings, locale, userId }) {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/ai/chat", {
+      const endpoint = agentMode ? "/api/ai/agent" : "/api/ai/chat";
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: nextMessages, context, useKnowledge, locale, voice: viaVoice || handsFreeRef.current }),
@@ -82,7 +86,8 @@ export default function AIChat({ strings, locale, userId }) {
         return;
       }
 
-      setMessages((list) => [...list, { role: "assistant", content: data.reply }]);
+      setMessages((list) => [...list, { role: "assistant", content: data.reply, actions: data.actions }]);
+      if (data.actions?.length > 0) router.refresh(); // reflect real changes elsewhere in the app
 
       if (viaVoice || speakRepliesRef.current || handsFreeRef.current) {
         voice.speak(data.reply, () => {
@@ -120,6 +125,17 @@ export default function AIChat({ strings, locale, userId }) {
     send(qa.prompt);
   }
 
+  function describeAction(action) {
+    const { name, args, result } = action;
+    const label = ai.actions[name] || name;
+    if (!result?.ok) {
+      if (result?.error === "ambiguous") return null; // the model already asks for clarification in its own reply
+      return { ok: false, label };
+    }
+    const detail = args?.title || args?.name || args?.symbol || "";
+    return { ok: true, label, detail };
+  }
+
   return (
     <div className="space-y-4">
       {/* Controls */}
@@ -146,6 +162,20 @@ export default function AIChat({ strings, locale, userId }) {
             {ai.useKnowledge}
           </label>
         </div>
+        <button
+          type="button"
+          onClick={() => setAgentMode((v) => !v)}
+          aria-pressed={agentMode}
+          className={`w-full flex items-center gap-2 rounded-soft border px-3 py-2 text-xs transition ${
+            agentMode
+              ? "border-dusk/40 bg-dusk/10 text-dusk"
+              : "border-black/10 dark:border-white/10 text-ink-muted dark:text-moon-muted"
+          }`}
+        >
+          <Zap size={13} strokeWidth={2.2} />
+          <span className="font-medium">{agentMode ? ai.agentModeOn : ai.agentModeOff}</span>
+          <span className="opacity-75">— {agentMode ? ai.agentModeOnHint : ai.agentModeOffHint}</span>
+        </button>
         {useKnowledge && (
           <p className="text-xs text-ink-muted/80 dark:text-moon-muted/80 leading-5">{ai.useKnowledgeHint}</p>
         )}
@@ -177,7 +207,7 @@ export default function AIChat({ strings, locale, userId }) {
         )}
 
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+          <div key={i} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
             <div
               className={`max-w-[85%] rounded-soft px-4 py-2.5 text-sm leading-7 whitespace-pre-wrap ${
                 m.role === "user"
@@ -187,13 +217,35 @@ export default function AIChat({ strings, locale, userId }) {
             >
               {m.content}
             </div>
+            {m.actions?.length > 0 && (
+              <div className="max-w-[85%] mt-1.5 flex flex-wrap gap-1.5">
+                {m.actions.map((action, j) => {
+                  const d = describeAction(action);
+                  if (!d) return null;
+                  return (
+                    <span
+                      key={j}
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] ${
+                        d.ok
+                          ? "bg-dusk/10 text-dusk"
+                          : "bg-red-500/10 text-red-500"
+                      }`}
+                    >
+                      {d.ok ? <Check size={11} /> : <XIcon size={11} />}
+                      {d.label}
+                      {d.detail && <span className="opacity-70">· {d.detail}</span>}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
           </div>
         ))}
 
         {loading && (
           <div className="flex justify-start">
             <div className="rounded-soft px-4 py-2.5 text-sm bg-black/[0.03] dark:bg-white/[0.05] text-ink-muted dark:text-moon-muted">
-              {ai.thinking}
+              {agentMode ? ai.acting : ai.thinking}
             </div>
           </div>
         )}

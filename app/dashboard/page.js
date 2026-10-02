@@ -209,6 +209,11 @@ export default async function DashboardPage({ searchParams }) {
           />
         </FadeIn>
 
+        {/* 1c — the day's quote, moved up front so it's seen, not buried at the bottom */}
+        <FadeIn delay={0.025}>
+          <QuoteOfTheDay quote={quote} userId={user.id} strings={strings} />
+        </FadeIn>
+
         {/* 2 — how the day is going (supporting info, not the star) */}
         <FadeIn delay={0.03}>
           <section className={`${cardBase} p-5 flex flex-wrap items-center gap-5`}>
@@ -332,10 +337,6 @@ export default async function DashboardPage({ searchParams }) {
               </span>
               <span className="text-sm">{d.askHamzawi}</span>
             </Link>
-          </FadeIn>
-
-          <FadeIn delay={0.11}>
-            <QuoteOfTheDay quote={quote} userId={user.id} strings={strings} />
           </FadeIn>
         </div>
       </main>
