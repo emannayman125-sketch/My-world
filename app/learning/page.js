@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { GraduationCap, Library as LibraryIcon, FlaskConical, Languages, BookMarked, ArrowLeft, ArrowRight } from "lucide-react";
+import { GraduationCap, Library as LibraryIcon, FlaskConical, Languages, BookMarked, BookOpenCheck, ArrowLeft, ArrowRight } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import AppHeader from "@/components/AppHeader";
 import { getLocale } from "@/lib/i18n/getLocale";
@@ -16,7 +16,8 @@ export default async function LearningHubPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: courses }, { data: instituteCourses }, { data: books }, { data: research }, { data: sessions }] = await Promise.all([
+  const [{ data: quranPortions }, { data: courses }, { data: instituteCourses }, { data: books }, { data: research }, { data: sessions }] = await Promise.all([
+    supabase.from("quran_portions").select("id").eq("user_id", user.id),
     supabase.from("mba_courses").select("id").eq("user_id", user.id).eq("program", "mba"),
     supabase.from("mba_courses").select("id").eq("user_id", user.id).eq("program", "institute"),
     supabase.from("library_books").select("id").eq("user_id", user.id),
@@ -25,6 +26,7 @@ export default async function LearningHubPage() {
   ]);
 
   const cards = [
+    { href: "/quran", icon: BookOpenCheck, accent: "#4F7A63", title: l.quran, desc: l.quranDesc, count: (quranPortions || []).length },
     { href: "/mba", icon: GraduationCap, accent: "#547DA5", title: l.mba, desc: l.mbaDesc, count: (courses || []).length },
     { href: "/institute", icon: BookMarked, accent: "#6256A8", title: l.institute, desc: l.instituteDesc, count: (instituteCourses || []).length },
     { href: "/library", icon: LibraryIcon, accent: "#547DA5", title: l.library, desc: l.libraryDesc, count: (books || []).length },
