@@ -98,7 +98,7 @@ button {
    ============================================================ */
 .exec-card {
   @apply bg-paper-card dark:bg-night-card rounded-md border border-black/[0.06] dark:border-white/[0.08]
-         border-s-[3px] border-s-[#B5624A] shadow-none transition-colors duration-200;
+         border-s-[3px] border-s-[#C45A3B] shadow-none transition-colors duration-200;
 }
 
 .exec-card-hover {
@@ -106,16 +106,16 @@ button {
 }
 
 .exec-label {
-  @apply text-[10px] tracking-[0.14em] text-[#B5624A] dark:text-[#C97D60] font-medium;
+  @apply text-[10px] tracking-[0.14em] text-[#C45A3B] dark:text-[#DB7B57] font-medium;
 }
 
 .exec-accent {
-  @apply text-[#B5624A] dark:text-[#C97D60];
+  @apply text-[#C45A3B] dark:text-[#DB7B57];
 }
 
 .exec-accent-bg {
   background-color: rgba(181, 98, 74, 0.12);
-  @apply text-[#8F4A36] dark:text-[#C97D60];
+  @apply text-[#8F4A36] dark:text-[#DB7B57];
 }
 
 /* ============================================================

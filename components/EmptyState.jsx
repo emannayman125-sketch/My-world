@@ -9,7 +9,7 @@ export default function EmptyState({ icon: Icon, title, hint, actionLabel, actio
     dusk: "bg-dusk/12 text-dusk",
     sky: "bg-sky-500/12 text-sky-600 dark:text-sky-400",
     violet: "bg-violet-500/12 text-violet-500",
-    copper: "bg-[#B5624A]/12 text-[#8F4A36] dark:text-[#C97D60]",
+    copper: "bg-[#C45A3B]/12 text-[#8F4A36] dark:text-[#DB7B57]",
   }[tone] || "bg-sage/12 text-sage dark:text-sage-soft";
 
   return (

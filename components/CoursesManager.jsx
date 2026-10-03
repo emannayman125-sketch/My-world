@@ -105,7 +105,7 @@ export default function CoursesManager({ userId, initialCourses, strings, progra
                 type="checkbox"
                 checked={form.is_shared}
                 onChange={(e) => setForm({ ...form, is_shared: e.target.checked })}
-                className="h-4 w-4 accent-[#6256A8]"
+                className="h-4 w-4 accent-[#6F4FC4]"
               />
               {m.shareWith.replace("{name}", partnerName)}
             </label>

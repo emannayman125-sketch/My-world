@@ -28,17 +28,17 @@ module.exports = {
           card: "#FFFFFF",    // raised surfaces, light mode
         },
         lantern: {
-          DEFAULT: "#C6832A", // the one accent
-          soft: "#E8A83C",    // brighter tone (dark mode / glows)
+          DEFAULT: "#D6870F", // the one accent — warmer, more saturated gold
+          soft: "#F2AE33",    // brighter tone (dark mode / glows)
           ink: "#2B1F08",     // text placed ON a lantern fill
         },
         ember: {
-          DEFAULT: "#C6832A", // alias of lantern
-          soft: "#E8A83C",
+          DEFAULT: "#D6870F", // alias of lantern
+          soft: "#F2AE33",
         },
         dusk: {
-          DEFAULT: "#6256A8", // Hamzawi's own identity
-          soft: "#9086C0",
+          DEFAULT: "#6F4FC4", // Hamzawi's own identity — richer violet, same role
+          soft: "#A58EE8",
         },
         ink: {
           DEFAULT: "#17281F", // primary text on light
@@ -49,12 +49,12 @@ module.exports = {
           muted: "#9FB8AC",   // secondary text on dark
         },
         sage: {
-          DEFAULT: "#4F7A63", // calm secondary: completed, growth, active
-          soft: "#8FAE9A",    // same, tuned for dark backgrounds
+          DEFAULT: "#2E8B63", // calm secondary: completed, growth, active — livelier emerald
+          soft: "#6FC79A",    // same, tuned for dark backgrounds
         },
         clay: {
-          DEFAULT: "#B5624A", // rare warmth touch (mood, Business hub)
-          soft: "#C97D60",
+          DEFAULT: "#C45A3B", // rare warmth touch (mood, Business hub) — warmer terracotta
+          soft: "#DB7B57",
         },
         hairline: {
           DEFAULT: "#E7E0D0", // borders on light
@@ -74,15 +74,15 @@ module.exports = {
         xl2: "24px",
       },
       boxShadow: {
-        lantern: "0 8px 30px -10px rgba(198, 131, 42, 0.30)",
-        glow: "0 0 40px -8px rgba(198, 131, 42, 0.40)",
-        duskGlow: "0 0 50px -12px rgba(98, 86, 168, 0.5)",
+        lantern: "0 8px 30px -10px rgba(214, 135, 15, 0.32)",
+        glow: "0 0 40px -8px rgba(214, 135, 15, 0.42)",
+        duskGlow: "0 0 50px -12px rgba(111, 79, 196, 0.5)",
         card: "0 1px 2px rgba(23, 40, 31, 0.04), 0 8px 24px -12px rgba(23, 40, 31, 0.08)",
         cardDark: "0 1px 2px rgba(0,0,0,0.2), 0 12px 32px -12px rgba(0,0,0,0.5)",
       },
       backgroundImage: {
         aurora:
-          "radial-gradient(600px circle at 15% 0%, rgba(198,131,42,0.12), transparent 55%), radial-gradient(500px circle at 85% 10%, rgba(79,122,99,0.14), transparent 55%)",
+          "radial-gradient(600px circle at 15% 0%, rgba(214,135,15,0.16), transparent 55%), radial-gradient(500px circle at 85% 10%, rgba(46,139,99,0.18), transparent 55%)",
       },
       keyframes: {
         "fade-up": {

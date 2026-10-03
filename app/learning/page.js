@@ -26,9 +26,9 @@ export default async function LearningHubPage() {
   ]);
 
   const cards = [
-    { href: "/quran", icon: BookOpenCheck, accent: "#4F7A63", title: l.quran, desc: l.quranDesc, count: (quranPortions || []).length },
+    { href: "/quran", icon: BookOpenCheck, accent: "#2E8B63", title: l.quran, desc: l.quranDesc, count: (quranPortions || []).length },
     { href: "/mba", icon: GraduationCap, accent: "#547DA5", title: l.mba, desc: l.mbaDesc, count: (courses || []).length },
-    { href: "/institute", icon: BookMarked, accent: "#6256A8", title: l.institute, desc: l.instituteDesc, count: (instituteCourses || []).length },
+    { href: "/institute", icon: BookMarked, accent: "#6F4FC4", title: l.institute, desc: l.instituteDesc, count: (instituteCourses || []).length },
     { href: "/library", icon: LibraryIcon, accent: "#547DA5", title: l.library, desc: l.libraryDesc, count: (books || []).length },
     { href: "/mba/research", icon: FlaskConical, accent: "#547DA5", title: l.research, desc: l.researchDesc, count: (research || []).length },
     { href: "/english", icon: Languages, accent: "#547DA5", title: l.english, desc: l.englishDesc, count: (sessions || []).length },

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient";
 
-const COLORS = ["#C6832A", "#6256A8", "#F0EDE6", "#9086C0", "#E8A83C"];
+const COLORS = ["#D6870F", "#6F4FC4", "#F0EDE6", "#A58EE8", "#F2AE33"];
 
 export default function BirthdayCelebration({ userId, name, year, strings, preview = false, nextHref }) {
   const router = useRouter();

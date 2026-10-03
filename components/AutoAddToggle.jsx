@@ -26,7 +26,7 @@ export default function AutoAddToggle({ userId, initialValue }) {
         checked={value}
         onChange={toggle}
         disabled={saving}
-        className="mt-1 h-4 w-4 accent-[#6256A8]"
+        className="mt-1 h-4 w-4 accent-[#6F4FC4]"
       />
       <span>
         <span className="block text-sm">حمزاوي يضيف تلقائي مهام اليوم المقترحة</span>

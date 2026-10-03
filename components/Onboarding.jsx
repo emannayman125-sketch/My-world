@@ -193,7 +193,7 @@ export default function Onboarding({ userId, name, locale, strings: s }) {
                       checked={x.on}
                       onChange={(e) => update(g.key, i, { on: e.target.checked })}
                       aria-label={s.keep}
-                      className="h-4 w-4 accent-[#4F7A63] shrink-0"
+                      className="h-4 w-4 accent-[#2E8B63] shrink-0"
                     />
                     {g.render(x, i)}
                   </li>
