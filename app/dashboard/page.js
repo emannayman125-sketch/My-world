@@ -38,7 +38,7 @@ export default async function DashboardPage({ searchParams }) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, has_seen_welcome, birthday_month, birthday_day, last_birthday_shown_year, avatar_url")
+    .select("display_name, display_name_en, has_seen_welcome, birthday_month, birthday_day, last_birthday_shown_year, avatar_url")
     .eq("id", user.id)
     .single();
 
@@ -76,7 +76,10 @@ export default async function DashboardPage({ searchParams }) {
     getDueHiddenMessage(supabase, user, { shownToday: cookies().get("surprise_day")?.value === today }),
   ]);
 
-  const name = profile?.display_name || (locale === "ar" ? "صديقي" : "friend");
+  const name =
+    (locale === "en" && profile?.display_name_en) ||
+    profile?.display_name ||
+    (locale === "ar" ? "صديقي" : "friend");
 
   const doneCount = (top3 || []).filter((t) => t.is_done).length;
   const progressPercent = top3 && top3.length > 0 ? Math.round((doneCount / top3.length) * 100) : 0;

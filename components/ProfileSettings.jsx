@@ -7,6 +7,7 @@ import AvatarUpload from "./AvatarUpload";
 export default function ProfileSettings({ userId, initialProfile }) {
   const supabase = createClient();
   const [displayName, setDisplayName] = useState(initialProfile?.display_name || "");
+  const [displayNameEn, setDisplayNameEn] = useState(initialProfile?.display_name_en || "");
   const [username, setUsername] = useState(initialProfile?.username || "");
   const [isBioPublic, setIsBioPublic] = useState(initialProfile?.is_bio_public ?? false);
   const [status, setStatus] = useState("");
@@ -16,7 +17,12 @@ export default function ProfileSettings({ userId, initialProfile }) {
     const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
     const { error } = await supabase
       .from("profiles")
-      .update({ display_name: displayName.trim() || null, username: cleanUsername || null, is_bio_public: isBioPublic })
+      .update({
+        display_name: displayName.trim() || null,
+        display_name_en: displayNameEn.trim() || null,
+        username: cleanUsername || null,
+        is_bio_public: isBioPublic,
+      })
       .eq("id", userId);
 
     if (error) {
@@ -38,6 +44,19 @@ export default function ProfileSettings({ userId, initialProfile }) {
         <input
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
+          className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm mb-1 text-ink-muted dark:text-moon-muted">
+          الاسم بالإنجليزي (اختياري — يظهر بس لما الموقع يبقى بالإنجليزي)
+        </label>
+        <input
+          value={displayNameEn}
+          onChange={(e) => setDisplayNameEn(e.target.value)}
+          placeholder="Ahmed"
+          dir="ltr"
           className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
         />
       </div>
