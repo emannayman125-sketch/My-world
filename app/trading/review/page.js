@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabaseServer";
+import TradingInsight from "@/components/TradingInsight";
 import AppHeader from "@/components/AppHeader";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
@@ -57,6 +58,8 @@ export default async function TradingReviewPage() {
       <AppHeader />
       <main className="max-w-3xl mx-auto px-6 pb-16 space-y-6">
         <h1 className="font-display text-3xl">{tr.review}</h1>
+
+        <TradingInsight locale={locale} strings={tr.insight} />
 
         {stats.totalTrades === 0 ? (
           <p className="text-sm desk-muted">{tr.noReviewData}</p>
