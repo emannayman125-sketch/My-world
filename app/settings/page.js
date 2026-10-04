@@ -6,6 +6,7 @@ import BackupManager from "@/components/BackupManager";
 import FontSizeControl from "@/components/FontSizeControl";
 import AutoAddToggle from "@/components/AutoAddToggle";
 import DeleteAccount from "@/components/DeleteAccount";
+import NotificationOptIn from "@/components/NotificationOptIn";
 
 export default async function SettingsPage() {
   const supabase = createServerSupabase();
@@ -32,6 +33,11 @@ export default async function SettingsPage() {
           <h2 className="font-display text-xl">✨ اقتراحات حمزاوي</h2>
           <AutoAddToggle userId={user.id} initialValue={profile?.auto_add_daily_focus} />
           <a href="/suggestions" className="inline-block text-sm text-sage dark:text-sage-soft underline">شوف الاقتراحات المستنية</a>
+        </div>
+
+        <div className="card p-6 space-y-3">
+          <h2 className="font-display text-xl">🔔 التذكيرات</h2>
+          <NotificationOptIn userId={user.id} />
         </div>
 
         <div className="card p-6 space-y-2">
