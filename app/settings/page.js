@@ -5,6 +5,7 @@ import ProfileSettings from "@/components/ProfileSettings";
 import BackupManager from "@/components/BackupManager";
 import FontSizeControl from "@/components/FontSizeControl";
 import AutoAddToggle from "@/components/AutoAddToggle";
+import DeleteAccount from "@/components/DeleteAccount";
 
 export default async function SettingsPage() {
   const supabase = createServerSupabase();
@@ -42,6 +43,8 @@ export default async function SettingsPage() {
         </div>
 
         <BackupManager userId={user.id} />
+
+        <DeleteAccount />
       </main>
     </div>
   );
