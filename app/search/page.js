@@ -15,7 +15,7 @@ export default async function SearchPage({ searchParams }) {
     mbaCourses: [], mbaAssignments: [], research: [], library: [],
     businessProjects: [], businessIdeas: [], businessContacts: [],
     supplyOrders: [], supplyIssues: [], supplySuppliers: [],
-    content: [], trading: [],
+    content: [], trading: [], quran: [], tradingNotes: [],
   };
 
   if (q) {
@@ -26,7 +26,7 @@ export default async function SearchPage({ searchParams }) {
       mbaCoursesRes, mbaAssignmentsRes, researchRes, libraryRes,
       businessProjectsRes, businessIdeasRes, businessContactsRes,
       supplyOrdersRes, supplyIssuesRes, supplySuppliersRes,
-      contentRes, tradingRes,
+      contentRes, tradingRes, quranRes, tradingNotesRes,
     ] = await Promise.all([
       supabase.from("tasks").select("*").eq("user_id", user.id).ilike("title", like),
       supabase.from("events").select("*").eq("user_id", user.id).ilike("title", like),
@@ -47,6 +47,8 @@ export default async function SearchPage({ searchParams }) {
       supabase.from("supply_chain_suppliers").select("*").eq("user_id", user.id).ilike("name", like),
       supabase.from("content_items").select("*").eq("user_id", user.id).ilike("title", like),
       supabase.from("trading_journal").select("*").eq("user_id", user.id).ilike("symbol", like),
+      supabase.from("quran_portions").select("*").eq("user_id", user.id).ilike("surah", like),
+      supabase.from("trading_day_notes").select("*").eq("user_id", user.id).ilike("lesson", like),
     ]);
 
     results.tasks = tasksRes.data || [];
@@ -68,6 +70,8 @@ export default async function SearchPage({ searchParams }) {
     results.supplySuppliers = supplySuppliersRes.data || [];
     results.content = contentRes.data || [];
     results.trading = tradingRes.data || [];
+    results.quran = quranRes.data || [];
+    results.tradingNotes = tradingNotesRes.data || [];
   }
 
   const totalCount = Object.values(results).reduce((sum, list) => sum + list.length, 0);
@@ -92,6 +96,8 @@ export default async function SearchPage({ searchParams }) {
     { key: "supplySuppliers", emoji: "🚚", label: "موردين", href: "/supply-chain/suppliers", render: (s) => s.name },
     { key: "content", emoji: "🎙️", label: "أفكار محتوى", href: "/creator", render: (c) => `${c.title} (${c.status})` },
     { key: "trading", emoji: "📈", label: "دفتر الصفقات", href: "/trading/journal", render: (t) => `${t.symbol} (${t.result})` },
+    { key: "quran", emoji: "📖", label: "القرآن", href: "/learning", render: (q) => `${q.surah} — ${q.status === "reviewing" ? "مراجعة" : "حفظ"}` },
+    { key: "tradingNotes", emoji: "🪞", label: "انعكاسات التداول", href: "/trading/journal", render: (n) => `${n.note_date} — ${n.lesson}` },
   ];
 
   return (
