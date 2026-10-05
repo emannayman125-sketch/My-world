@@ -39,12 +39,20 @@ function toHref(platform, value) {
 }
 
 const KIND_SECTION = {
-  book: { title: "من على الرف", subtitle: "كتب تستاهل تتحفظ." },
-  podcast: { title: "بسمعه", subtitle: "" },
   music: { title: "بسمعه كمان", subtitle: "" },
   movie: { title: "بتفرج عليه", subtitle: "" },
   place: { title: "أماكن في بالي", subtitle: "" },
   hobby: { title: "بيوقّت فيه", subtitle: "" },
+};
+
+// The four pillar sections from the brief always get a header, with a
+// quiet placeholder line when empty — the rest (music/movies/places/
+// hobbies) only appear once there's something real to show.
+const EMPTY_NOTES = {
+  book: "الرف لسه بيتكوّن.",
+  podcast: "لسه مفيش حلقات اتسجّلت هنا.",
+  interests: "حاجات تستاهل المعرفة هتكون هنا قريب.",
+  social: "لسه ما حدّدش فين يتلاقى.",
 };
 
 async function getProfile(username) {
@@ -113,26 +121,6 @@ export default async function PublicProfilePage({ params }) {
             </h1>
             <p className={`text-sm ${SUBTLE}`}>مجموعة صغيرة من الحاجات اللي بتكوّن عالم {firstName}.</p>
 
-            {hasSocial && (
-              <div className="flex flex-wrap gap-x-5 gap-y-2 pt-1">
-                {Object.entries(profile.social_links).map(([platform, value]) => {
-                  const href = toHref(platform, value);
-                  if (!href) return null;
-                  const label = SOCIAL_LABELS[platform] ?? platform;
-                  return (
-                    <a
-                      key={platform}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                      className={`text-sm ${COPPER} hover:underline underline-offset-4`}
-                    >
-                      {label || value}
-                    </a>
-                  );
-                })}
-              </div>
-            )}
           </header>
         </FadeIn>
 
@@ -157,40 +145,84 @@ export default async function PublicProfilePage({ params }) {
           </FadeIn>
         )}
 
-        {/* Reading / Listening / etc. — editorial lists, one section per kind */}
-        {Object.entries(worldByKind).map(([kind, items], idx) => {
-          const meta = KIND_SECTION[kind] || { title: kind, subtitle: "" };
-          return (
-            <FadeIn key={kind} delay={0.1 + idx * 0.04}>
-              <section className={`border-t ${BORDER} pt-10 space-y-5`}>
-                <div>
-                  <h2 className="font-display text-2xl">{meta.title}</h2>
-                  {meta.subtitle && <p className={`text-sm ${SUBTLE} mt-1`}>{meta.subtitle}</p>}
-                </div>
-                <ul className="space-y-4">
-                  {items.map((w) => (
-                    <li key={w.id} className="flex items-baseline justify-between gap-4">
-                      <span>{w.title}</span>
-                      {w.subtitle && <span className={`text-sm ${SUBTLE} shrink-0`}>{w.subtitle}</span>}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            </FadeIn>
-          );
-        })}
+        {/* From the shelf — a pillar section, always present */}
+        <FadeIn delay={0.1}>
+          <section className={`border-t ${BORDER} pt-10 space-y-5`}>
+            <div>
+              <h2 className="font-display text-2xl">من على الرف</h2>
+              <p className={`text-sm ${SUBTLE} mt-1`}>كتب تستاهل تتحفظ.</p>
+            </div>
+            {worldByKind.book?.length > 0 ? (
+              <ul className="space-y-4">
+                {worldByKind.book.map((w) => (
+                  <li key={w.id} className="flex items-baseline justify-between gap-4">
+                    <span>{w.title}</span>
+                    {w.subtitle && <span className={`text-sm ${SUBTLE} shrink-0`}>{w.subtitle}</span>}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.book}</p>
+            )}
+          </section>
+        </FadeIn>
 
-        {/* Interests */}
-        {interests && interests.length > 0 && (
-          <FadeIn delay={0.3}>
-            <section className={`border-t ${BORDER} pt-10 space-y-5`}>
-              <h2 className="font-display text-2xl">حاجات بحبها</h2>
-              <p className="leading-8">
-                {interests.map((i) => i.value).join("  ·  ")}
-              </p>
-            </section>
-          </FadeIn>
-        )}
+        {/* Listening (podcasts) — a pillar section, always present */}
+        <FadeIn delay={0.14}>
+          <section className={`border-t ${BORDER} pt-10 space-y-5`}>
+            <h2 className="font-display text-2xl">بسمعه</h2>
+            {worldByKind.podcast?.length > 0 ? (
+              <ul className="space-y-4">
+                {worldByKind.podcast.map((w) => (
+                  <li key={w.id} className="flex items-baseline justify-between gap-4">
+                    <span>{w.title}</span>
+                    {w.subtitle && <span className={`text-sm ${SUBTLE} shrink-0`}>{w.subtitle}</span>}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.podcast}</p>
+            )}
+          </section>
+        </FadeIn>
+
+        {/* Any remaining kinds (music/movies/places/hobbies) — only when non-empty */}
+        {Object.entries(worldByKind)
+          .filter(([kind]) => kind !== "book" && kind !== "podcast")
+          .map(([kind, items], idx) => {
+            const meta = KIND_SECTION[kind] || { title: kind, subtitle: "" };
+            return (
+              <FadeIn key={kind} delay={0.18 + idx * 0.04}>
+                <section className={`border-t ${BORDER} pt-10 space-y-5`}>
+                  <div>
+                    <h2 className="font-display text-2xl">{meta.title}</h2>
+                    {meta.subtitle && <p className={`text-sm ${SUBTLE} mt-1`}>{meta.subtitle}</p>}
+                  </div>
+                  <ul className="space-y-4">
+                    {items.map((w) => (
+                      <li key={w.id} className="flex items-baseline justify-between gap-4">
+                        <span>{w.title}</span>
+                        {w.subtitle && <span className={`text-sm ${SUBTLE} shrink-0`}>{w.subtitle}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              </FadeIn>
+            );
+          })}
+
+        {/* Interests — a pillar section, always present */}
+        <FadeIn delay={0.3}>
+          <section className={`border-t ${BORDER} pt-10 space-y-5`}>
+            <h2 className="font-display text-2xl">حاجات بحبها</h2>
+            {(!interests || interests.length === 0) && (
+              <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.interests}</p>
+            )}
+            {interests && interests.length > 0 && (
+              <p className="leading-8">{interests.map((i) => i.value).join("  ·  ")}</p>
+            )}
+          </section>
+        </FadeIn>
 
         {/* About */}
         {profile.bio && (
@@ -201,7 +233,36 @@ export default async function PublicProfilePage({ params }) {
           </FadeIn>
         )}
 
-        <FadeIn delay={0.4}>
+        {/* Find me elsewhere — a pillar section, always present */}
+        <FadeIn delay={0.38}>
+          <section className={`border-t ${BORDER} pt-10 space-y-4`}>
+            <h2 className="font-display text-2xl">تلاقيني كمان في</h2>
+            {hasSocial ? (
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                {Object.entries(profile.social_links).map(([platform, value]) => {
+                  const href = toHref(platform, value);
+                  if (!href) return null;
+                  const label = SOCIAL_LABELS[platform] ?? platform;
+                  return (
+                    <a
+                      key={platform}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                      className={`text-sm ${COPPER} hover:underline underline-offset-4`}
+                    >
+                      {label || value}
+                    </a>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.social}</p>
+            )}
+          </section>
+        </FadeIn>
+
+        <FadeIn delay={0.42}>
           <p className={`text-center text-xs ${SUBTLE} pt-6`}>صُنع بحب 🤍</p>
         </FadeIn>
       </div>

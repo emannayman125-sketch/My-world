@@ -6,6 +6,7 @@ import AppHeader from "@/components/AppHeader";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
 import SocialLinksEditor from "@/components/SocialLinksEditor";
+import PublicProfileManager from "@/components/PublicProfileManager";
 
 export default async function PrivacyPage() {
   const locale = getLocale();
@@ -19,22 +20,19 @@ export default async function PrivacyPage() {
   const [{ data: profile }, { data: interests }, { data: currently }, { data: world }, { data: link }, { data: sharedTasks }, { data: sharedGoals }] =
     await Promise.all([
       supabase.from("profiles").select("username, is_bio_public, social_links").eq("id", user.id).single(),
-      supabase.from("interests").select("is_public").eq("user_id", user.id),
-      supabase.from("currently_items").select("is_public").eq("user_id", user.id),
-      supabase.from("world_items").select("is_public").eq("user_id", user.id),
+      supabase.from("interests").select("id, value, is_public").eq("user_id", user.id),
+      supabase.from("currently_items").select("id, kind, title, is_public").eq("user_id", user.id),
+      supabase.from("world_items").select("id, kind, title, subtitle, is_public").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("partner_links").select("*").or(`user_a.eq.${user.id},user_b.eq.${user.id}`).order("created_at", { ascending: false }).limit(1).maybeSingle(),
       supabase.from("tasks").select("id").eq("user_id", user.id).eq("is_shared", true),
       supabase.from("goals").select("id").eq("user_id", user.id).eq("is_shared", true),
     ]);
 
-  const countPublic = (list) => (list || []).filter((i) => i.is_public).length;
-
-  const publicRows = [
-    { label: p.bio, value: profile?.is_bio_public ? `1/1 ${p.publicOf}` : `0/1 ${p.publicOf}` },
-    { label: p.interests, value: `${countPublic(interests)}/${interests?.length || 0} ${p.publicOf}`, href: "/interests" },
-    { label: p.currently, value: `${countPublic(currently)}/${currently?.length || 0} ${p.publicOf}`, href: "/dashboard" },
-    { label: p.world, value: `${countPublic(world)}/${world?.length || 0} ${p.publicOf}`, href: "/world" },
-  ];
+  const bioRow = {
+    label: p.bio,
+    value: profile?.is_bio_public ? `1/1 ${p.publicOf}` : `0/1 ${p.publicOf}`,
+    href: "/settings",
+  };
 
   let partnerStatus = p.partnerNone;
   if (link?.status === "accepted") partnerStatus = p.partnerActive;
@@ -73,17 +71,23 @@ export default async function PrivacyPage() {
           ) : (
             <p className="text-sm text-ink-muted dark:text-moon-muted">{p.noUsername}</p>
           )}
-          <div className="divide-y divide-black/5 dark:divide-white/10">
-            {publicRows.map((r) => (
-              <div key={r.label} className="flex items-center justify-between py-2 text-sm">
-                <span>{r.label}</span>
-                <div className="flex items-center gap-3">
-                  <span className="text-ink-muted dark:text-moon-muted">{r.value}</span>
-                  {r.href && <Link href={r.href} className="text-xs text-sage dark:text-sage-soft underline">{p.manage}</Link>}
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center justify-between py-2 text-sm border-b border-black/5 dark:border-white/10">
+            <span>{bioRow.label}</span>
+            <div className="flex items-center gap-3">
+              <span className="text-ink-muted dark:text-moon-muted">{bioRow.value}</span>
+              <Link href={bioRow.href} className="text-xs text-sage dark:text-sage-soft underline">{p.manage}</Link>
+            </div>
           </div>
+
+          <PublicProfileManager
+            userId={user.id}
+            initialWorld={world || []}
+            initialCurrently={currently || []}
+            initialInterests={interests || []}
+            strings={p.publicManager}
+            worldKindLabels={strings.legacy.world.kinds}
+            currentlyKindLabels={strings.legacy.currently.kinds}
+          />
         </div>
 
         {/* Social links: exactly what he chooses to share, nothing else */}
