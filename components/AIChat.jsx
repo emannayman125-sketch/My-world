@@ -79,7 +79,8 @@ export default function AIChat({ strings, locale, userId }) {
         if (data.error === "no_api_key") {
           setError(ai.errorNoKey);
         } else if (data.error === "upstream_error:503" || data.error === "upstream_error:429") {
-          setError(ai.errorBusy);
+          const detail = data.detail ? ` (${String(data.detail).slice(0, 300)})` : "";
+          setError(ai.errorBusy + detail);
         } else {
           const detail = data.detail ? ` (${data.error}: ${String(data.detail).slice(0, 200)})` : ` (${data.error})`;
           setError(ai.errorGeneric + detail);
