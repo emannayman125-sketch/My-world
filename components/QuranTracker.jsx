@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpenCheck, Plus, Check } from "lucide-react";
+import { BookOpenCheck, Plus, Check, ChevronDown, AlertCircle } from "lucide-react";
 import { createClient } from "@/lib/supabaseClient";
 import { todayISO } from "@/lib/time";
 import { groupPortions, markMemorizedPatch, markReviewedPatch } from "@/lib/quranReview";
@@ -14,6 +14,9 @@ export default function QuranTracker({ userId, initialPortions, initialWeekly, s
   const [form, setForm] = useState({ surah: "", from_ayah: "", to_ayah: "" });
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState(null);
+  const [showRange, setShowRange] = useState(false);
+  const [addError, setAddError] = useState(false);
+  const [actionError, setActionError] = useState(false);
 
   const { memorizing, dueToday, onTrack } = groupPortions(portions);
 
@@ -21,6 +24,7 @@ export default function QuranTracker({ userId, initialPortions, initialWeekly, s
     e.preventDefault();
     if (!form.surah.trim()) return;
     setSaving(true);
+    setAddError(false);
     const { data, error } = await supabase
       .from("quran_portions")
       .insert({
@@ -35,29 +39,36 @@ export default function QuranTracker({ userId, initialPortions, initialWeekly, s
     if (!error && data) {
       setPortions((list) => [data, ...list]);
       setForm({ surah: "", from_ayah: "", to_ayah: "" });
+      setShowRange(false);
+    } else {
+      setAddError(true);
     }
   }
 
   async function markMemorized(portion) {
     setBusyId(portion.id);
+    setActionError(false);
     const patch = markMemorizedPatch();
-    await Promise.all([
+    const [{ error: e1 }, { error: e2 }] = await Promise.all([
       supabase.from("quran_portions").update(patch).eq("id", portion.id),
       supabase.from("quran_events").insert({ user_id: userId, portion_id: portion.id, kind: "memorized", event_date: todayISO() }),
     ]);
-    setPortions((list) => list.map((p) => (p.id === portion.id ? { ...p, ...patch } : p)));
     setBusyId(null);
+    if (e1 || e2) { setActionError(true); return; }
+    setPortions((list) => list.map((p) => (p.id === portion.id ? { ...p, ...patch } : p)));
   }
 
   async function markReviewed(portion) {
     setBusyId(portion.id);
+    setActionError(false);
     const patch = markReviewedPatch(portion);
-    await Promise.all([
+    const [{ error: e1 }, { error: e2 }] = await Promise.all([
       supabase.from("quran_portions").update(patch).eq("id", portion.id),
       supabase.from("quran_events").insert({ user_id: userId, portion_id: portion.id, kind: "reviewed", event_date: todayISO() }),
     ]);
-    setPortions((list) => list.map((p) => (p.id === portion.id ? { ...p, ...patch } : p)));
     setBusyId(null);
+    if (e1 || e2) { setActionError(true); return; }
+    setPortions((list) => list.map((p) => (p.id === portion.id ? { ...p, ...patch } : p)));
   }
 
   const range = (p) => (p.from_ayah && p.to_ayah ? ` (${p.from_ayah}–${p.to_ayah})` : "");
@@ -82,35 +93,63 @@ export default function QuranTracker({ userId, initialPortions, initialWeekly, s
         </div>
       </div>
 
-      <form onSubmit={addPortion} className="card p-4 flex flex-wrap items-center gap-2">
-        <input
-          value={form.surah}
-          onChange={(e) => setForm({ ...form, surah: e.target.value })}
-          placeholder={s.surahPlaceholder}
-          className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
-        />
-        <input
-          type="number" min="1"
-          value={form.from_ayah}
-          onChange={(e) => setForm({ ...form, from_ayah: e.target.value })}
-          placeholder={s.fromAyah}
-          className="w-24 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
-        />
-        <input
-          type="number" min="1"
-          value={form.to_ayah}
-          onChange={(e) => setForm({ ...form, to_ayah: e.target.value })}
-          placeholder={s.toAyah}
-          className="w-24 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
-        />
-        <button
-          type="submit"
-          disabled={saving || !form.surah.trim()}
-          className="inline-flex items-center gap-1 rounded-soft bg-lantern text-lantern-ink text-sm font-medium px-4 py-2 shadow-lantern hover:brightness-105 transition disabled:opacity-50"
-        >
-          <Plus size={14} /> {s.add}
-        </button>
+      <form onSubmit={addPortion} className="card p-4 space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            value={form.surah}
+            onChange={(e) => setForm({ ...form, surah: e.target.value })}
+            placeholder={s.surahPlaceholder}
+            className="flex-1 min-w-[160px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
+          />
+          <button
+            type="submit"
+            disabled={saving || !form.surah.trim()}
+            className="inline-flex items-center gap-1 rounded-soft bg-lantern text-lantern-ink text-sm font-medium px-4 py-2 shadow-lantern hover:brightness-105 transition disabled:opacity-50"
+          >
+            <Plus size={14} /> {saving ? s.adding : s.add}
+          </button>
+        </div>
+
+        {!showRange ? (
+          <button
+            type="button"
+            onClick={() => setShowRange(true)}
+            className="text-xs text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon flex items-center gap-1"
+          >
+            <ChevronDown size={12} /> {s.specifyRange}
+          </button>
+        ) : (
+          <div className="flex items-center gap-2">
+            <input
+              type="number" min="1"
+              value={form.from_ayah}
+              onChange={(e) => setForm({ ...form, from_ayah: e.target.value })}
+              placeholder={s.fromAyah}
+              className="w-24 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
+            />
+            <span className="text-xs text-ink-muted dark:text-moon-muted">{s.to}</span>
+            <input
+              type="number" min="1"
+              value={form.to_ayah}
+              onChange={(e) => setForm({ ...form, to_ayah: e.target.value })}
+              placeholder={s.toAyah}
+              className="w-24 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage"
+            />
+          </div>
+        )}
+
+        {addError && (
+          <p className="text-xs text-red-500 flex items-center gap-1.5">
+            <AlertCircle size={13} /> {s.addError}
+          </p>
+        )}
       </form>
+
+      {actionError && (
+        <p className="text-xs text-red-500 flex items-center gap-1.5">
+          <AlertCircle size={13} /> {s.actionError}
+        </p>
+      )}
 
       {dueToday.length > 0 && (
         <section className="space-y-2">
