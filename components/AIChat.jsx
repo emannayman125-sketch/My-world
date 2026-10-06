@@ -68,11 +68,15 @@ export default function AIChat({ strings, locale, userId }) {
 
     try {
       const endpoint = agentMode ? "/api/ai/agent" : "/api/ai/chat";
+      const timeoutController = new AbortController();
+      const timeoutId = setTimeout(() => timeoutController.abort(), 15000);
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: nextMessages, context, useKnowledge, locale, voice: viaVoice || handsFreeRef.current }),
+        signal: timeoutController.signal,
       });
+      clearTimeout(timeoutId);
       const data = await res.json();
 
       if (!res.ok) {
@@ -99,7 +103,11 @@ export default function AIChat({ strings, locale, userId }) {
         });
       }
     } catch (err) {
-      setError(ai.errorGeneric + ` (client_exception: ${String(err?.message || err).slice(0, 200)})`);
+      if (err?.name === "AbortError") {
+        setError(ai.errorTimeout);
+      } else {
+        setError(ai.errorGeneric + ` (client_exception: ${String(err?.message || err).slice(0, 200)})`);
+      }
     }
     setLoading(false);
   }
