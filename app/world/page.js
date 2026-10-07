@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { Globe } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import AppHeader from "@/components/AppHeader";
 import WorldHubTabs from "@/components/WorldHubTabs";
@@ -29,6 +31,17 @@ export default async function WorldPage() {
       <AppHeader />
       <main className="max-w-3xl mx-auto px-6 pb-16 space-y-6">
         <h1 className="font-display text-3xl">{strings.nav.world}</h1>
+
+        <Link href="/public-profile" className="card card-hover p-5 flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sage/15 text-sage dark:text-sage-soft shrink-0">
+            <Globe size={18} strokeWidth={2} />
+          </span>
+          <div className="flex-1">
+            <p className="font-medium text-sm">{strings.privacy.publicProfilePage.title}</p>
+            <p className="text-xs text-ink-muted dark:text-moon-muted">{strings.privacy.publicProfilePage.subtitle}</p>
+          </div>
+        </Link>
+
         <WorldHubTabs
           userId={user.id}
           strings={strings}

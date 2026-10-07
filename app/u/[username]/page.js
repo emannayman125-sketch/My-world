@@ -59,7 +59,7 @@ async function getProfile(username) {
   const supabase = createServerSupabase();
   const { data } = await supabase
     .from("public_profiles")
-    .select("id, display_name, bio, avatar_url, social_links")
+    .select("id, display_name, bio, avatar_url, social_links, public_section_order")
     .eq("username", username)
     .maybeSingle();
   return data;
@@ -98,10 +98,127 @@ export default async function PublicProfilePage({ params }) {
   const hasSocial = profile.social_links && Object.values(profile.social_links).some(Boolean);
   const firstName = (profile.display_name || "").trim().split(/\s+/)[0] || "صديقي";
 
+  const DEFAULT_ORDER = ["currently", "books", "podcasts", "interests", "about", "social"];
+  // Defensive: drop unknown keys from a stale order, then append any
+  // default section missing from it (e.g. a new section added later).
+  const configured = (profile.public_section_order || []).filter((k) => DEFAULT_ORDER.includes(k));
+  const order = [...configured, ...DEFAULT_ORDER.filter((k) => !configured.includes(k))];
+
+  const otherKinds = Object.entries(worldByKind).filter(([kind]) => kind !== "book" && kind !== "podcast");
+
+  // Each pillar section as a render function, so they can be reordered —
+  // the hero and the "other kinds" block stay fixed, everything else here
+  // follows the order Ahmed set in /privacy.
+  const sections = {
+    currently:
+      currently && currently.length > 0 ? (
+        <section className={`border-t ${BORDER} pt-10 space-y-5`}>
+          <p className={`text-xs tracking-[0.2em] uppercase ${SUBTLE}`}>حاليًا</p>
+          <div className="space-y-4">
+            {currently.map((c) => (
+              <div key={c.id}>
+                <p className={`text-xs ${TEAL}`}>
+                  {c.kind === "listening" && "بيسمع"}
+                  {c.kind === "watching" && "بيتفرج على"}
+                  {c.kind === "reading" && "بيقرأ"}
+                </p>
+                <p className="font-display text-xl">{c.title}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null,
+
+    books: (
+      <section className={`border-t ${BORDER} pt-10 space-y-5`}>
+        <div>
+          <h2 className="font-display text-2xl">من على الرف</h2>
+          <p className={`text-sm ${SUBTLE} mt-1`}>كتب تستاهل تتحفظ.</p>
+        </div>
+        {worldByKind.book?.length > 0 ? (
+          <ul className="space-y-4">
+            {worldByKind.book.map((w) => (
+              <li key={w.id} className="flex items-baseline justify-between gap-4">
+                <span>{w.title}</span>
+                {w.subtitle && <span className={`text-sm ${SUBTLE} shrink-0`}>{w.subtitle}</span>}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.book}</p>
+        )}
+      </section>
+    ),
+
+    podcasts: (
+      <section className={`border-t ${BORDER} pt-10 space-y-5`}>
+        <h2 className="font-display text-2xl">بسمعه</h2>
+        {worldByKind.podcast?.length > 0 ? (
+          <ul className="space-y-4">
+            {worldByKind.podcast.map((w) => (
+              <li key={w.id} className="flex items-baseline justify-between gap-4">
+                <span>{w.title}</span>
+                {w.subtitle && <span className={`text-sm ${SUBTLE} shrink-0`}>{w.subtitle}</span>}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.podcast}</p>
+        )}
+      </section>
+    ),
+
+    interests: (
+      <section className={`border-t ${BORDER} pt-10 space-y-5`}>
+        <h2 className="font-display text-2xl">حاجات بحبها</h2>
+        {(!interests || interests.length === 0) && (
+          <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.interests}</p>
+        )}
+        {interests && interests.length > 0 && (
+          <p className="leading-8">{interests.map((i) => i.value).join("  ·  ")}</p>
+        )}
+      </section>
+    ),
+
+    about: profile.bio ? (
+      <section className={`border-t ${BORDER} pt-10`}>
+        <p className="font-letter text-xl leading-9 whitespace-pre-wrap">{profile.bio}</p>
+      </section>
+    ) : null,
+
+    social: (
+      <section className={`border-t ${BORDER} pt-10 space-y-4`}>
+        <h2 className="font-display text-2xl">تلاقيني كمان في</h2>
+        {hasSocial ? (
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            {Object.entries(profile.social_links).map(([platform, value]) => {
+              const href = toHref(platform, value);
+              if (!href) return null;
+              const label = SOCIAL_LABELS[platform] ?? platform;
+              return (
+                <a
+                  key={platform}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className={`text-sm ${COPPER} hover:underline underline-offset-4`}
+                >
+                  {label || value}
+                </a>
+              );
+            })}
+          </div>
+        ) : (
+          <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.social}</p>
+        )}
+      </section>
+    ),
+  };
+
   return (
     <main className={`min-h-screen bg-[#F4F0E7] ${INK}`} style={{ fontFamily: "var(--font-body), sans-serif" }}>
       <div className="max-w-xl mx-auto px-6 py-16 sm:py-24 space-y-20">
-        {/* Hero */}
+        {/* Hero — always first, not part of the configurable order */}
         <FadeIn>
           <header className="space-y-6">
             {profile.avatar_url && (
@@ -120,149 +237,42 @@ export default async function PublicProfilePage({ params }) {
               <span className={TEAL}>واللي بيتكوّن منه.</span>
             </h1>
             <p className={`text-sm ${SUBTLE}`}>مجموعة صغيرة من الحاجات اللي بتكوّن عالم {firstName}.</p>
-
           </header>
         </FadeIn>
 
-        {/* Currently — the featured, close-to-hero section */}
-        {currently && currently.length > 0 && (
-          <FadeIn delay={0.05}>
-            <section className={`border-t ${BORDER} pt-10 space-y-5`}>
-              <p className={`text-xs tracking-[0.2em] uppercase ${SUBTLE}`}>حاليًا</p>
-              <div className="space-y-4">
-                {currently.map((c) => (
-                  <div key={c.id}>
-                    <p className={`text-xs ${TEAL}`}>
-                      {c.kind === "listening" && "بيسمع"}
-                      {c.kind === "watching" && "بيتفرج على"}
-                      {c.kind === "reading" && "بيقرأ"}
-                    </p>
-                    <p className="font-display text-xl">{c.title}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </FadeIn>
+        {order.map((key, i) =>
+          sections[key] ? (
+            <FadeIn key={key} delay={0.05 + i * 0.04}>
+              {sections[key]}
+            </FadeIn>
+          ) : null
         )}
 
-        {/* From the shelf — a pillar section, always present */}
-        <FadeIn delay={0.1}>
-          <section className={`border-t ${BORDER} pt-10 space-y-5`}>
-            <div>
-              <h2 className="font-display text-2xl">من على الرف</h2>
-              <p className={`text-sm ${SUBTLE} mt-1`}>كتب تستاهل تتحفظ.</p>
-            </div>
-            {worldByKind.book?.length > 0 ? (
-              <ul className="space-y-4">
-                {worldByKind.book.map((w) => (
-                  <li key={w.id} className="flex items-baseline justify-between gap-4">
-                    <span>{w.title}</span>
-                    {w.subtitle && <span className={`text-sm ${SUBTLE} shrink-0`}>{w.subtitle}</span>}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.book}</p>
-            )}
-          </section>
-        </FadeIn>
+        {/* Any remaining world_items kinds (music/movies/places/hobbies) — fixed
+            position, not part of the configurable order, only shown when non-empty */}
+        {otherKinds.map(([kind, items], idx) => {
+          const meta = KIND_SECTION[kind] || { title: kind, subtitle: "" };
+          return (
+            <FadeIn key={kind} delay={0.3 + idx * 0.04}>
+              <section className={`border-t ${BORDER} pt-10 space-y-5`}>
+                <div>
+                  <h2 className="font-display text-2xl">{meta.title}</h2>
+                  {meta.subtitle && <p className={`text-sm ${SUBTLE} mt-1`}>{meta.subtitle}</p>}
+                </div>
+                <ul className="space-y-4">
+                  {items.map((w) => (
+                    <li key={w.id} className="flex items-baseline justify-between gap-4">
+                      <span>{w.title}</span>
+                      {w.subtitle && <span className={`text-sm ${SUBTLE} shrink-0`}>{w.subtitle}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </FadeIn>
+          );
+        })}
 
-        {/* Listening (podcasts) — a pillar section, always present */}
-        <FadeIn delay={0.14}>
-          <section className={`border-t ${BORDER} pt-10 space-y-5`}>
-            <h2 className="font-display text-2xl">بسمعه</h2>
-            {worldByKind.podcast?.length > 0 ? (
-              <ul className="space-y-4">
-                {worldByKind.podcast.map((w) => (
-                  <li key={w.id} className="flex items-baseline justify-between gap-4">
-                    <span>{w.title}</span>
-                    {w.subtitle && <span className={`text-sm ${SUBTLE} shrink-0`}>{w.subtitle}</span>}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.podcast}</p>
-            )}
-          </section>
-        </FadeIn>
-
-        {/* Any remaining kinds (music/movies/places/hobbies) — only when non-empty */}
-        {Object.entries(worldByKind)
-          .filter(([kind]) => kind !== "book" && kind !== "podcast")
-          .map(([kind, items], idx) => {
-            const meta = KIND_SECTION[kind] || { title: kind, subtitle: "" };
-            return (
-              <FadeIn key={kind} delay={0.18 + idx * 0.04}>
-                <section className={`border-t ${BORDER} pt-10 space-y-5`}>
-                  <div>
-                    <h2 className="font-display text-2xl">{meta.title}</h2>
-                    {meta.subtitle && <p className={`text-sm ${SUBTLE} mt-1`}>{meta.subtitle}</p>}
-                  </div>
-                  <ul className="space-y-4">
-                    {items.map((w) => (
-                      <li key={w.id} className="flex items-baseline justify-between gap-4">
-                        <span>{w.title}</span>
-                        {w.subtitle && <span className={`text-sm ${SUBTLE} shrink-0`}>{w.subtitle}</span>}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              </FadeIn>
-            );
-          })}
-
-        {/* Interests — a pillar section, always present */}
-        <FadeIn delay={0.3}>
-          <section className={`border-t ${BORDER} pt-10 space-y-5`}>
-            <h2 className="font-display text-2xl">حاجات بحبها</h2>
-            {(!interests || interests.length === 0) && (
-              <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.interests}</p>
-            )}
-            {interests && interests.length > 0 && (
-              <p className="leading-8">{interests.map((i) => i.value).join("  ·  ")}</p>
-            )}
-          </section>
-        </FadeIn>
-
-        {/* About */}
-        {profile.bio && (
-          <FadeIn delay={0.35}>
-            <section className={`border-t ${BORDER} pt-10`}>
-              <p className="font-letter text-xl leading-9 whitespace-pre-wrap">{profile.bio}</p>
-            </section>
-          </FadeIn>
-        )}
-
-        {/* Find me elsewhere — a pillar section, always present */}
-        <FadeIn delay={0.38}>
-          <section className={`border-t ${BORDER} pt-10 space-y-4`}>
-            <h2 className="font-display text-2xl">تلاقيني كمان في</h2>
-            {hasSocial ? (
-              <div className="flex flex-wrap gap-x-5 gap-y-2">
-                {Object.entries(profile.social_links).map(([platform, value]) => {
-                  const href = toHref(platform, value);
-                  if (!href) return null;
-                  const label = SOCIAL_LABELS[platform] ?? platform;
-                  return (
-                    <a
-                      key={platform}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                      className={`text-sm ${COPPER} hover:underline underline-offset-4`}
-                    >
-                      {label || value}
-                    </a>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.social}</p>
-            )}
-          </section>
-        </FadeIn>
-
-        <FadeIn delay={0.42}>
+        <FadeIn delay={0.5}>
           <p className={`text-center text-xs ${SUBTLE} pt-6`}>صُنع بحب 🤍</p>
         </FadeIn>
       </div>

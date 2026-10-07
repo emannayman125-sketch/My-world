@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Sparkles, Check, X } from "lucide-react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
 import PrivacyToggle from "./PrivacyToggle";
@@ -23,6 +24,9 @@ export default function WorldManager({ userId, initialItems, strings }) {
   const [items, setItems] = useState(initialItems || []);
   const [activeKind, setActiveKind] = useState(KIND_KEYS[0]);
   const [form, setForm] = useState({ title: "", subtitle: "", status: KIND_META[KIND_KEYS[0]].statusKeys[0], link_url: "", is_public: false });
+  // Hamzawi's one-time nudge: appears right when an item reaches its final
+  // status (finished/visited), offering — never forcing — to make it public.
+  const [suggestFor, setSuggestFor] = useState(null); // item id currently showing the nudge
 
   const currentMeta = KIND_META[activeKind];
 
@@ -54,6 +58,24 @@ export default function WorldManager({ userId, initialItems, strings }) {
     const next = !item.is_public;
     await supabase.from("world_items").update({ is_public: next }).eq("id", item.id);
     setItems((list) => list.map((i) => (i.id === item.id ? { ...i, is_public: next } : i)));
+  }
+
+  async function cycleStatus(item) {
+    const keys = KIND_META[item.kind].statusKeys;
+    const i = keys.indexOf(item.status);
+    const nextStatus = keys[(i + 1) % keys.length];
+    await supabase.from("world_items").update({ status: nextStatus }).eq("id", item.id);
+    setItems((list) => list.map((x) => (x.id === item.id ? { ...x, status: nextStatus } : x)));
+
+    // Reaching the LAST status (finished/visited) and not public yet: offer once.
+    const reachedCompletion = keys.length > 1 && nextStatus === keys[keys.length - 1];
+    if (reachedCompletion && !item.is_public) setSuggestFor(item.id);
+    else if (suggestFor === item.id) setSuggestFor(null);
+  }
+
+  function acceptSuggestion(item) {
+    togglePublic(item);
+    setSuggestFor(null);
   }
 
   async function removeItem(id) {
@@ -153,7 +175,13 @@ export default function WorldManager({ userId, initialItems, strings }) {
                       <span className="text-ink-muted dark:text-moon-muted"> — {item.subtitle}</span>
                     )}
                     {statusLabel && (
-                      <span className="text-xs text-dusk"> · {statusLabel}</span>
+                      <button
+                        onClick={() => cycleStatus(item)}
+                        title={tr.cycleStatusHint}
+                        className="text-xs text-dusk hover:underline underline-offset-2"
+                      >
+                        · {statusLabel}
+                      </button>
                     )}
                     <PrivacyToggle isPublic={item.is_public} onToggle={() => togglePublic(item)} />
                   </div>
@@ -165,6 +193,25 @@ export default function WorldManager({ userId, initialItems, strings }) {
                   </button>
                 </div>
                 <LinkField url={item.link_url} />
+                {suggestFor === item.id && (
+                  <div className="mt-2 flex items-center gap-2 rounded-soft bg-dusk/[0.07] dark:bg-dusk/[0.14] px-3 py-2">
+                    <Sparkles size={13} className="text-dusk dark:text-dusk-soft shrink-0" />
+                    <span className="text-xs flex-1">{tr.suggestPublic.replace("{title}", item.title)}</span>
+                    <button
+                      onClick={() => acceptSuggestion(item)}
+                      className="inline-flex items-center gap-1 rounded-full bg-dusk/15 text-dusk dark:text-dusk-soft text-xs px-2.5 py-1 hover:bg-dusk/25 transition shrink-0"
+                    >
+                      <Check size={12} /> {tr.suggestAccept}
+                    </button>
+                    <button
+                      onClick={() => setSuggestFor(null)}
+                      aria-label={tr.suggestDismiss}
+                      className="p-1 rounded-full text-ink-muted dark:text-moon-muted hover:bg-black/5 dark:hover:bg-white/10 transition shrink-0"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )}
               </li>
             );
           })}
