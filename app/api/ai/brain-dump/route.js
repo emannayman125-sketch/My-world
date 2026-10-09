@@ -3,6 +3,10 @@ import { createServerSupabase } from "@/lib/supabaseServer";
 import { callGemini } from "@/lib/ai/gemini";
 import { todayISO } from "@/lib/time";
 
+// Raises the serverless function's time ceiling as far as the hosting plan allows (Hobby still hard-caps at 10s; this is a no-op there, but matters if/when the plan changes).
+export const maxDuration = 30;
+
+
 // This route ONLY extracts structure from free text -- it never writes
 // to the database itself. The client shows the extracted items for
 // Ahmed to confirm/edit, then saves them with the normal client-side

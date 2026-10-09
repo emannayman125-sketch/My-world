@@ -3,6 +3,10 @@ import { createServerSupabase } from "@/lib/supabaseServer";
 import { callGemini } from "@/lib/ai/gemini";
 import { todayISO } from "@/lib/time";
 
+// Raises the serverless function's time ceiling as far as the hosting plan allows (Hobby still hard-caps at 10s; this is a no-op there, but matters if/when the plan changes).
+export const maxDuration = 30;
+
+
 // Onboarding: turns Ahmed's five free-form answers into a PROPOSED set of
 // tasks, habits, goals and "currently" items. Like Brain Dump, this route never
 // writes anything. The client shows the proposal and only what he keeps gets saved.

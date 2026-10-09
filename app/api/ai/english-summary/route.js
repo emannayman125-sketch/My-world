@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import { callGemini } from "@/lib/ai/gemini";
 
+// Raises the serverless function's time ceiling as far as the hosting plan allows (Hobby still hard-caps at 10s; this is a no-op there, but matters if/when the plan changes).
+export const maxDuration = 30;
+
+
 // Summarizes an English-practice conversation into structured progress
 // data. Like Brain Dump, this ONLY extracts -- it never saves anything
 // itself. The client shows the summary for Ahmed to confirm/edit first.

@@ -80,6 +80,14 @@ export default function AIChat({ strings, locale, userId }) {
       const data = await res.json();
 
       if (!res.ok) {
+        // The agent may have already DONE things (added a task, logged a habit)
+        // before the call failed or ran out of time. Never leave those silent:
+        // show them, so Ahmed doesn't think nothing happened and retry into a
+        // duplicate.
+        if (data.actions?.length > 0) {
+          setMessages((list) => [...list, { role: "assistant", content: ai.partialDone, actions: data.actions }]);
+          router.refresh();
+        }
         if (data.error === "no_api_key") {
           setError(ai.errorNoKey);
         } else if (data.error === "upstream_error:503" || data.error === "upstream_error:429") {

@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import { callGemini } from "@/lib/ai/gemini";
 
+// Raises the serverless function's time ceiling as far as the hosting plan allows (Hobby still hard-caps at 10s; this is a no-op there, but matters if/when the plan changes).
+export const maxDuration = 30;
+
+
 // Hamzawi reads back his OWN logged data and reflects patterns to him —
 // never advice, never predictions, never "buy/sell". Pure reflection:
 // "Understand the trader", not "run the trades". On-demand only.

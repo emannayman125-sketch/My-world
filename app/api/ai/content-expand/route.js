@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import { callGemini } from "@/lib/ai/gemini";
 
+// Raises the serverless function's time ceiling as far as the hosting plan allows (Hobby still hard-caps at 10s; this is a no-op there, but matters if/when the plan changes).
+export const maxDuration = 30;
+
+
 // Turns a bare content idea into a working draft: a sharper hook, a few
 // title options, an outline, and a starter script. Propose-only — like
 // Brain Dump and onboarding, nothing is written to content_items until

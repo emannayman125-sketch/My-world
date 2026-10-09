@@ -4,6 +4,10 @@ import { callGemini } from "@/lib/ai/gemini";
 import { todayISO, addDaysISO } from "@/lib/time";
 import { reconcileDailyFocusSuggestions } from "@/lib/suggestionsInbox";
 
+// Raises the serverless function's time ceiling as far as the hosting plan allows (Hobby still hard-caps at 10s; this is a no-op there, but matters if/when the plan changes).
+export const maxDuration = 30;
+
+
 export const dynamic = "force-dynamic";
 
 // Daily Brief: Hamzawi's short "here's your day" card for the Home page.

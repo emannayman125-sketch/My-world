@@ -3,6 +3,10 @@ import { createServerSupabase } from "@/lib/supabaseServer";
 import { callGeminiWithTools } from "@/lib/ai/gemini";
 import { AGENT_TOOLS, makeAgentExecutor } from "@/lib/ai/agentTools";
 
+// Raises the serverless function's time ceiling as far as the hosting plan allows (Hobby still hard-caps at 10s; this is a no-op there, but matters if/when the plan changes).
+export const maxDuration = 30;
+
+
 // Hamzawi as an agent: he doesn't just talk about the app, he acts in it.
 // One message can trigger several real actions (add a task, log a habit,
 // log a trade...) in a single turn. Everything the model can do is listed
