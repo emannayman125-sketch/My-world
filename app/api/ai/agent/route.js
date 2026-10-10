@@ -48,7 +48,12 @@ Hard rules:
   });
 
   if (result.error) {
-    return NextResponse.json({ error: result.error, actions: result.actions || [] }, { status: 502 });
+    // Every other AI route (chat, brain-dump, english-summary) forwards `detail`
+    // to the client -- this one was silently dropping it, so the chat UI could
+    // only ever show the generic "busy" message with no way to tell a real
+    // transient Google outage apart from something else (e.g. the API key
+    // hitting a hard quota, which also returns 429/503 but never clears up).
+    return NextResponse.json({ error: result.error, detail: result.detail, actions: result.actions || [] }, { status: 502 });
   }
   return NextResponse.json({ reply: result.text, actions: result.actions });
 }
