@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
-import { Instagram, Youtube, Music2, Twitter, Link as LinkIcon } from "lucide-react";
+import { Instagram, Youtube, Music2, Twitter, Facebook, Linkedin, Link as LinkIcon } from "lucide-react";
 
 // The ONLY account links Ahmed chooses to put on his public page. Nothing
 // here is inferred; every field starts empty and is entered by him.
 const PLATFORMS = [
   { key: "instagram", Icon: Instagram, prefix: "instagram.com/" },
+  { key: "facebook", Icon: Facebook, prefix: "facebook.com/" },
+  { key: "linkedin", Icon: Linkedin, prefix: "linkedin.com/in/" },
   { key: "youtube", Icon: Youtube, prefix: "youtube.com/@" },
   { key: "tiktok", Icon: Music2, prefix: "tiktok.com/@" },
   { key: "x", Icon: Twitter, prefix: "x.com/" },
@@ -17,7 +19,7 @@ const PLATFORMS = [
 export default function SocialLinksEditor({ userId, initialLinks, strings: s }) {
   const supabase = createClient();
   const [links, setLinks] = useState(() => {
-    const base = { instagram: "", youtube: "", tiktok: "", x: "", website: "" };
+    const base = { instagram: "", facebook: "", linkedin: "", youtube: "", tiktok: "", x: "", website: "" };
     return { ...base, ...(initialLinks || {}) };
   });
   const [status, setStatus] = useState("");
