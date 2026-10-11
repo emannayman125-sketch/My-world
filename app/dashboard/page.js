@@ -169,7 +169,7 @@ export default async function DashboardPage({ searchParams }) {
   return (
     <div className="min-h-screen bg-paper dark:bg-night lg:ps-64">
       <AppHeader />
-      <ReminderNotifier todayEvents={todayEvents || []} strings={strings} />
+      <ReminderNotifier todayEvents={todayEvents || []} contentDueToday={contentDueToday || []} strings={strings} />
       {isBirthdayToday && <BirthdayCelebration userId={user.id} name={name} year={currentYear} strings={strings} preview={previewBirthday} nextHref={needsSetup || previewBirthday ? "/onboarding" : undefined} />}
 
       <main className="max-w-2xl mx-auto px-6 pt-4 lg:pt-10 pb-20 space-y-8">
