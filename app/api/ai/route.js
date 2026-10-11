@@ -1,61 +1,63 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabaseServer";
-import { callGeminiWithTools } from "@/lib/ai/gemini";
-import { AGENT_TOOLS, makeAgentExecutor } from "@/lib/ai/agentTools";
+import { callGemini } from "@/lib/ai/gemini";
 
-// Raises the serverless function's time ceiling as far as the hosting plan
-// allows (a plan import can need many tool calls -- more than a normal chat
-// turn -- so it benefits the most from this of any AI route).
-export const maxDuration = 30;
-
-// "Give Hamzawi your plan and let him sort it out": he reads a plan however
-// it comes in -- typed out, a photo of a handwritten/printed schedule, or
-// pasted text copied from a Word/Excel file -- and turns it into real tasks,
-// goals, and habits using the exact same tools (and the same safety limits:
-// no deletes, nothing outside the app) as the regular Hamzawi chat.
-//
-// Scope note: a real .docx/.xlsx file isn't parsed server-side here -- doing
-// that reliably needs new parsing dependencies this sandbox can't verify
-// build cleanly on Vercel before this ships, so for now the client extracts
-// text from an Office file before sending it (or the person pastes it
-// directly), while an image is sent to Gemini's vision input as-is.
+// Grounded content ideas: instead of asking Hamzawi to invent generic
+// "5 tips" posts, this pulls a few real, recent facts from hubs he's
+// actually active in (MBA, trading, business) and asks for ideas that
+// reference something real he did -- so a suggestion is at minimum
+// plausible, not fabricated from nothing. Existing content titles are
+// passed along so it doesn't propose something already in the pipeline.
 export async function POST(request) {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));
-  const text = typeof body.text === "string" ? body.text.trim() : "";
-  const image = body.image && body.image.mimeType && body.image.data ? body.image : null;
   const locale = body.locale === "en" ? "en" : "ar";
 
-  if (!text && !image) return NextResponse.json({ error: "missing_plan" }, { status: 400 });
+  const [{ data: courses }, { data: assignments }, { data: trades }, { data: bizIdeas }, { data: existing }] = await Promise.all([
+    supabase.from("mba_courses").select("name, progress").eq("user_id", user.id).order("progress", { ascending: false }).limit(3),
+    supabase.from("mba_assignments").select("title, status").eq("user_id", user.id).eq("status", "submitted").order("created_at", { ascending: false }).limit(3),
+    supabase.from("trading_journal").select("symbol, result").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
+    supabase.from("business_ideas").select("title, stage").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
+    supabase.from("content_items").select("title").eq("user_id", user.id).limit(20),
+  ]);
 
-  const system = `You are Hamzawi. He just handed you his personal plan/routine (as text, or as a photo of something he wrote or printed) and wants it turned into real items in his app -- not just discussed.
+  const facts = [];
+  if (courses?.length) facts.push(`MBA courses in progress: ${courses.map((c) => `${c.name} (${c.progress}%)`).join(", ")}`);
+  if (assignments?.length) facts.push(`Recently submitted assignments: ${assignments.map((a) => a.title).join(", ")}`);
+  if (trades?.length) {
+    const wins = trades.filter((t) => t.result === "win").length;
+    facts.push(`Recent trades (last ${trades.length}): ${wins} wins, symbols include ${[...new Set(trades.map((t) => t.symbol))].slice(0, 5).join(", ")}`);
+  }
+  if (bizIdeas?.length) facts.push(`Business ideas he's exploring: ${bizIdeas.map((b) => `${b.title} (${b.stage})`).join(", ")}`);
 
-Read everything carefully -- it may mix a weekly schedule, habits he wants to keep, and longer-term goals in no particular order or structure, possibly handwritten and partly unclear.
+  if (facts.length === 0) {
+    // Nothing real to ground ideas in yet -- say so honestly instead of
+    // inventing a life for him. The UI shows this as "no new ideas yet".
+    return NextResponse.json({ suggestions: [] });
+  }
 
-Call tools for EVERY distinct item you can identify:
-- A one-off or recurring to-do → add_task
-- A habit he wants to track daily (exercise, reading, prayer times, etc.) → add_habit
-- A weekly or monthly goal/target → add_goal (pick the closer-fitting period)
+  const existingTitles = (existing || []).map((e) => e.title).join(" | ") || "none yet";
 
-Call the tool once per distinct item -- a plan can reasonably have 10-20 items, don't stop early and don't merge different items into one call. Skip anything you genuinely can't read or that isn't actionable (e.g. a vague mood note) rather than guessing at it. If a date is implied, include it; if not, omit it rather than inventing one.
+  const system = `You help come up with LinkedIn/Facebook post ideas for someone's real, current activity. You are given a short list of real facts about what he's actually doing right now (his MBA courses, trading, business ideas) -- use ONLY these facts, never invent achievements, numbers, or experiences not given to you. A trading result is personal/sensitive: if you reference it, keep it general (e.g. "lessons from this week's trades") rather than stating specific P&L or win counts in the post idea itself.
 
-Language: reply in ${locale === "ar" ? "natural, warm Egyptian Arabic" : "plain, warm English"}.
+Return JSON only: {"suggestions": [{"title": string, "hook": string, "platform": "linkedin"|"facebook"}, ...]} with 3 to 5 ideas. "title" is a short internal working title (not the post itself). "hook" is one compelling opening line/angle for the actual post, in ${locale === "ar" ? "Arabic" : "English"}. Don't repeat any idea whose title is close to one of these already in his pipeline: ${existingTitles}.`;
 
-After acting, give a short summary (3-5 sentences) grouped by what you added: "X tasks, Y habits, Z goals", naming a few examples by title. If you skipped anything, say so briefly and why.`;
-
-  const messages = [{ role: "user", content: text || "Here's a photo of my plan." }];
-  const executor = makeAgentExecutor(supabase, user.id);
-  const result = await callGeminiWithTools(system, messages, AGENT_TOOLS, executor, {
-    maxSteps: 20,
-    maxTokens: 2048,
-    images: image ? [image] : undefined,
-  });
+  const result = await callGemini(system, [{ role: "user", content: facts.join("\n") }], { jsonMode: true, maxTokens: 1024 });
 
   if (result.error) {
-    return NextResponse.json({ error: result.error, detail: result.detail, actions: result.actions || [] }, { status: 502 });
+    return NextResponse.json({ error: result.error, detail: result.detail }, { status: 502 });
   }
-  return NextResponse.json({ reply: result.text, actions: result.actions });
+
+  let suggestions = [];
+  try {
+    const parsed = JSON.parse(result.text);
+    suggestions = Array.isArray(parsed.suggestions) ? parsed.suggestions : [];
+  } catch {
+    return NextResponse.json({ error: "bad_json" }, { status: 502 });
+  }
+
+  return NextResponse.json({ suggestions });
 }
