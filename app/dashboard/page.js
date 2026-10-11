@@ -20,6 +20,7 @@ import GettingStarted from "@/components/GettingStarted";
 import DailyBrief from "@/components/DailyBrief";
 import Collapsible from "@/components/Collapsible";
 import StreakCard from "@/components/StreakCard";
+import ContentDueToday from "@/components/ContentDueToday";
 import { getActivityDates } from "@/lib/activityDates";
 import { computeActivityStreak } from "@/lib/streaks";
 import OnboardingPrompt from "@/components/OnboardingPrompt";
@@ -75,6 +76,18 @@ export default async function DashboardPage({ searchParams }) {
     supabase.from("goals").select("id").eq("user_id", user.id).limit(1),
     getDueHiddenMessage(supabase, user, { shownToday: cookies().get("surprise_day")?.value === today }),
   ]);
+
+  // Content scheduled to publish today with "remind me" on (Creator Studio) —
+  // a small heads-up card, not a push notification: reliable regardless of
+  // browser notification permissions, same spirit as ReminderNotifier below.
+  const { data: contentDueToday } = await supabase
+    .from("content_items")
+    .select("id, title, platform, publish_time")
+    .eq("user_id", user.id)
+    .eq("publish_date", today)
+    .eq("auto_publish", true)
+    .neq("status", "published")
+    .order("publish_time", { ascending: true, nullsFirst: false });
 
   const name =
     (locale === "en" && profile?.display_name_en) ||
@@ -273,6 +286,12 @@ export default async function DashboardPage({ searchParams }) {
         <FadeIn delay={0.09}>
           <TopThree userId={user.id} initialTasks={top3List} strings={strings} />
         </FadeIn>
+
+        {contentDueToday && contentDueToday.length > 0 && (
+          <FadeIn delay={0.1}>
+            <ContentDueToday items={contentDueToday} strings={strings} />
+          </FadeIn>
+        )}
 
         {/* 6 — everything else, folded into one row instead of six stacked cards */}
         <FadeIn delay={0.05}>
