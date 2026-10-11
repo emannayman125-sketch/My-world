@@ -3,27 +3,23 @@ import { createServerSupabase } from "@/lib/supabaseServer";
 import FadeIn from "@/components/FadeIn";
 
 // ============================================================
-// The public profile — a curated personal page, deliberately NOT
-// styled like the private dashboard. Same data, same RLS-protected
-// queries as before (every table filtered .eq("is_public", true)) —
-// this file changes presentation only, not what is fetched or shown.
-// Palette is scoped to this one route via arbitrary Tailwind values,
-// so it never touches the app's own design tokens.
+// The public profile — dark, warm-glow, "premium dashboard" look
+// (per the reference she sent: dark charcoal/teal background, one
+// amber glow accent, rounded card modules, sticky pill nav) instead
+// of the earlier light editorial-paper direction. Reuses the app's
+// own "Lantern Night" dark palette (night/lantern tokens already
+// defined in tailwind.config.js) rather than inventing a new one —
+// same accent color the rest of the app already uses for its one
+// highlight color, so this page still feels like it belongs to the
+// same product instead of a bolt-on theme.
 //
-// Typography note: an earlier version forced the hero into exactly
-// three lines with hard <br/> breaks at a tight leading-[1.15]. On a
-// narrow phone screen the third line still wrapped on top of that
-// tight spacing, which is what reads as "lines running into each
-// other". Fixed by letting the heading wrap naturally (no forced
-// breaks) with a generous leading and a capped width, which is the
-// correct way to handle Arabic headings of unpredictable length.
+// Same data, same RLS-protected queries as before (every table
+// filtered .eq("is_public", true)) — this file changes presentation
+// only, not what is fetched or shown.
 // ============================================================
 
-const INK = "text-[#18201D]";
-const SUBTLE = "text-[#68736E]";
-const BORDER = "border-[#D8CCBC]";
-const TEAL = "text-[#3F706A]";
-const COPPER = "text-[#A9694D]";
+const BORDER = "border-white/[0.06]";
+const MUTED = "text-moon-muted";
 
 const SOCIAL_LABELS = {
   instagram: "Instagram",
@@ -51,15 +47,12 @@ function toHref(platform, value) {
 }
 
 const KIND_SECTION = {
-  music: { title: "بسمعه كمان", subtitle: "" },
-  movie: { title: "بتفرج عليه", subtitle: "" },
-  place: { title: "أماكن في بالي", subtitle: "" },
-  hobby: { title: "بيوقّت فيه", subtitle: "" },
+  music: { title: "بسمعه كمان" },
+  movie: { title: "بتفرج عليه" },
+  place: { title: "أماكن في بالي" },
+  hobby: { title: "بيوقّت فيه" },
 };
 
-// The four pillar sections from the brief always get a header, with a
-// quiet placeholder line when empty — the rest (music/movies/places/
-// hobbies) only appear once there's something real to show.
 const EMPTY_NOTES = {
   book: "الرف لسه بيتكوّن.",
   podcast: "لسه مفيش حلقات اتسجّلت هنا.",
@@ -67,8 +60,6 @@ const EMPTY_NOTES = {
   social: "لسه ما حدّدش فين يتلاقى.",
 };
 
-// Minimal anchor nav, per-section — only sections that actually have
-// something to show get a link, so it never points at an empty area.
 const NAV_LABELS = {
   currently: "حاليًا",
   books: "القراءة",
@@ -77,6 +68,23 @@ const NAV_LABELS = {
   about: "نبذة",
   social: "روابط",
 };
+
+// One card shell used everywhere (books, podcasts, interests, about,
+// social, currently) so the whole page reads as one consistent system
+// of modules -- exactly the "card grid" language of the reference.
+function Card({ id, title, subtitle, children, className = "" }) {
+  return (
+    <section id={id} className={`scroll-mt-24 rounded-3xl bg-night-card/80 border ${BORDER} p-6 sm:p-8 ${className}`}>
+      {title && (
+        <div className="mb-5">
+          <h2 className="font-display text-xl sm:text-2xl leading-[1.4] text-moon">{title}</h2>
+          {subtitle && <p className={`text-sm ${MUTED} mt-1`}>{subtitle}</p>}
+        </div>
+      )}
+      {children}
+    </section>
+  );
+}
 
 async function getProfile(username) {
   const supabase = createServerSupabase();
@@ -119,8 +127,7 @@ export default async function PublicProfilePage({ params }) {
   }
 
   // Books carry their category in `notes` (reusing the existing column —
-  // no schema change needed). Group by that so "From the shelf" reads as
-  // an organized shelf instead of one flat list once there are a dozen+.
+  // no schema change needed), grouped here into a shelf-by-shelf layout.
   const booksByCategory = new Map();
   for (const b of worldByKind.book || []) {
     const cat = (b.notes || "").trim() || "كتب";
@@ -132,16 +139,11 @@ export default async function PublicProfilePage({ params }) {
   const firstName = (profile.display_name || "").trim().split(/\s+/)[0] || "صديقي";
 
   const DEFAULT_ORDER = ["currently", "books", "podcasts", "interests", "about", "social"];
-  // Defensive: drop unknown keys from a stale order, then append any
-  // default section missing from it (e.g. a new section added later).
   const configured = (profile.public_section_order || []).filter((k) => DEFAULT_ORDER.includes(k));
   const order = [...configured, ...DEFAULT_ORDER.filter((k) => !configured.includes(k))];
 
   const otherKinds = Object.entries(worldByKind).filter(([kind]) => kind !== "book" && kind !== "podcast");
 
-  // Which of the orderable sections actually render something — used for
-  // both the nav bar (only link to non-empty sections) and the sections
-  // themselves below.
   const hasContent = {
     currently: currently && currently.length > 0,
     books: (worldByKind.book?.length || 0) > 0,
@@ -152,44 +154,50 @@ export default async function PublicProfilePage({ params }) {
   };
   const navItems = order.filter((k) => hasContent[k]);
 
-  // Each pillar section as a render function, so they can be reordered —
-  // the hero and the "other kinds" block stay fixed, everything else here
-  // follows the order Ahmed set in /privacy.
+  // Small glanceable stat row under the hero — real counts only, no
+  // invented metrics, but it gives the page the same "at a glance"
+  // feeling as the reference's stat-tile row.
+  const stats = [
+    { label: "كتاب", value: worldByKind.book?.length || 0 },
+    { label: "حلقة بيسمعها", value: worldByKind.podcast?.length || 0 },
+    { label: "اهتمام", value: interests?.length || 0 },
+  ].filter((s) => s.value > 0);
+
   const sections = {
     currently: hasContent.currently ? (
-      <section id="currently" className={`border-t ${BORDER} pt-10 sm:pt-14 space-y-5 scroll-mt-20`}>
-        <p className={`text-xs tracking-[0.2em] uppercase ${SUBTLE}`}>حاليًا</p>
-        <div className="space-y-5">
+      <Card id="currently" title="حاليًا">
+        <div className="grid sm:grid-cols-2 gap-4">
           {currently.map((c) => (
-            <div key={c.id}>
-              <p className={`text-xs mb-1 ${TEAL}`}>
+            <div key={c.id} className={`rounded-2xl bg-white/[0.03] border ${BORDER} p-4`}>
+              <p className="text-xs text-lantern-soft mb-1.5">
                 {c.kind === "listening" && "بيسمع"}
                 {c.kind === "watching" && "بيتفرج على"}
                 {c.kind === "reading" && "بيقرأ"}
               </p>
-              <p className="font-display text-xl sm:text-2xl leading-[1.5]">{c.title}</p>
+              <p className="font-display text-lg leading-[1.5] text-moon">{c.title}</p>
             </div>
           ))}
         </div>
-      </section>
+      </Card>
     ) : null,
 
     books: (
-      <section id="books" className={`border-t ${BORDER} pt-10 sm:pt-14 space-y-8 scroll-mt-20`}>
-        <div>
-          <h2 className="font-display text-2xl sm:text-3xl leading-[1.4]">من على الرف</h2>
-          <p className={`text-sm ${SUBTLE} mt-1.5`}>كتب تستاهل تتحفظ.</p>
-        </div>
+      <Card id="books" title="من على الرف" subtitle="كتب تستاهل تتحفظ.">
         {booksByCategory.size > 0 ? (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {[...booksByCategory.entries()].map(([category, books]) => (
               <div key={category}>
-                <p className={`text-xs tracking-[0.15em] uppercase mb-3 ${COPPER}`}>{category}</p>
-                <ul className="space-y-3.5">
+                <span className="inline-block text-xs text-lantern-ink bg-lantern-soft/90 rounded-full px-3 py-1 mb-3">
+                  {category}
+                </span>
+                <ul className="grid sm:grid-cols-2 gap-2.5">
                   {books.map((w) => (
-                    <li key={w.id} className="flex items-baseline justify-between gap-4 leading-[1.6]">
-                      <span>{w.title}</span>
-                      {w.subtitle && <span className={`text-sm ${SUBTLE} shrink-0`} dir="auto">{w.subtitle}</span>}
+                    <li
+                      key={w.id}
+                      className={`rounded-xl bg-white/[0.03] border ${BORDER} px-4 py-3 flex items-baseline justify-between gap-3`}
+                    >
+                      <span className="text-moon leading-[1.5]">{w.title}</span>
+                      {w.subtitle && <span className={`text-xs ${MUTED} shrink-0`} dir="auto">{w.subtitle}</span>}
                     </li>
                   ))}
                 </ul>
@@ -197,61 +205,64 @@ export default async function PublicProfilePage({ params }) {
             ))}
           </div>
         ) : (
-          <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.book}</p>
+          <p className={`text-sm italic ${MUTED}`}>{EMPTY_NOTES.book}</p>
         )}
-      </section>
+      </Card>
     ),
 
     podcasts: (
-      <section id="podcasts" className={`border-t ${BORDER} pt-10 sm:pt-14 space-y-5 scroll-mt-20`}>
-        <h2 className="font-display text-2xl sm:text-3xl leading-[1.4]">بسمعه</h2>
+      <Card id="podcasts" title="بسمعه">
         {worldByKind.podcast?.length > 0 ? (
-          <ul className="space-y-3.5">
+          <ul className="grid sm:grid-cols-2 gap-2.5">
             {worldByKind.podcast.map((w) => {
               const href = w.link_url && /^https?:\/\//.test(w.link_url) ? w.link_url : null;
               const Wrapper = href ? "a" : "div";
               return (
-                <li key={w.id} className="leading-[1.6]">
+                <li key={w.id}>
                   <Wrapper
                     {...(href ? { href, target: "_blank", rel: "noopener noreferrer nofollow" } : {})}
-                    className={`flex items-baseline justify-between gap-4 ${href ? `hover:${COPPER} transition` : ""}`}
+                    className={`rounded-xl bg-white/[0.03] border ${BORDER} px-4 py-3 flex items-baseline justify-between gap-3 ${
+                      href ? "hover:border-lantern-soft/40 transition" : ""
+                    }`}
                   >
-                    <span>{w.title}</span>
-                    {w.subtitle && <span className={`text-sm ${SUBTLE} shrink-0`} dir="auto">{w.subtitle}</span>}
+                    <span className="text-moon leading-[1.5]">{w.title}</span>
+                    {w.subtitle && <span className={`text-xs ${MUTED} shrink-0`} dir="auto">{w.subtitle}</span>}
                   </Wrapper>
                 </li>
               );
             })}
           </ul>
         ) : (
-          <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.podcast}</p>
+          <p className={`text-sm italic ${MUTED}`}>{EMPTY_NOTES.podcast}</p>
         )}
-      </section>
+      </Card>
     ),
 
     interests: (
-      <section id="interests" className={`border-t ${BORDER} pt-10 sm:pt-14 space-y-5 scroll-mt-20`}>
-        <h2 className="font-display text-2xl sm:text-3xl leading-[1.4]">حاجات بحبها</h2>
-        {(!interests || interests.length === 0) && (
-          <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.interests}</p>
-        )}
+      <Card id="interests" title="حاجات بحبها">
+        {(!interests || interests.length === 0) && <p className={`text-sm italic ${MUTED}`}>{EMPTY_NOTES.interests}</p>}
         {interests && interests.length > 0 && (
-          <p className="leading-[2.1] text-lg">{interests.map((i) => i.value).join("  ·  ")}</p>
+          <div className="flex flex-wrap gap-2.5">
+            {interests.map((i) => (
+              <span key={i.id} className={`rounded-full bg-white/[0.04] border ${BORDER} text-moon text-sm px-4 py-2`}>
+                {i.value}
+              </span>
+            ))}
+          </div>
         )}
-      </section>
+      </Card>
     ),
 
     about: hasContent.about ? (
-      <section id="about" className={`border-t ${BORDER} pt-10 sm:pt-14 scroll-mt-20`}>
-        <p className="font-letter text-xl sm:text-2xl leading-[1.8] whitespace-pre-wrap">{profile.bio}</p>
-      </section>
+      <Card id="about" title="نبذة">
+        <p className="font-letter text-lg sm:text-xl leading-[1.9] text-moon whitespace-pre-wrap">{profile.bio}</p>
+      </Card>
     ) : null,
 
     social: (
-      <section id="social" className={`border-t ${BORDER} pt-10 sm:pt-14 space-y-5 scroll-mt-20`}>
-        <h2 className="font-display text-2xl sm:text-3xl leading-[1.4]">تلاقيني كمان في</h2>
+      <Card id="social" title="تلاقيني كمان في">
         {hasSocial ? (
-          <div className="flex flex-wrap gap-x-6 gap-y-3">
+          <div className="flex flex-wrap gap-3">
             {Object.entries(profile.social_links).map(([platform, value]) => {
               const href = toHref(platform, value);
               if (!href) return null;
@@ -262,7 +273,7 @@ export default async function PublicProfilePage({ params }) {
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
-                  className={`text-sm ${COPPER} hover:underline underline-offset-4`}
+                  className={`rounded-full bg-white/[0.04] border ${BORDER} hover:border-lantern-soft/40 hover:text-lantern-soft transition text-moon text-sm px-4 py-2`}
                 >
                   {label || value}
                 </a>
@@ -270,19 +281,23 @@ export default async function PublicProfilePage({ params }) {
             })}
           </div>
         ) : (
-          <p className={`text-sm italic ${SUBTLE}`}>{EMPTY_NOTES.social}</p>
+          <p className={`text-sm italic ${MUTED}`}>{EMPTY_NOTES.social}</p>
         )}
-      </section>
+      </Card>
     ),
   };
 
   return (
-    <main className={`min-h-screen bg-[#F4F0E7] ${INK}`} style={{ fontFamily: "var(--font-body), sans-serif" }}>
+    <main className="min-h-screen bg-night" style={{ fontFamily: "var(--font-body), sans-serif" }}>
       {navItems.length > 1 && (
-        <nav className={`sticky top-0 z-10 bg-[#F4F0E7]/90 backdrop-blur-sm border-b ${BORDER}`}>
-          <div className="max-w-2xl mx-auto px-6 flex items-center gap-5 overflow-x-auto text-xs py-3.5 whitespace-nowrap">
+        <nav className="sticky top-0 z-10 bg-night/85 backdrop-blur-md border-b border-white/[0.06]">
+          <div className="max-w-3xl mx-auto px-6 flex items-center gap-2 overflow-x-auto py-3.5 whitespace-nowrap">
             {navItems.map((key) => (
-              <a key={key} href={`#${key}`} className={`${SUBTLE} hover:${TEAL} transition shrink-0`}>
+              <a
+                key={key}
+                href={`#${key}`}
+                className={`shrink-0 text-xs rounded-full px-3.5 py-1.5 ${MUTED} hover:text-moon hover:bg-white/[0.06] transition`}
+              >
                 {NAV_LABELS[key]}
               </a>
             ))}
@@ -290,25 +305,42 @@ export default async function PublicProfilePage({ params }) {
         </nav>
       )}
 
-      <div className="max-w-2xl mx-auto px-6 py-16 sm:py-24 space-y-16 sm:space-y-20">
-        {/* Hero — always first, not part of the configurable order. No forced
-            line breaks: the heading wraps naturally at whatever width/length
-            it needs, with a generous leading so Arabic ascenders/descenders
-            never crowd the line above or below. */}
+      <div className="max-w-3xl mx-auto px-6 py-14 sm:py-20 space-y-6">
+        {/* Hero — a glowing dark card like the reference's headline tile,
+            with a soft blurred amber glow behind it rather than a flat
+            background. No forced <br/> line breaks: the heading wraps
+            naturally with generous leading. */}
         <FadeIn>
-          <header className="space-y-6">
-            {profile.avatar_url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={profile.avatar_url}
-                alt={profile.display_name}
-                className="w-16 h-16 rounded-full object-cover"
-              />
-            )}
-            <h1 className="font-display text-[2.1rem] sm:text-5xl leading-[1.5] sm:leading-[1.45] max-w-[14ch]">
-              اللي بيقراه، اللي بيسمعه، <span className={TEAL}>واللي بيتكوّن منه.</span>
-            </h1>
-            <p className={`text-sm ${SUBTLE} leading-[1.9]`}>مجموعة صغيرة من الحاجات اللي بتكوّن عالم {firstName}.</p>
+          <header className="relative rounded-3xl bg-night-card/80 border border-white/[0.06] p-8 sm:p-12 overflow-hidden">
+            <div
+              className="pointer-events-none absolute -top-24 -start-24 w-72 h-72 rounded-full bg-lantern/25 blur-[90px]"
+              aria-hidden="true"
+            />
+            <div className="relative space-y-5">
+              {profile.avatar_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.display_name}
+                  className="w-16 h-16 rounded-full object-cover border-2 border-white/10"
+                />
+              )}
+              <h1 className="font-display text-[2rem] sm:text-5xl leading-[1.5] sm:leading-[1.45] max-w-[16ch] text-moon">
+                اللي بيقراه، اللي بيسمعه، <span className="text-lantern-soft">واللي بيتكوّن منه.</span>
+              </h1>
+              <p className={`text-sm ${MUTED} leading-[1.9]`}>مجموعة صغيرة من الحاجات اللي بتكوّن عالم {firstName}.</p>
+
+              {stats.length > 0 && (
+                <div className="flex flex-wrap gap-3 pt-2">
+                  {stats.map((s) => (
+                    <div key={s.label} className={`rounded-2xl bg-white/[0.04] border ${BORDER} px-4 py-2.5`}>
+                      <span className="font-display text-xl text-lantern-soft">{s.value}</span>{" "}
+                      <span className={`text-xs ${MUTED}`}>{s.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </header>
         </FadeIn>
 
@@ -320,32 +352,29 @@ export default async function PublicProfilePage({ params }) {
           ) : null
         )}
 
-        {/* Any remaining world_items kinds (music/movies/places/hobbies) — fixed
-            position, not part of the configurable order, only shown when non-empty */}
         {otherKinds.map(([kind, items], idx) => {
-          const meta = KIND_SECTION[kind] || { title: kind, subtitle: "" };
+          const meta = KIND_SECTION[kind] || { title: kind };
           return (
             <FadeIn key={kind} delay={0.3 + idx * 0.04}>
-              <section className={`border-t ${BORDER} pt-10 sm:pt-14 space-y-5`}>
-                <div>
-                  <h2 className="font-display text-2xl sm:text-3xl leading-[1.4]">{meta.title}</h2>
-                  {meta.subtitle && <p className={`text-sm ${SUBTLE} mt-1.5`}>{meta.subtitle}</p>}
-                </div>
-                <ul className="space-y-3.5">
+              <Card title={meta.title}>
+                <ul className="grid sm:grid-cols-2 gap-2.5">
                   {items.map((w) => (
-                    <li key={w.id} className="flex items-baseline justify-between gap-4 leading-[1.6]">
-                      <span>{w.title}</span>
-                      {w.subtitle && <span className={`text-sm ${SUBTLE} shrink-0`} dir="auto">{w.subtitle}</span>}
+                    <li
+                      key={w.id}
+                      className={`rounded-xl bg-white/[0.03] border ${BORDER} px-4 py-3 flex items-baseline justify-between gap-3`}
+                    >
+                      <span className="text-moon leading-[1.5]">{w.title}</span>
+                      {w.subtitle && <span className={`text-xs ${MUTED} shrink-0`} dir="auto">{w.subtitle}</span>}
                     </li>
                   ))}
                 </ul>
-              </section>
+              </Card>
             </FadeIn>
           );
         })}
 
         <FadeIn delay={0.5}>
-          <p className={`text-center text-xs ${SUBTLE} pt-6`}>{firstName} — {new Date().getFullYear()}</p>
+          <p className={`text-center text-xs ${MUTED} pt-6`}>{firstName} — {new Date().getFullYear()}</p>
         </FadeIn>
       </div>
     </main>
