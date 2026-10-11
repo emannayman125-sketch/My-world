@@ -19,6 +19,8 @@ const COPPER = "text-[#A9694D]";
 
 const SOCIAL_LABELS = {
   instagram: "Instagram",
+  facebook: "Facebook",
+  linkedin: "LinkedIn",
   youtube: "YouTube",
   tiktok: "TikTok",
   x: "X",
@@ -30,6 +32,8 @@ function toHref(platform, value) {
   if (/^https?:\/\//.test(value)) return value;
   const bases = {
     instagram: "https://instagram.com/",
+    facebook: "https://facebook.com/",
+    linkedin: "https://linkedin.com/in/",
     youtube: "https://youtube.com/@",
     tiktok: "https://tiktok.com/@",
     x: "https://x.com/",
@@ -273,7 +277,7 @@ export default async function PublicProfilePage({ params }) {
         })}
 
         <FadeIn delay={0.5}>
-          <p className={`text-center text-xs ${SUBTLE} pt-6`}>صُنع بحب 🤍</p>
+          <p className={`text-center text-xs ${SUBTLE} pt-6`}>{firstName} — {new Date().getFullYear()}</p>
         </FadeIn>
       </div>
     </main>
