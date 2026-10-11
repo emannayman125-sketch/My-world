@@ -4,14 +4,17 @@ import FadeIn from "@/components/FadeIn";
 
 // ============================================================
 // The public profile — dark, warm-glow, "premium dashboard" look
-// (per the reference she sent: dark charcoal/teal background, one
-// amber glow accent, rounded card modules, sticky pill nav) instead
-// of the earlier light editorial-paper direction. Reuses the app's
-// own "Lantern Night" dark palette (night/lantern tokens already
-// defined in tailwind.config.js) rather than inventing a new one —
-// same accent color the rest of the app already uses for its one
-// highlight color, so this page still feels like it belongs to the
-// same product instead of a bolt-on theme.
+// (reference: dark charcoal background, one amber glow accent, rounded
+// card modules, sticky pill nav). Reuses the app's own "Lantern Night"
+// dark palette (night/lantern tokens already defined in
+// tailwind.config.js) rather than inventing a new one — same accent
+// color the rest of the app already uses, so this page still feels
+// part of the same product instead of a bolt-on theme.
+//
+// Copy is English (per her request — the earlier Arabic wording read
+// as clumsy/informal for something meant to look premium and be
+// shared with colleagues/friends). dir="ltr" is set explicitly below
+// since this page no longer follows the app's own RTL default.
 //
 // Same data, same RLS-protected queries as before (every table
 // filtered .eq("is_public", true)) — this file changes presentation
@@ -47,26 +50,32 @@ function toHref(platform, value) {
 }
 
 const KIND_SECTION = {
-  music: { title: "بسمعه كمان" },
-  movie: { title: "بتفرج عليه" },
-  place: { title: "أماكن في بالي" },
-  hobby: { title: "بيوقّت فيه" },
+  music: { title: "Also on Repeat" },
+  movie: { title: "Watching" },
+  place: { title: "Places on My Mind" },
+  hobby: { title: "What I'm Into" },
 };
 
 const EMPTY_NOTES = {
-  book: "الرف لسه بيتكوّن.",
-  podcast: "لسه مفيش حلقات اتسجّلت هنا.",
-  interests: "حاجات تستاهل المعرفة هتكون هنا قريب.",
-  social: "لسه ما حدّدش فين يتلاقى.",
+  book: "The shelf is still taking shape.",
+  podcast: "Nothing queued up here yet.",
+  interests: "A few favorites, coming soon.",
+  social: "No links shared yet.",
 };
 
 const NAV_LABELS = {
-  currently: "حاليًا",
-  books: "القراءة",
-  podcasts: "الاستماع",
-  interests: "الاهتمامات",
-  about: "نبذة",
-  social: "روابط",
+  currently: "Currently",
+  books: "Reading",
+  podcasts: "Listening",
+  interests: "Interests",
+  about: "About",
+  social: "Links",
+};
+
+const CURRENTLY_LABELS = {
+  reading: "Reading",
+  listening: "Listening to",
+  watching: "Watching",
 };
 
 // One card shell used everywhere (books, podcasts, interests, about,
@@ -98,9 +107,9 @@ async function getProfile(username) {
 
 export async function generateMetadata({ params }) {
   const profile = await getProfile(params.username);
-  if (!profile) return { title: "الصفحة دي مش موجودة" };
-  const name = profile.display_name || "صديقي";
-  const description = profile.bio ? profile.bio.slice(0, 150) : `عالم ${name} الشخصي`;
+  if (!profile) return { title: "This page doesn't exist" };
+  const name = profile.display_name || "my";
+  const description = profile.bio ? profile.bio.slice(0, 150) : `${name}'s personal space.`;
   return {
     title: `${name}`,
     description,
@@ -130,13 +139,13 @@ export default async function PublicProfilePage({ params }) {
   // no schema change needed), grouped here into a shelf-by-shelf layout.
   const booksByCategory = new Map();
   for (const b of worldByKind.book || []) {
-    const cat = (b.notes || "").trim() || "كتب";
+    const cat = (b.notes || "").trim() || "Books";
     if (!booksByCategory.has(cat)) booksByCategory.set(cat, []);
     booksByCategory.get(cat).push(b);
   }
 
   const hasSocial = profile.social_links && Object.values(profile.social_links).some(Boolean);
-  const firstName = (profile.display_name || "").trim().split(/\s+/)[0] || "صديقي";
+  const firstName = (profile.display_name || "").trim().split(/\s+/)[0] || "Welcome";
 
   const DEFAULT_ORDER = ["currently", "books", "podcasts", "interests", "about", "social"];
   const configured = (profile.public_section_order || []).filter((k) => DEFAULT_ORDER.includes(k));
@@ -158,22 +167,18 @@ export default async function PublicProfilePage({ params }) {
   // invented metrics, but it gives the page the same "at a glance"
   // feeling as the reference's stat-tile row.
   const stats = [
-    { label: "كتاب", value: worldByKind.book?.length || 0 },
-    { label: "حلقة بيسمعها", value: worldByKind.podcast?.length || 0 },
-    { label: "اهتمام", value: interests?.length || 0 },
+    { label: worldByKind.book?.length === 1 ? "book" : "books", value: worldByKind.book?.length || 0 },
+    { label: "episodes", value: worldByKind.podcast?.length || 0 },
+    { label: interests?.length === 1 ? "interest" : "interests", value: interests?.length || 0 },
   ].filter((s) => s.value > 0);
 
   const sections = {
     currently: hasContent.currently ? (
-      <Card id="currently" title="حاليًا">
+      <Card id="currently" title="Currently">
         <div className="grid sm:grid-cols-2 gap-4">
           {currently.map((c) => (
             <div key={c.id} className={`rounded-2xl bg-white/[0.03] border ${BORDER} p-4`}>
-              <p className="text-xs text-lantern-soft mb-1.5">
-                {c.kind === "listening" && "بيسمع"}
-                {c.kind === "watching" && "بيتفرج على"}
-                {c.kind === "reading" && "بيقرأ"}
-              </p>
+              <p className="text-xs text-lantern-soft mb-1.5">{CURRENTLY_LABELS[c.kind] || c.kind}</p>
               <p className="font-display text-lg leading-[1.5] text-moon">{c.title}</p>
             </div>
           ))}
@@ -182,7 +187,7 @@ export default async function PublicProfilePage({ params }) {
     ) : null,
 
     books: (
-      <Card id="books" title="من على الرف" subtitle="كتب تستاهل تتحفظ.">
+      <Card id="books" title="From the Shelf" subtitle="A few books worth keeping.">
         {booksByCategory.size > 0 ? (
           <div className="space-y-6">
             {[...booksByCategory.entries()].map(([category, books]) => (
@@ -197,7 +202,7 @@ export default async function PublicProfilePage({ params }) {
                       className={`rounded-xl bg-white/[0.03] border ${BORDER} px-4 py-3 flex items-baseline justify-between gap-3`}
                     >
                       <span className="text-moon leading-[1.5]">{w.title}</span>
-                      {w.subtitle && <span className={`text-xs ${MUTED} shrink-0`} dir="auto">{w.subtitle}</span>}
+                      {w.subtitle && <span className={`text-xs ${MUTED} shrink-0`}>{w.subtitle}</span>}
                     </li>
                   ))}
                 </ul>
@@ -211,7 +216,7 @@ export default async function PublicProfilePage({ params }) {
     ),
 
     podcasts: (
-      <Card id="podcasts" title="بسمعه">
+      <Card id="podcasts" title="What I'm Listening To">
         {worldByKind.podcast?.length > 0 ? (
           <ul className="grid sm:grid-cols-2 gap-2.5">
             {worldByKind.podcast.map((w) => {
@@ -226,7 +231,7 @@ export default async function PublicProfilePage({ params }) {
                     }`}
                   >
                     <span className="text-moon leading-[1.5]">{w.title}</span>
-                    {w.subtitle && <span className={`text-xs ${MUTED} shrink-0`} dir="auto">{w.subtitle}</span>}
+                    {w.subtitle && <span className={`text-xs ${MUTED} shrink-0`}>{w.subtitle}</span>}
                   </Wrapper>
                 </li>
               );
@@ -239,7 +244,7 @@ export default async function PublicProfilePage({ params }) {
     ),
 
     interests: (
-      <Card id="interests" title="حاجات بحبها">
+      <Card id="interests" title="A Few Things I Love">
         {(!interests || interests.length === 0) && <p className={`text-sm italic ${MUTED}`}>{EMPTY_NOTES.interests}</p>}
         {interests && interests.length > 0 && (
           <div className="flex flex-wrap gap-2.5">
@@ -254,13 +259,13 @@ export default async function PublicProfilePage({ params }) {
     ),
 
     about: hasContent.about ? (
-      <Card id="about" title="نبذة">
+      <Card id="about" title="About">
         <p className="font-letter text-lg sm:text-xl leading-[1.9] text-moon whitespace-pre-wrap">{profile.bio}</p>
       </Card>
     ) : null,
 
     social: (
-      <Card id="social" title="تلاقيني كمان في">
+      <Card id="social" title="Find Me Elsewhere">
         {hasSocial ? (
           <div className="flex flex-wrap gap-3">
             {Object.entries(profile.social_links).map(([platform, value]) => {
@@ -288,7 +293,7 @@ export default async function PublicProfilePage({ params }) {
   };
 
   return (
-    <main className="min-h-screen bg-night" style={{ fontFamily: "var(--font-body), sans-serif" }}>
+    <main dir="ltr" lang="en" className="min-h-screen bg-night" style={{ fontFamily: "var(--font-body), sans-serif" }}>
       {navItems.length > 1 && (
         <nav className="sticky top-0 z-10 bg-night/85 backdrop-blur-md border-b border-white/[0.06]">
           <div className="max-w-3xl mx-auto px-6 flex items-center gap-2 overflow-x-auto py-3.5 whitespace-nowrap">
@@ -325,10 +330,10 @@ export default async function PublicProfilePage({ params }) {
                   className="w-16 h-16 rounded-full object-cover border-2 border-white/10"
                 />
               )}
-              <h1 className="font-display text-[2rem] sm:text-5xl leading-[1.5] sm:leading-[1.45] max-w-[16ch] text-moon">
-                اللي بيقراه، اللي بيسمعه، <span className="text-lantern-soft">واللي بيتكوّن منه.</span>
+              <h1 className="font-display text-[2rem] sm:text-5xl leading-[1.3] sm:leading-[1.25] max-w-[14ch] text-moon">
+                What I read. What I listen to. <span className="text-lantern-soft">What I'm becoming.</span>
               </h1>
-              <p className={`text-sm ${MUTED} leading-[1.9]`}>مجموعة صغيرة من الحاجات اللي بتكوّن عالم {firstName}.</p>
+              <p className={`text-sm ${MUTED} leading-[1.9]`}>A small collection of the things that shape my world.</p>
 
               {stats.length > 0 && (
                 <div className="flex flex-wrap gap-3 pt-2">
@@ -364,7 +369,7 @@ export default async function PublicProfilePage({ params }) {
                       className={`rounded-xl bg-white/[0.03] border ${BORDER} px-4 py-3 flex items-baseline justify-between gap-3`}
                     >
                       <span className="text-moon leading-[1.5]">{w.title}</span>
-                      {w.subtitle && <span className={`text-xs ${MUTED} shrink-0`} dir="auto">{w.subtitle}</span>}
+                      {w.subtitle && <span className={`text-xs ${MUTED} shrink-0`}>{w.subtitle}</span>}
                     </li>
                   ))}
                 </ul>
