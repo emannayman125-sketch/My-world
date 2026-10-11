@@ -395,64 +395,40 @@ export default async function PublicProfilePage({ params }) {
               )}
             </div>
 
-            {/* His real photo when he's set one in Profile settings;
-                otherwise an abstract editorial composition rather than
-                an invented personal photo. */}
-            {profile.avatar_url ? (
-              <div className="relative rounded-3xl overflow-hidden aspect-[4/3] md:aspect-square">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={profile.avatar_url}
-                  alt={profile.display_name || firstName}
-                  className="w-full h-full object-cover"
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{ background: `linear-gradient(0deg, ${INK}66 0%, transparent 35%)` }}
-                  aria-hidden="true"
-                />
-                <p
-                  className="absolute top-7 end-7 text-xs tracking-[0.15em]"
-                  style={{ color: `${WHITE}E6`, writingMode: "vertical-rl" }}
-                >
-                  Better Every Day
-                </p>
-              </div>
-            ) : (
+            {/* Abstract editorial visual — no invented personal photo. */}
+            <div
+              className="relative rounded-3xl overflow-hidden aspect-[4/3] md:aspect-square"
+              style={{ background: `linear-gradient(145deg, ${TEAL} 0%, ${INK} 100%)` }}
+            >
               <div
-                className="relative rounded-3xl overflow-hidden aspect-[4/3] md:aspect-square"
-                style={{ background: `linear-gradient(145deg, ${TEAL} 0%, ${INK} 100%)` }}
-              >
-                <div
-                  className="absolute inset-0 opacity-40"
-                  style={{
-                    backgroundImage: `radial-gradient(circle at 25% 20%, ${COPPER}99, transparent 45%), radial-gradient(circle at 80% 75%, ${SAND}66, transparent 50%)`,
-                  }}
-                  aria-hidden="true"
-                />
-                <div className="absolute inset-0 flex items-end p-7">
-                  <div className="flex items-end gap-2">
-                    {[0.55, 0.85, 0.4, 0.7].map((h, i) => (
-                      <div
-                        key={i}
-                        className="w-5 sm:w-6 rounded-sm"
-                        style={{
-                          height: `${h * 100}px`,
-                          backgroundColor: [SAND, WHITE, COPPER, SAND][i % 4],
-                          opacity: 0.9,
-                        }}
-                      />
-                    ))}
-                  </div>
+                className="absolute inset-0 opacity-40"
+                style={{
+                  backgroundImage: `radial-gradient(circle at 25% 20%, ${COPPER}99, transparent 45%), radial-gradient(circle at 80% 75%, ${SAND}66, transparent 50%)`,
+                }}
+                aria-hidden="true"
+              />
+              <div className="absolute inset-0 flex items-end p-7">
+                <div className="flex items-end gap-2">
+                  {[0.55, 0.85, 0.4, 0.7].map((h, i) => (
+                    <div
+                      key={i}
+                      className="w-5 sm:w-6 rounded-sm"
+                      style={{
+                        height: `${h * 100}px`,
+                        backgroundColor: [SAND, WHITE, COPPER, SAND][i % 4],
+                        opacity: 0.9,
+                      }}
+                    />
+                  ))}
                 </div>
-                <p
-                  className="absolute top-7 end-7 text-xs tracking-[0.15em]"
-                  style={{ color: `${WHITE}CC`, writingMode: "vertical-rl" }}
-                >
-                  Better Every Day
-                </p>
               </div>
-            )}
+              <p
+                className="absolute top-7 end-7 text-xs tracking-[0.15em]"
+                style={{ color: `${WHITE}CC`, writingMode: "vertical-rl" }}
+              >
+                Better Every Day
+              </p>
+            </div>
           </div>
         </FadeIn>
 
