@@ -64,7 +64,7 @@ Rules:
 
   const res = await callGemini(system, [{ role: "user", content: JSON.stringify(taste) }], { jsonMode: true, maxTokens: 2048 });
   if (!res || res.error || !res.text) {
-    return NextResponse.json({ error: "ai_unavailable" }, { status: 502 });
+    return NextResponse.json({ error: "ai_unavailable", detail: res?.detail }, { status: 502 });
   }
 
   try {

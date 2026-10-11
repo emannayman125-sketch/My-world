@@ -6,8 +6,8 @@ import { useConfirm } from "./ConfirmProvider";
 import { Plus, Trash2, RefreshCw } from "lucide-react";
 
 const STATUS_COLOR = {
-  watching: "bg-white/5 desk-muted",
-  setup: "bg-sky-500/20 text-sky-400",
+  watching: "bg-black/5 dark:bg-white/10 text-ink-muted dark:text-moon-muted",
+  setup: "bg-sage/20 text-sage dark:text-sage-soft",
   entered: "bg-emerald-500/15 text-emerald-400",
 };
 
@@ -73,33 +73,33 @@ export default function WatchlistManager({ userId, initialItems, strings }) {
 
   return (
     <div className="space-y-4">
-      <p className="text-xs desk-muted">{tr.disclaimer}</p>
+      <p className="text-xs text-ink-muted dark:text-moon-muted">{tr.disclaimer}</p>
 
       {!open ? (
         <button
           onClick={() => setOpen(true)}
           className="w-full card card-hover p-4 flex items-center justify-center gap-2 text-sm
-                     desk-muted hover:text-sky-400 transition"
+                     text-ink-muted dark:text-moon-muted hover:text-sage dark:hover:text-sage-soft transition"
         >
           <Plus size={15} strokeWidth={2} />
           {tr.addSymbol}
         </button>
       ) : (
-        <form onSubmit={addSymbol} className="desk-card p-4 space-y-2">
+        <form onSubmit={addSymbol} className="card p-4 space-y-2">
           <div className="flex gap-2 flex-wrap">
             <input
               autoFocus
               value={form.symbol}
               onChange={(e) => setForm({ ...form, symbol: e.target.value })}
               placeholder={tr.symbol}
-              className="flex-1 min-w-[120px] rounded-soft border border-white/10 bg-transparent
-                         px-3 py-2 text-sm outline-none focus:border-sky-500 uppercase"
+              className="flex-1 min-w-[120px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent
+                         px-3 py-2 text-sm outline-none focus:border-sage uppercase"
             />
             <select
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className="rounded-soft border border-white/10 bg-transparent
-                         px-3 py-2 text-sm outline-none focus:border-sky-500"
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent
+                         px-3 py-2 text-sm outline-none focus:border-sage"
             >
               {Object.entries(tr.status).map(([k, label]) => (
                 <option key={k} value={k}>{label}</option>
@@ -111,14 +111,14 @@ export default function WatchlistManager({ userId, initialItems, strings }) {
             onChange={(e) => setForm({ ...form, thesis: e.target.value })}
             placeholder={tr.thesis}
             rows={2}
-            className="w-full rounded-soft border border-white/10 bg-transparent
-                       px-3 py-2 text-sm outline-none focus:border-sky-500 resize-none"
+            className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent
+                       px-3 py-2 text-sm outline-none focus:border-sage resize-none"
           />
           <div className="flex items-center gap-2">
             <button
               type="submit"
               disabled={saving || !form.symbol.trim()}
-              className="rounded-soft bg-sky-600 text-white text-sm font-medium px-4 py-2
+              className="rounded-soft bg-sage text-white text-sm font-medium px-4 py-2
                          hover:brightness-110 transition disabled:opacity-50"
             >
               {saving ? tr.saving : tr.save}
@@ -126,7 +126,7 @@ export default function WatchlistManager({ userId, initialItems, strings }) {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="text-sm desk-muted hover:text-white"
+              className="text-sm text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon"
             >
               {strings.quote.cancel}
             </button>
@@ -135,7 +135,7 @@ export default function WatchlistManager({ userId, initialItems, strings }) {
       )}
 
       {items.length === 0 && !open && (
-        <p className="text-sm desk-muted text-center py-6">{tr.noWatchlist}</p>
+        <p className="text-sm text-ink-muted dark:text-moon-muted text-center py-6">{tr.noWatchlist}</p>
       )}
 
       <div className="space-y-2">
@@ -143,7 +143,7 @@ export default function WatchlistManager({ userId, initialItems, strings }) {
           const p = prices[item.symbol];
           const isUp = p && typeof p === "object" && p.change >= 0;
           return (
-            <div key={item.id} className="desk-card p-4">
+            <div key={item.id} className="card p-4">
               <div className="flex items-center gap-3">
                 <span className={`shrink-0 text-xs rounded-full px-2.5 py-1 font-medium ${STATUS_COLOR[item.status] || STATUS_COLOR.watching}`}>
                   {tr.status[item.status] || tr.status.watching}
@@ -153,10 +153,10 @@ export default function WatchlistManager({ userId, initialItems, strings }) {
                 <div className="flex-1 min-w-0" />
 
                 {p === "loading" && (
-                  <span className="text-xs desk-muted">{tr.loadingPrice}</span>
+                  <span className="text-xs text-ink-muted dark:text-moon-muted">{tr.loadingPrice}</span>
                 )}
                 {p === "error" && (
-                  <span className="text-xs desk-muted">{tr.priceUnavailable}</span>
+                  <span className="text-xs text-ink-muted dark:text-moon-muted">{tr.priceUnavailable}</span>
                 )}
                 {p && typeof p === "object" && (
                   <div className="text-end">
@@ -170,20 +170,20 @@ export default function WatchlistManager({ userId, initialItems, strings }) {
                 <button
                   onClick={() => fetchPrice(item.symbol)}
                   aria-label={tr.refresh}
-                  className="text-white/30 hover:text-sky-400 transition shrink-0"
+                  className="text-ink-muted/50 dark:text-moon-muted/40 hover:text-sage dark:hover:text-sage-soft transition shrink-0"
                 >
                   <RefreshCw size={14} strokeWidth={2} />
                 </button>
                 <button
                   onClick={() => removeSymbol(item.id)}
                   aria-label={tr.delete}
-                  className="text-white/30 hover:text-red-500 transition shrink-0"
+                  className="text-ink-muted/50 dark:text-moon-muted/40 hover:text-red-500 transition shrink-0"
                 >
                   <Trash2 size={14} strokeWidth={2} />
                 </button>
               </div>
               {item.thesis && (
-                <p className="text-sm mt-2 desk-muted leading-6">{item.thesis}</p>
+                <p className="text-sm mt-2 text-ink-muted dark:text-moon-muted leading-6">{item.thesis}</p>
               )}
             </div>
           );

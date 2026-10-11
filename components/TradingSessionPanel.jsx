@@ -57,12 +57,12 @@ export default function TradingSessionPanel({ userId, initialSession, todayTrade
     g.set ? (
       <div className="space-y-1">
         <div className="flex items-center justify-between text-xs">
-          <span className="desk-muted">{label}</span>
-          <span className={g.breached ? "text-red-400" : g.ratio >= 0.8 ? "text-amber-400" : "desk-muted"}>
+          <span className="text-ink-muted dark:text-moon-muted">{label}</span>
+          <span className={g.breached ? "text-red-400" : g.ratio >= 0.8 ? "text-amber-400" : "text-ink-muted dark:text-moon-muted"}>
             {valueLabel}
           </span>
         </div>
-        <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+        <div className="h-1.5 rounded-full bg-black/5 dark:bg-white/10 overflow-hidden">
           <div
             className={`h-full rounded-full ${g.breached ? "bg-red-500" : g.ratio >= 0.8 ? "bg-amber-400" : "bg-emerald-500"}`}
             style={{ width: `${Math.round(g.ratio * 100)}%` }}
@@ -73,40 +73,40 @@ export default function TradingSessionPanel({ userId, initialSession, todayTrade
 
   if (editing) {
     return (
-      <form onSubmit={save} className="desk-card p-4 space-y-3">
+      <form onSubmit={save} className="card p-4 space-y-3">
         <p className="text-sm font-medium flex items-center gap-2">
           <Settings2 size={15} /> {tr.sessionTitle}
         </p>
-        <p className="text-xs desk-muted">{tr.sessionHint}</p>
+        <p className="text-xs text-ink-muted dark:text-moon-muted">{tr.sessionHint}</p>
         <div className="grid grid-cols-3 gap-2">
           <input
             type="number" min="0" step="any"
             value={form.max_loss}
             onChange={(e) => setForm({ ...form, max_loss: e.target.value })}
             placeholder={tr.maxLossPlaceholder}
-            className="rounded-soft border border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sky-400"
+            className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
           />
           <input
             type="number" min="1" step="1"
             value={form.max_trades}
             onChange={(e) => setForm({ ...form, max_trades: e.target.value })}
             placeholder={tr.maxTradesPlaceholder}
-            className="rounded-soft border border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sky-400"
+            className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
           />
           <input
             type="number" min="1" step="1"
             value={form.max_consecutive_losses}
             onChange={(e) => setForm({ ...form, max_consecutive_losses: e.target.value })}
             placeholder={tr.maxStreakPlaceholder}
-            className="rounded-soft border border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sky-400"
+            className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
           />
         </div>
         <div className="flex items-center gap-3">
-          <button type="submit" disabled={saving} className="rounded-soft bg-sky-500 text-night text-sm font-medium px-4 py-2 hover:brightness-105 transition disabled:opacity-50">
+          <button type="submit" disabled={saving} className="rounded-soft bg-sage text-white text-sm font-medium px-4 py-2 hover:brightness-105 transition disabled:opacity-50">
             {saving ? tr.saving : tr.startSession}
           </button>
           {session && (
-            <button type="button" onClick={() => setEditing(false)} className="text-sm desk-muted hover:text-white">
+            <button type="button" onClick={() => setEditing(false)} className="text-sm text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon">
               {tr.cancel}
             </button>
           )}
@@ -116,7 +116,7 @@ export default function TradingSessionPanel({ userId, initialSession, todayTrade
   }
 
   return (
-    <div className={`desk-card p-4 space-y-3 border ${LEVEL_STYLE[s.level]}`}>
+    <div className={`card p-4 space-y-3 border ${LEVEL_STYLE[s.level]}`}>
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium flex items-center gap-2">
           {s.level === "breached" ? (
@@ -128,19 +128,19 @@ export default function TradingSessionPanel({ userId, initialSession, todayTrade
           )}
           {tr.sessionTitle}
         </p>
-        <button onClick={() => setEditing(true)} className="text-xs desk-muted hover:text-white flex items-center gap-1">
+        <button onClick={() => setEditing(true)} className="text-xs text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon flex items-center gap-1">
           <Settings2 size={13} /> {tr.editLimits}
         </button>
       </div>
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-        <span className="desk-muted">{tr.netToday}</span>
+        <span className="text-ink-muted dark:text-moon-muted">{tr.netToday}</span>
         <span className={s.net < 0 ? "text-red-400" : "text-emerald-400"}>${s.net.toFixed(2)}</span>
-        <span className="desk-muted">{tr.tradesToday}</span>
+        <span className="text-ink-muted dark:text-moon-muted">{tr.tradesToday}</span>
         <span>{s.tradeCount}</span>
         {s.lossStreak > 0 && (
           <>
-            <span className="desk-muted">{tr.lossStreak}</span>
+            <span className="text-ink-muted dark:text-moon-muted">{tr.lossStreak}</span>
             <span>{s.lossStreak}</span>
           </>
         )}
@@ -156,7 +156,7 @@ export default function TradingSessionPanel({ userId, initialSession, todayTrade
 
       {s.level === "breached" && <p className="text-xs text-red-400">{tr.breachedNote}</p>}
       {s.level === "warning" && <p className="text-xs text-amber-400">{tr.warningNote}</p>}
-      {!anyLimitSet && <p className="text-xs desk-muted">{tr.noLimitsNote}</p>}
+      {!anyLimitSet && <p className="text-xs text-ink-muted dark:text-moon-muted">{tr.noLimitsNote}</p>}
     </div>
   );
 }

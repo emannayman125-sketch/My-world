@@ -16,6 +16,7 @@ export default async function SearchPage({ searchParams }) {
     businessProjects: [], businessIdeas: [], businessContacts: [],
     supplyOrders: [], supplyIssues: [], supplySuppliers: [],
     content: [], trading: [], quran: [], tradingNotes: [],
+    habits: [], english: [],
   };
 
   if (q) {
@@ -27,6 +28,7 @@ export default async function SearchPage({ searchParams }) {
       businessProjectsRes, businessIdeasRes, businessContactsRes,
       supplyOrdersRes, supplyIssuesRes, supplySuppliersRes,
       contentRes, tradingRes, quranRes, tradingNotesRes,
+      habitsRes, englishRes,
     ] = await Promise.all([
       supabase.from("tasks").select("*").eq("user_id", user.id).ilike("title", like),
       supabase.from("events").select("*").eq("user_id", user.id).ilike("title", like),
@@ -49,6 +51,8 @@ export default async function SearchPage({ searchParams }) {
       supabase.from("trading_journal").select("*").eq("user_id", user.id).ilike("symbol", like),
       supabase.from("quran_portions").select("*").eq("user_id", user.id).ilike("surah", like),
       supabase.from("trading_day_notes").select("*").eq("user_id", user.id).ilike("lesson", like),
+      supabase.from("habits").select("*").eq("user_id", user.id).ilike("name", like),
+      supabase.from("english_sessions").select("*").eq("user_id", user.id).ilike("topic", like),
     ]);
 
     results.tasks = tasksRes.data || [];
@@ -72,6 +76,8 @@ export default async function SearchPage({ searchParams }) {
     results.trading = tradingRes.data || [];
     results.quran = quranRes.data || [];
     results.tradingNotes = tradingNotesRes.data || [];
+    results.habits = habitsRes.data || [];
+    results.english = englishRes.data || [];
   }
 
   const totalCount = Object.values(results).reduce((sum, list) => sum + list.length, 0);
@@ -98,6 +104,8 @@ export default async function SearchPage({ searchParams }) {
     { key: "trading", emoji: "📈", label: "دفتر الصفقات", href: "/trading/journal", render: (t) => `${t.symbol} (${t.result})` },
     { key: "quran", emoji: "📖", label: "القرآن", href: "/learning", render: (q) => `${q.surah} — ${q.status === "reviewing" ? "مراجعة" : "حفظ"}` },
     { key: "tradingNotes", emoji: "🪞", label: "انعكاسات التداول", href: "/trading/journal", render: (n) => `${n.note_date} — ${n.lesson}` },
+    { key: "habits", emoji: "🔥", label: "عادات", href: "/growth", render: (h) => `${h.emoji} ${h.name}` },
+    { key: "english", emoji: "🗣️", label: "جلسات إنجليزي", href: "/english", render: (s) => s.topic },
   ];
 
   return (

@@ -54,7 +54,7 @@ export default async function TradingReviewPage() {
   const maxAbs = Math.max(1, ...stats.months.map(([, v]) => Math.abs(v)));
 
   return (
-    <div className="desk-shell lg:ps-64">
+    <div className="min-h-screen bg-paper dark:bg-night lg:ps-64">
       <AppHeader />
       <main className="max-w-3xl mx-auto px-6 pb-16 space-y-6">
         <h1 className="font-display text-3xl">{tr.review}</h1>
@@ -62,7 +62,7 @@ export default async function TradingReviewPage() {
         <TradingInsight locale={locale} strings={tr.insight} />
 
         {stats.totalTrades === 0 ? (
-          <p className="text-sm desk-muted">{tr.noReviewData}</p>
+          <p className="text-sm text-ink-muted dark:text-moon-muted">{tr.noReviewData}</p>
         ) : (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -78,13 +78,13 @@ export default async function TradingReviewPage() {
             </div>
 
             {stats.months.length > 0 && (
-              <div className="desk-card p-6">
+              <div className="card p-6">
                 <h2 className="font-display text-xl mb-4">{tr.monthlyPerformance}</h2>
                 <div className="space-y-2">
                   {stats.months.map(([month, value]) => (
                     <div key={month} className="flex items-center gap-3">
-                      <span className="text-xs desk-muted w-16 shrink-0">{month}</span>
-                      <div className="flex-1 h-2 rounded-full bg-white/5 overflow-hidden">
+                      <span className="text-xs text-ink-muted dark:text-moon-muted w-16 shrink-0">{month}</span>
+                      <div className="flex-1 h-2 rounded-full bg-black/5 dark:bg-white/10 overflow-hidden">
                         <div
                           className={`h-full rounded-full ${value >= 0 ? "bg-emerald-500" : "bg-red-500"}`}
                           style={{ width: `${(Math.abs(value) / maxAbs) * 100}%` }}
@@ -107,8 +107,8 @@ export default async function TradingReviewPage() {
 
 function StatCard({ label, value, positive, negative }) {
   return (
-    <div className="desk-card p-4">
-      <p className="text-xs desk-muted mb-1">{label}</p>
+    <div className="card p-4">
+      <p className="text-xs text-ink-muted dark:text-moon-muted mb-1">{label}</p>
       <p className={`desk-mono text-2xl font-semibold ${positive ? "text-emerald-400" : negative ? "text-red-400" : ""}`}>
         {value}
       </p>

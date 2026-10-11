@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import EmptyState from "./EmptyState";
 import { Plus, Trash2, ChevronDown, ChevronUp, Mic2, ExternalLink, Sparkles } from "lucide-react";
 
@@ -20,6 +21,7 @@ const STAGE_COLOR = {
 export default function ContentManager({ userId, initialItems, strings, locale = "ar" }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const c = strings.creator;
 
   const [items, setItems] = useState(initialItems || []);
@@ -57,12 +59,14 @@ export default function ContentManager({ userId, initialItems, strings, locale =
 
   async function cycleStage(item) {
     const next = STAGE_ORDER[(STAGE_ORDER.indexOf(item.status) + 1) % STAGE_ORDER.length];
-    await supabase.from("content_items").update({ status: next }).eq("id", item.id);
+    const { error } = await supabase.from("content_items").update({ status: next }).eq("id", item.id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setItems((list) => list.map((i) => (i.id === item.id ? { ...i, status: next } : i)));
   }
 
   async function updateField(item, field, value) {
-    await supabase.from("content_items").update({ [field]: value }).eq("id", item.id);
+    const { error } = await supabase.from("content_items").update({ [field]: value }).eq("id", item.id);
+    if (error) { showToast("حصلت مشكلة في الحفظ. جرّب تاني."); return; }
     setItems((list) => list.map((i) => (i.id === item.id ? { ...i, [field]: value } : i)));
   }
 
@@ -88,10 +92,11 @@ export default function ContentManager({ userId, initialItems, strings, locale =
     if (!proposalFor) return;
     const { itemId, hook, outline, script, thumbnail_idea } = proposalFor;
     const scriptWithOutline = outline ? `${outline}\n\n---\n\n${script}` : script;
-    await supabase
+    const { error } = await supabase
       .from("content_items")
       .update({ hook: hook || null, script: scriptWithOutline || null, thumbnail_idea: thumbnail_idea || null })
       .eq("id", itemId);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setItems((list) =>
       list.map((i) => (i.id === itemId ? { ...i, hook: hook || i.hook, script: scriptWithOutline || i.script, thumbnail_idea: thumbnail_idea || i.thumbnail_idea } : i))
     );
@@ -101,7 +106,8 @@ export default function ContentManager({ userId, initialItems, strings, locale =
 
   async function removeItem(id) {
     if (!(await confirm(c.confirmDelete))) return;
-    await supabase.from("content_items").delete().eq("id", id);
+    const { error } = await supabase.from("content_items").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setItems((list) => list.filter((i) => i.id !== id));
   }
 

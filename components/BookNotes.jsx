@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
+import { useToast } from "./ToastProvider";
 
 export default function BookNotes({ bookId, initialNotes, strings }) {
   const supabase = createClient();
+  const { showToast } = useToast();
   const l = strings.library;
   const [notes, setNotes] = useState(initialNotes || "");
   const [saving, setSaving] = useState(false);
@@ -12,8 +14,9 @@ export default function BookNotes({ bookId, initialNotes, strings }) {
 
   async function save() {
     setSaving(true);
-    await supabase.from("library_books").update({ notes }).eq("id", bookId);
+    const { error } = await supabase.from("library_books").update({ notes }).eq("id", bookId);
     setSaving(false);
+    if (error) { showToast("حصلت مشكلة في الحفظ. جرّب تاني."); return; }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }

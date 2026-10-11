@@ -2,21 +2,24 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
+import { useToast } from "./ToastProvider";
 
 // The one real autonomy setting in the app: when on, Hamzawi adds his daily
 // focus suggestions straight to today's top 3 (when a slot is free) instead
 // of waiting for a tap. Off by default. Always reversible from Home.
 export default function AutoAddToggle({ userId, initialValue }) {
   const supabase = createClient();
+  const { showToast } = useToast();
   const [value, setValue] = useState(!!initialValue);
   const [saving, setSaving] = useState(false);
 
   async function toggle() {
     const next = !value;
-    setValue(next);
     setSaving(true);
-    await supabase.from("profiles").update({ auto_add_daily_focus: next }).eq("id", userId);
+    const { error } = await supabase.from("profiles").update({ auto_add_daily_focus: next }).eq("id", userId);
     setSaving(false);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
+    setValue(next);
   }
 
   return (

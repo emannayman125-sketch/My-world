@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import { signMemoryPhotos, isLegacyPublicUrl } from "@/lib/memoryPhotos";
 import LinkField from "./LinkField";
 
 export default function TimelineManager({ userId, initialMemories, strings }) {
   const tr = strings.legacy.timeline;
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const supabase = createClient();
   const [memories, setMemories] = useState(initialMemories || []);
   const [form, setForm] = useState({ year: new Date().getFullYear(), emoji: "✨", title: "", description: "", link_url: "" });
@@ -63,8 +65,11 @@ export default function TimelineManager({ userId, initialMemories, strings }) {
     if (!uploadError) {
       // Store the storage PATH (bucket is private now, not a public URL).
       const bustUrl = path;
-      await supabase.from("memories").update({ image_url: bustUrl }).eq("id", memory.id);
-      setMemories((list) => list.map((m) => (m.id === memory.id ? { ...m, image_url: bustUrl } : m)));
+      const { error } = await supabase.from("memories").update({ image_url: bustUrl }).eq("id", memory.id);
+      if (error) { showToast("حصلت مشكلة في رفع الصورة. جرّب تاني."); }
+      else setMemories((list) => list.map((m) => (m.id === memory.id ? { ...m, image_url: bustUrl } : m)));
+    } else {
+      showToast("حصلت مشكلة في رفع الصورة. جرّب تاني.");
     }
 
     setUploadingFor(null);
@@ -72,7 +77,8 @@ export default function TimelineManager({ userId, initialMemories, strings }) {
 
   async function removeMemory(id) {
     if (!(await confirm(tr.confirmDelete))) return;
-    await supabase.from("memories").delete().eq("id", id);
+    const { error } = await supabase.from("memories").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setMemories((list) => list.filter((m) => m.id !== id));
   }
 

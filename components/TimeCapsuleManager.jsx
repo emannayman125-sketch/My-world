@@ -3,19 +3,25 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import { Hourglass, Lock, Unlock, Trash2 } from "lucide-react";
 import EmptyState from "./EmptyState";
 import { todayISO } from "@/lib/time";
 
 function addMonths(date, months) {
+  // Parse and add in UTC throughout (not local time) so this lands on the
+  // same date regardless of the browser's timezone offset -- mixing
+  // UTC-parse with a local-time setMonth() could shift the result by a day
+  // for a browser west of UTC.
   const d = new Date(date);
-  d.setMonth(d.getMonth() + months);
+  d.setUTCMonth(d.getUTCMonth() + months);
   return d.toISOString().slice(0, 10);
 }
 
 export default function TimeCapsuleManager({ userId, initialCapsules, strings }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const tc = strings.timeCapsule;
   const [capsules, setCapsules] = useState(initialCapsules || []);
   const [message, setMessage] = useState("");
@@ -54,7 +60,8 @@ export default function TimeCapsuleManager({ userId, initialCapsules, strings })
 
   async function remove(id) {
     if (!(await confirm(tc.confirmDelete))) return;
-    await supabase.from("time_capsules").delete().eq("id", id);
+    const { error } = await supabase.from("time_capsules").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setCapsules((list) => list.filter((c) => c.id !== id));
   }
 

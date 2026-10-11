@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
+import { useToast } from "./ToastProvider";
 import { GripVertical, LayoutGrid } from "lucide-react";
 import EmptyState from "./EmptyState";
 
@@ -14,14 +15,20 @@ const QUADRANTS = [
 
 export default function MatrixBoard({ userId, initialTasks, strings }) {
   const supabase = createClient();
+  const { showToast } = useToast();
   const m = strings.matrix;
   const [tasks, setTasks] = useState(initialTasks || []);
   const [draggingId, setDraggingId] = useState(null);
   const [dragOverKey, setDragOverKey] = useState(null);
 
   async function moveTask(taskId, quadrant) {
+    const previous = tasks.find((t) => t.id === taskId)?.quadrant ?? null;
     setTasks((list) => list.map((t) => (t.id === taskId ? { ...t, quadrant } : t)));
-    await supabase.from("tasks").update({ quadrant }).eq("id", taskId);
+    const { error } = await supabase.from("tasks").update({ quadrant }).eq("id", taskId);
+    if (error) {
+      setTasks((list) => list.map((t) => (t.id === taskId ? { ...t, quadrant: previous } : t)));
+      showToast("حصلت مشكلة، جرّب تاني.");
+    }
   }
 
   function handleDrop(e, quadrantKey) {

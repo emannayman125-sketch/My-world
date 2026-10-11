@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import EmptyState from "./EmptyState";
 import { Plus, Trash2, ClipboardList } from "lucide-react";
 
@@ -17,6 +18,7 @@ const STATUS_COLOR = {
 export default function AssignmentsManager({ userId, initialAssignments, courses, strings }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const m = strings.mba;
   const [items, setItems] = useState(initialAssignments || []);
   const [open, setOpen] = useState(false);
@@ -50,13 +52,15 @@ export default function AssignmentsManager({ userId, initialAssignments, courses
   async function cycleStatus(item) {
     const idx = STATUS_ORDER.indexOf(item.status);
     const next = STATUS_ORDER[(idx + 1) % STATUS_ORDER.length];
-    await supabase.from("mba_assignments").update({ status: next }).eq("id", item.id);
+    const { error } = await supabase.from("mba_assignments").update({ status: next }).eq("id", item.id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setItems((list) => list.map((a) => (a.id === item.id ? { ...a, status: next } : a)));
   }
 
   async function removeAssignment(id) {
     if (!(await confirm(m.confirmDeleteAssignment))) return;
-    await supabase.from("mba_assignments").delete().eq("id", id);
+    const { error } = await supabase.from("mba_assignments").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setItems((list) => list.filter((a) => a.id !== id));
   }
 

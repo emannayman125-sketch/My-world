@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Sparkles, Check, X } from "lucide-react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import PrivacyToggle from "./PrivacyToggle";
 import LinkField from "./LinkField";
 
@@ -20,6 +21,7 @@ const KIND_KEYS = Object.keys(KIND_META);
 export default function WorldManager({ userId, initialItems, strings }) {
   const tr = strings.legacy.world;
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const supabase = createClient();
   const [items, setItems] = useState(initialItems || []);
   const [activeKind, setActiveKind] = useState(KIND_KEYS[0]);
@@ -56,7 +58,8 @@ export default function WorldManager({ userId, initialItems, strings }) {
 
   async function togglePublic(item) {
     const next = !item.is_public;
-    await supabase.from("world_items").update({ is_public: next }).eq("id", item.id);
+    const { error } = await supabase.from("world_items").update({ is_public: next }).eq("id", item.id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setItems((list) => list.map((i) => (i.id === item.id ? { ...i, is_public: next } : i)));
   }
 
@@ -64,7 +67,8 @@ export default function WorldManager({ userId, initialItems, strings }) {
     const keys = KIND_META[item.kind].statusKeys;
     const i = keys.indexOf(item.status);
     const nextStatus = keys[(i + 1) % keys.length];
-    await supabase.from("world_items").update({ status: nextStatus }).eq("id", item.id);
+    const { error } = await supabase.from("world_items").update({ status: nextStatus }).eq("id", item.id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setItems((list) => list.map((x) => (x.id === item.id ? { ...x, status: nextStatus } : x)));
 
     // Reaching the LAST status (finished/visited) and not public yet: offer once.
@@ -80,7 +84,8 @@ export default function WorldManager({ userId, initialItems, strings }) {
 
   async function removeItem(id) {
     if (!(await confirm(tr.confirmDelete))) return;
-    await supabase.from("world_items").delete().eq("id", id);
+    const { error } = await supabase.from("world_items").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setItems((list) => list.filter((i) => i.id !== id));
   }
 

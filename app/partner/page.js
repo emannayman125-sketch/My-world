@@ -172,8 +172,8 @@ export default async function PartnerPage() {
         )}
 
         {link?.status === "accepted" && otherProfile && partnerTrades !== null && (
-          <div className="desk-card p-6 space-y-4">
-            <h2 className="font-display text-xl text-white">
+          <div className="card p-6 space-y-4">
+            <h2 className="font-display text-xl">
               {strings.trading.journal} — {otherProfile.display_name || strings.partner?.them || ""}
             </h2>
             <TradingJournalManager

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import EmptyState from "./EmptyState";
 import { Plus, Trash2, ChevronDown, ChevronUp, ExternalLink, FlaskConical } from "lucide-react";
 
@@ -18,6 +19,7 @@ const STATUS_COLOR = {
 export default function ResearchWorkspace({ userId, initialResearch, initialNotes, courses, strings }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const m = strings.mba;
 
   const [projects, setProjects] = useState(initialResearch || []);
@@ -63,13 +65,15 @@ export default function ResearchWorkspace({ userId, initialResearch, initialNote
   async function cycleStatus(project) {
     const idx = STATUS_ORDER.indexOf(project.status);
     const next = STATUS_ORDER[(idx + 1) % STATUS_ORDER.length];
-    await supabase.from("research_projects").update({ status: next }).eq("id", project.id);
+    const { error } = await supabase.from("research_projects").update({ status: next }).eq("id", project.id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setProjects((list) => list.map((p) => (p.id === project.id ? { ...p, status: next } : p)));
   }
 
   async function removeProject(id) {
     if (!(await confirm(m.confirmDeleteResearch))) return;
-    await supabase.from("research_projects").delete().eq("id", id);
+    const { error } = await supabase.from("research_projects").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setProjects((list) => list.filter((p) => p.id !== id));
   }
 
@@ -204,6 +208,7 @@ export default function ResearchWorkspace({ userId, initialResearch, initialNote
 function ResearchNotes({ researchId, userId, notes, onChange, strings }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const m = strings.mba;
   const [text, setText] = useState("");
   const [kind, setKind] = useState("note");
@@ -238,7 +243,8 @@ function ResearchNotes({ researchId, userId, notes, onChange, strings }) {
 
   async function removeNote(id) {
     if (!(await confirm(m.confirmDeleteNote))) return;
-    await supabase.from("research_notes").delete().eq("id", id);
+    const { error } = await supabase.from("research_notes").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     onChange((list) => list.filter((n) => n.id !== id));
   }
 

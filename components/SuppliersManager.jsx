@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import EmptyState from "./EmptyState";
 import { Plus, Trash2, Truck } from "lucide-react";
 
 export default function SuppliersManager({ userId, initialSuppliers, strings }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const s = strings.supplyChain;
   const [suppliers, setSuppliers] = useState(initialSuppliers || []);
   const [open, setOpen] = useState(false);
@@ -43,7 +45,8 @@ export default function SuppliersManager({ userId, initialSuppliers, strings }) 
 
   async function removeSupplier(id) {
     if (!(await confirm(s.confirmDeleteSupplier))) return;
-    await supabase.from("supply_chain_suppliers").delete().eq("id", id);
+    const { error } = await supabase.from("supply_chain_suppliers").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setSuppliers((list) => list.filter((sup) => sup.id !== id));
   }
 

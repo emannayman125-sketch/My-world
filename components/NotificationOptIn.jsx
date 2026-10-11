@@ -47,12 +47,21 @@ export default function NotificationOptIn({ userId }) {
         applicationServerKey: urlBase64ToUint8Array(publicKey),
       });
       const json = sub.toJSON();
-      await supabase.from("push_subscriptions").insert({
+      const { error: insertError } = await supabase.from("push_subscriptions").insert({
         user_id: userId,
         endpoint: json.endpoint,
         p256dh: json.keys.p256dh,
         auth_key: json.keys.auth,
       });
+      if (insertError) {
+        // The browser subscribed but the server has no row for it, so no
+        // reminder would ever actually arrive -- undo the browser side too
+        // instead of showing "on" for something that silently can't work.
+        await sub.unsubscribe();
+        setError("حصلت مشكلة في تفعيل التذكيرات. جرب تاني.");
+        setBusy(false);
+        return;
+      }
       setStatus("on");
     } catch {
       setError("حصلت مشكلة في تفعيل التذكيرات. جرب تاني.");
@@ -66,7 +75,12 @@ export default function NotificationOptIn({ userId }) {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
       if (sub) {
-        await supabase.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
+        const { error: deleteError } = await supabase.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
+        if (deleteError) {
+          setError("حصلت مشكلة في إيقاف التذكيرات. جرب تاني.");
+          setBusy(false);
+          return;
+        }
         await sub.unsubscribe();
       }
       setStatus("off");

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import EmptyState from "./EmptyState";
 import { Plus, Trash2, ChevronDown, ChevronUp, Lightbulb } from "lucide-react";
 
@@ -17,6 +18,7 @@ const STAGE_COLOR = {
 export default function IdeasManager({ userId, initialIdeas, strings }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const b = strings.business;
   const [ideas, setIdeas] = useState(initialIdeas || []);
   const [open, setOpen] = useState(false);
@@ -45,18 +47,21 @@ export default function IdeasManager({ userId, initialIdeas, strings }) {
 
   async function cycleStage(idea) {
     const next = STAGE_ORDER[(STAGE_ORDER.indexOf(idea.stage) + 1) % STAGE_ORDER.length];
-    await supabase.from("business_ideas").update({ stage: next }).eq("id", idea.id);
+    const { error } = await supabase.from("business_ideas").update({ stage: next }).eq("id", idea.id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setIdeas((list) => list.map((i) => (i.id === idea.id ? { ...i, stage: next } : i)));
   }
 
   async function updateField(idea, field, value) {
-    await supabase.from("business_ideas").update({ [field]: value }).eq("id", idea.id);
+    const { error } = await supabase.from("business_ideas").update({ [field]: value }).eq("id", idea.id);
+    if (error) { showToast("حصلت مشكلة في الحفظ. جرّب تاني."); return; }
     setIdeas((list) => list.map((i) => (i.id === idea.id ? { ...i, [field]: value } : i)));
   }
 
   async function removeIdea(id) {
     if (!(await confirm(b.confirmDeleteIdea))) return;
-    await supabase.from("business_ideas").delete().eq("id", id);
+    const { error } = await supabase.from("business_ideas").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setIdeas((list) => list.filter((i) => i.id !== id));
   }
 

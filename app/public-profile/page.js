@@ -81,7 +81,7 @@ export default async function PublicProfilePage() {
             initialInterests={interests || []}
             strings={p.publicManager}
             worldKindLabels={strings.legacy.world.kinds}
-            currentlyKindLabels={strings.legacy.currently.kinds}
+            currentlyKindLabels={strings.dashboard.currently.kinds}
           />
         </div>
 

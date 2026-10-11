@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import EmptyState from "./EmptyState";
 import { Plus, Trash2, AlertTriangle } from "lucide-react";
 
@@ -21,6 +22,7 @@ const PRIORITY_COLOR = {
 export default function IssuesManager({ userId, initialIssues, orders, suppliers, strings }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const s = strings.supplyChain;
   const [issues, setIssues] = useState(initialIssues || []);
   const [open, setOpen] = useState(false);
@@ -56,13 +58,15 @@ export default function IssuesManager({ userId, initialIssues, orders, suppliers
   async function cycleStatus(issue) {
     const order = ["open", "investigating", "waiting", "resolved"];
     const next = order[(order.indexOf(issue.status) + 1) % order.length];
-    await supabase.from("supply_chain_issues").update({ status: next }).eq("id", issue.id);
+    const { error } = await supabase.from("supply_chain_issues").update({ status: next }).eq("id", issue.id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setIssues((list) => list.map((i) => (i.id === issue.id ? { ...i, status: next } : i)));
   }
 
   async function removeIssue(id) {
     if (!(await confirm(s.confirmDeleteIssue))) return;
-    await supabase.from("supply_chain_issues").delete().eq("id", id);
+    const { error } = await supabase.from("supply_chain_issues").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setIssues((list) => list.filter((i) => i.id !== id));
   }
 

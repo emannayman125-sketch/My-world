@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 
 export default function MessagesManager({ userId, initialMessages, strings }) {
   const tr = strings.legacy.messages;
@@ -26,6 +27,7 @@ export default function MessagesManager({ userId, initialMessages, strings }) {
     return String(v ?? "").trim() !== "" && Number.isInteger(n) && n >= (t.min ?? 1);
   };
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const supabase = createClient();
   const [messages, setMessages] = useState(initialMessages || []);
   const [form, setForm] = useState({ trigger_type: "days_after_join", trigger_value: "", content: "" });
@@ -60,7 +62,8 @@ export default function MessagesManager({ userId, initialMessages, strings }) {
 
   async function removeMessage(id) {
     if (!(await confirm(tr.confirmDelete))) return;
-    await supabase.from("hidden_messages").delete().eq("id", id);
+    const { error } = await supabase.from("hidden_messages").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setMessages((list) => list.filter((m) => m.id !== id));
   }
 

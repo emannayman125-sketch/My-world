@@ -19,7 +19,7 @@ export default async function WatchlistPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="desk-shell lg:ps-64">
+    <div className="min-h-screen bg-paper dark:bg-night lg:ps-64">
       <AppHeader />
       <main className="max-w-3xl mx-auto px-6 pb-16 space-y-6">
         <h1 className="font-display text-3xl">{strings.trading.watchlist}</h1>

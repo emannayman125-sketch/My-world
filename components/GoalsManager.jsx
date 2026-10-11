@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import LinkField from "./LinkField";
 
 export default function GoalsManager({ userId, initialGoals, strings }) {
   const tr = strings.legacy.goals;
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const supabase = createClient();
   const [goals, setGoals] = useState(initialGoals || []);
   const [form, setForm] = useState({ title: "", period: "weekly", is_shared: false, link_url: "" });
@@ -35,13 +37,15 @@ export default function GoalsManager({ userId, initialGoals, strings }) {
   }
 
   async function updateProgress(goal, progress) {
-    await supabase.from("goals").update({ progress }).eq("id", goal.id);
+    const { error } = await supabase.from("goals").update({ progress }).eq("id", goal.id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setGoals((list) => list.map((g) => (g.id === goal.id ? { ...g, progress } : g)));
   }
 
   async function removeGoal(id) {
     if (!(await confirm(tr.confirmDelete))) return;
-    await supabase.from("goals").delete().eq("id", id);
+    const { error } = await supabase.from("goals").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setGoals((list) => list.filter((g) => g.id !== id));
   }
 

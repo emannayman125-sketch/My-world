@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import { recomputeAndSaveStreak } from "@/lib/streaks";
 import { todayISO } from "@/lib/time";
 
@@ -11,6 +12,7 @@ const EMOJIS = ["📖", "🏃", "💧", "🧘", "🕌", "✍️", "🎯"];
 export default function HabitsManager({ userId, initialHabits, initialLogsToday, strings }) {
   const tr = strings.legacy.habits;
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const supabase = createClient();
   const [habits, setHabits] = useState(initialHabits || []);
   const [doneToday, setDoneToday] = useState(new Set((initialLogsToday || []).map((l) => l.habit_id)));
@@ -37,14 +39,16 @@ export default function HabitsManager({ userId, initialHabits, initialLogsToday,
     const isDone = doneToday.has(habit.id);
 
     if (isDone) {
-      await supabase
+      const { error } = await supabase
         .from("habit_logs")
         .delete()
         .eq("habit_id", habit.id)
         .eq("done_date", todayISO());
+      if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
       setDoneToday((s) => { const next = new Set(s); next.delete(habit.id); return next; });
     } else {
-      await supabase.from("habit_logs").insert({ habit_id: habit.id, user_id: userId, done_date: todayISO() });
+      const { error } = await supabase.from("habit_logs").insert({ habit_id: habit.id, user_id: userId, done_date: todayISO() });
+      if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
       setDoneToday((s) => new Set(s).add(habit.id));
     }
 
@@ -54,7 +58,8 @@ export default function HabitsManager({ userId, initialHabits, initialLogsToday,
 
   async function removeHabit(id) {
     if (!(await confirm(tr.confirmDelete))) return;
-    await supabase.from("habits").delete().eq("id", id);
+    const { error } = await supabase.from("habits").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setHabits((list) => list.filter((h) => h.id !== id));
   }
 

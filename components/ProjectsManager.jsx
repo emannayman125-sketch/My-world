@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import EmptyState from "./EmptyState";
 import { Plus, Trash2, Building2 } from "lucide-react";
 
@@ -17,6 +18,7 @@ const STATUS_COLOR = {
 export default function ProjectsManager({ userId, initialProjects, strings }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const b = strings.business;
   const [projects, setProjects] = useState(initialProjects || []);
   const [open, setOpen] = useState(false);
@@ -52,13 +54,15 @@ export default function ProjectsManager({ userId, initialProjects, strings }) {
   async function cycleStatus(project) {
     const order = ["planning", "active", "on_hold", "completed"];
     const next = order[(order.indexOf(project.status) + 1) % order.length];
-    await supabase.from("business_projects").update({ status: next }).eq("id", project.id);
+    const { error } = await supabase.from("business_projects").update({ status: next }).eq("id", project.id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setProjects((list) => list.map((p) => (p.id === project.id ? { ...p, status: next } : p)));
   }
 
   async function removeProject(id) {
     if (!(await confirm(b.confirmDeleteProject))) return;
-    await supabase.from("business_projects").delete().eq("id", id);
+    const { error } = await supabase.from("business_projects").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setProjects((list) => list.filter((p) => p.id !== id));
   }
 

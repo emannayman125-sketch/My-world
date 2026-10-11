@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import { signMemoryPhotos, isLegacyPublicUrl } from "@/lib/memoryPhotos";
 
 const KIND_EMOJI = { journal: "📝", treasure: "⭐", note: "💡", quote: "💭", learned: "🧠" };
@@ -11,6 +12,7 @@ const KIND_KEYS = Object.keys(KIND_EMOJI);
 export default function JournalManager({ userId, initialNotes, strings }) {
   const tr = strings.legacy.journal;
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const supabase = createClient();
   const [notes, setNotes] = useState(initialNotes || []);
   const [kind, setKind] = useState("journal");
@@ -60,8 +62,11 @@ export default function JournalManager({ userId, initialNotes, strings }) {
     if (!uploadError) {
       // Store the storage PATH (bucket is private now, not a public URL).
       const bustUrl = path;
-      await supabase.from("notes").update({ image_url: bustUrl }).eq("id", note.id);
-      setNotes((list) => list.map((n) => (n.id === note.id ? { ...n, image_url: bustUrl } : n)));
+      const { error } = await supabase.from("notes").update({ image_url: bustUrl }).eq("id", note.id);
+      if (error) { showToast("حصلت مشكلة في رفع الصورة. جرّب تاني."); }
+      else setNotes((list) => list.map((n) => (n.id === note.id ? { ...n, image_url: bustUrl } : n)));
+    } else {
+      showToast("حصلت مشكلة في رفع الصورة. جرّب تاني.");
     }
 
     setUploadingFor(null);
@@ -69,7 +74,8 @@ export default function JournalManager({ userId, initialNotes, strings }) {
 
   async function removeNote(id) {
     if (!(await confirm(tr.confirmDelete))) return;
-    await supabase.from("notes").delete().eq("id", id);
+    const { error } = await supabase.from("notes").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setNotes((list) => list.filter((n) => n.id !== id));
   }
 

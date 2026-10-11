@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import GoogleCalendarSync from "./GoogleCalendarSync";
 import LinkField from "./LinkField";
 
@@ -40,6 +41,7 @@ export default function CalendarView({ userId, initialEvents, strings, locale })
   const tr = strings.legacy.calendar;
   const supabase = createClient();
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const [events, setEvents] = useState(initialEvents || []);
   const [cursor, setCursor] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(toISODate(new Date()));
@@ -95,7 +97,8 @@ export default function CalendarView({ userId, initialEvents, strings, locale })
 
   async function removeEvent(id) {
     if (!(await confirm(tr.confirmDelete))) return;
-    await supabase.from("events").delete().eq("id", id);
+    const { error } = await supabase.from("events").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setEvents((list) => list.filter((e) => e.id !== id));
   }
 

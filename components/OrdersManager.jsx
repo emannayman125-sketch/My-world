@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import EmptyState from "./EmptyState";
 import { Plus, Trash2, Package } from "lucide-react";
 import { todayISO } from "@/lib/time";
@@ -24,6 +25,7 @@ const STATUS_COLOR = {
 export default function OrdersManager({ userId, initialOrders, suppliers, strings, projects = [], defaultProjectId = "" }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const s = strings.supplyChain;
   const [orders, setOrders] = useState(initialOrders || []);
   const [open, setOpen] = useState(false);
@@ -61,19 +63,22 @@ export default function OrdersManager({ userId, initialOrders, suppliers, string
   async function cycleStatus(order) {
     const idx = STATUS_ORDER.indexOf(order.status);
     const next = idx === -1 ? "draft" : STATUS_ORDER[(idx + 1) % STATUS_ORDER.length];
-    await supabase.from("supply_chain_orders").update({ status: next }).eq("id", order.id);
+    const { error } = await supabase.from("supply_chain_orders").update({ status: next }).eq("id", order.id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setOrders((list) => list.map((o) => (o.id === order.id ? { ...o, status: next } : o)));
   }
 
   async function markDelayed(order) {
     const next = order.status === "delayed" ? "in_transit" : "delayed";
-    await supabase.from("supply_chain_orders").update({ status: next }).eq("id", order.id);
+    const { error } = await supabase.from("supply_chain_orders").update({ status: next }).eq("id", order.id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setOrders((list) => list.map((o) => (o.id === order.id ? { ...o, status: next } : o)));
   }
 
   async function removeOrder(id) {
     if (!(await confirm(s.confirmDeleteOrder))) return;
-    await supabase.from("supply_chain_orders").delete().eq("id", id);
+    const { error } = await supabase.from("supply_chain_orders").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setOrders((list) => list.filter((o) => o.id !== id));
   }
 

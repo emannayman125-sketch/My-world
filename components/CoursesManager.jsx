@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import EmptyState from "./EmptyState";
 import { Plus, Trash2, GraduationCap } from "lucide-react";
 
 export default function CoursesManager({ userId, initialCourses, strings, program = "mba", partnerName = "" }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const m = strings.mba;
   const [courses, setCourses] = useState(initialCourses || []);
   const [open, setOpen] = useState(false);
@@ -44,13 +46,15 @@ export default function CoursesManager({ userId, initialCourses, strings, progra
 
   async function toggleShared(course) {
     const next = !course.is_shared;
-    await supabase.from("mba_courses").update({ is_shared: next }).eq("id", course.id);
+    const { error } = await supabase.from("mba_courses").update({ is_shared: next }).eq("id", course.id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setCourses((list) => list.map((c) => (c.id === course.id ? { ...c, is_shared: next } : c)));
   }
 
   async function removeCourse(id) {
     if (!(await confirm(m.confirmDeleteCourse))) return;
-    await supabase.from("mba_courses").delete().eq("id", id);
+    const { error } = await supabase.from("mba_courses").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setCourses((list) => list.filter((c) => c.id !== id));
   }
 

@@ -40,7 +40,8 @@ export default function EnglishSessionLogger({ userId, messages, strings }) {
 
   async function confirmLog() {
     setSaving(true);
-    await supabase.from("english_sessions").insert({
+    setError("");
+    const { error: saveError } = await supabase.from("english_sessions").insert({
       user_id: userId,
       topic: summary.topic,
       vocabulary: summary.vocabulary,
@@ -48,6 +49,10 @@ export default function EnglishSessionLogger({ userId, messages, strings }) {
       self_rating: rating,
     });
     setSaving(false);
+    if (saveError) {
+      setError(ai.errorGeneric);
+      return;
+    }
     setLogged(true);
     setSummary(null);
   }
@@ -127,6 +132,7 @@ export default function EnglishSessionLogger({ userId, messages, strings }) {
       >
         {saving ? ai.saving : ai.confirmLog}
       </button>
+      {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
   );
 }

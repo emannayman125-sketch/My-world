@@ -70,10 +70,14 @@ export default function LibraryManager({ userId, initialBooks, strings }) {
 
   async function removeBook(book) {
     if (!(await confirm(l.confirmDelete))) return;
+    // Delete the DB row first: if that fails we bail out with nothing lost.
+    // Doing it the other way around (file first) could orphan a DB row
+    // pointing at a file that's already gone.
+    const { error: deleteError } = await supabase.from("library_books").delete().eq("id", book.id);
+    if (deleteError) { setError(deleteError.message); return; }
     if (book.file_path) {
       await supabase.storage.from("library").remove([book.file_path]);
     }
-    await supabase.from("library_books").delete().eq("id", book.id);
     setBooks((list) => list.filter((b) => b.id !== book.id));
   }
 

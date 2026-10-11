@@ -1,7 +1,7 @@
 {
   "name": "عالمك الخاص — Personal World",
   "short_name": "عالمك",
-  "description": "مساحة شخصية صُنعت بحب.",
+  "description": "مساحة شخصية صُنعت ليك.",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#F7F3E8",

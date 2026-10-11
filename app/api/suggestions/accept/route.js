@@ -39,9 +39,17 @@ export async function POST(request) {
     if ((count || 0) >= 3) {
       return NextResponse.json({ error: "top3_full" }, { status: 409 });
     }
-    await supabase.from("top3_tasks").insert({ user_id: user.id, title: row.title, for_date: todayISO() });
+    const { error: insertError } = await supabase
+      .from("top3_tasks")
+      .insert({ user_id: user.id, title: row.title, for_date: todayISO() });
+    if (insertError) {
+      return NextResponse.json({ error: "save_failed" }, { status: 500 });
+    }
   }
 
-  await supabase.from("ai_suggestions").update({ status: "accepted" }).eq("id", id);
+  const { error: updateError } = await supabase.from("ai_suggestions").update({ status: "accepted" }).eq("id", id);
+  if (updateError) {
+    return NextResponse.json({ error: "save_failed" }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }

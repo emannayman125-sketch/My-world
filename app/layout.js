@@ -37,7 +37,7 @@ const fraunces = Fraunces({
 
 export const metadata = {
   title: "عالمك الخاص",
-  description: "مساحة شخصية صُنعت لك .",
+  description: "مساحة شخصية صُنعت لك.",
   manifest: "/manifest.json",
 };
 

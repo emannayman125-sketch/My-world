@@ -30,7 +30,7 @@ export default function TradingShareSettings({ userId, partnerName, initialShare
   }
 
   if (!partnerName) {
-    return <p className="text-xs desk-muted">{tr.noPartnerYet}</p>;
+    return <p className="text-xs text-ink-muted dark:text-moon-muted">{tr.noPartnerYet}</p>;
   }
 
   return (
@@ -59,7 +59,7 @@ export default function TradingShareSettings({ userId, partnerName, initialShare
         </label>
       )}
 
-      <p className="text-xs desk-muted">
+      <p className="text-xs text-ink-muted dark:text-moon-muted">
         {shared ? (canLog ? tr.statusEdit : tr.statusView) : tr.statusOff}
       </p>
     </div>

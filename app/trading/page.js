@@ -25,38 +25,38 @@ export default async function TradingHubPage() {
     .maybeSingle();
 
   return (
-    <div className="desk-shell lg:ps-64">
+    <div className="min-h-screen bg-paper dark:bg-night lg:ps-64">
       <AppHeader />
       <main className="max-w-4xl mx-auto px-6 pb-16 space-y-6">
         <div>
           <h1 className="font-display text-3xl">{tr.title}</h1>
-          <p className="desk-muted mt-1">{tr.subtitle}</p>
+          <p className="text-ink-muted dark:text-moon-muted mt-1">{tr.subtitle}</p>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          <Link href="/trading/journal" className="desk-card desk-card-hover p-5 flex items-center gap-3">
+          <Link href="/trading/journal" className="card card-hover p-5 flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-dusk/15 text-dusk shrink-0">
               <NotebookPen size={18} strokeWidth={2} />
             </span>
             <div className="flex-1">
               <p className="font-medium text-sm">{tr.journal}</p>
-              <p className="text-xs desk-muted">{todayNote ? tr.todayLogged : tr.todayNotLogged}</p>
+              <p className="text-xs text-ink-muted dark:text-moon-muted">{todayNote ? tr.todayLogged : tr.todayNotLogged}</p>
             </div>
-            <Arrow size={16} className="text-white/30" />
+            <Arrow size={16} className="text-ink-muted/50 dark:text-moon-muted/40" />
           </Link>
 
-          <Link href="/trading/review" className="desk-card desk-card-hover p-5 flex items-center gap-3">
+          <Link href="/trading/review" className="card card-hover p-5 flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-500/15 text-violet-500 shrink-0">
               <BarChart3 size={18} strokeWidth={2} />
             </span>
             <div className="flex-1">
               <p className="font-medium text-sm">{tr.review}</p>
             </div>
-            <Arrow size={16} className="text-white/30" />
+            <Arrow size={16} className="text-ink-muted/50 dark:text-moon-muted/40" />
           </Link>
         </div>
 
-        <p className="text-xs desk-muted">{tr.disclaimer}</p>
+        <p className="text-xs text-ink-muted dark:text-moon-muted">{tr.disclaimer}</p>
       </main>
     </div>
   );

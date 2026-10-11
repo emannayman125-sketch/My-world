@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
+import { useToast } from "./ToastProvider";
 import { todayISO, weekStartISO } from "@/lib/time";
 
 export default function ReviewTabs({ userId, todayReview, weekReview, strings }) {
   const g = strings.growthHub;
   const supabase = createClient();
+  const { showToast } = useToast();
   const [tab, setTab] = useState("evening");
 
   const [accomplished, setAccomplished] = useState(todayReview?.accomplished || "");
@@ -20,15 +22,16 @@ export default function ReviewTabs({ userId, todayReview, weekReview, strings })
   const [savedWeekly, setSavedWeekly] = useState(true);
 
   async function saveEvening() {
-    await supabase.from("evening_reviews").upsert(
+    const { error } = await supabase.from("evening_reviews").upsert(
       { user_id: userId, review_date: todayISO(), accomplished, proud_of: proudOf },
       { onConflict: "user_id,review_date" }
     );
+    if (error) { showToast("حصلت مشكلة في الحفظ. جرّب تاني."); return; }
     setSavedEvening(true);
   }
 
   async function saveWeekly() {
-    await supabase.from("weekly_reviews").upsert(
+    const { error } = await supabase.from("weekly_reviews").upsert(
       {
         user_id: userId,
         week_start: weekStartISO(),
@@ -39,6 +42,7 @@ export default function ReviewTabs({ userId, todayReview, weekReview, strings })
       },
       { onConflict: "user_id,week_start" }
     );
+    if (error) { showToast("حصلت مشكلة في الحفظ. جرّب تاني."); return; }
     setSavedWeekly(true);
   }
 

@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
+import { useToast } from "./ToastProvider";
 import { recomputeAndSaveStreak } from "@/lib/streaks";
 import { todayISO } from "@/lib/time";
 
 export default function HabitsToday({ userId, habits, initialLogsToday, strings }) {
   const supabase = createClient();
+  const { showToast } = useToast();
   const [doneToday, setDoneToday] = useState(new Set((initialLogsToday || []).map((l) => l.habit_id)));
 
   if (!habits || habits.length === 0) return null;
@@ -14,10 +16,12 @@ export default function HabitsToday({ userId, habits, initialLogsToday, strings 
   async function toggle(habit) {
     const isDone = doneToday.has(habit.id);
     if (isDone) {
-      await supabase.from("habit_logs").delete().eq("habit_id", habit.id).eq("done_date", todayISO());
+      const { error } = await supabase.from("habit_logs").delete().eq("habit_id", habit.id).eq("done_date", todayISO());
+      if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
       setDoneToday((s) => { const next = new Set(s); next.delete(habit.id); return next; });
     } else {
-      await supabase.from("habit_logs").insert({ habit_id: habit.id, user_id: userId, done_date: todayISO() });
+      const { error } = await supabase.from("habit_logs").insert({ habit_id: habit.id, user_id: userId, done_date: todayISO() });
+      if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
       setDoneToday((s) => new Set(s).add(habit.id));
     }
     await recomputeAndSaveStreak(supabase, habit.id, userId);

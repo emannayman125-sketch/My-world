@@ -7,7 +7,7 @@ import { Plus, Trash2, ChevronDown, ChevronUp, Zap } from "lucide-react";
 import { todayISO } from "@/lib/time";
 
 const RESULT_COLOR = {
-  open: "bg-white/5 desk-muted",
+  open: "bg-black/5 dark:bg-white/10 text-ink-muted dark:text-moon-muted",
   win: "bg-emerald-500/15 text-emerald-400",
   loss: "bg-red-500/15 text-red-500",
   breakeven: "bg-dusk/20 text-dusk",
@@ -114,32 +114,32 @@ export default function TradingJournalManager({ userId, initialTrades, strings, 
   return (
     <div className="space-y-3">
       {readOnly && (
-        <p className="text-xs desk-muted">{tr.sharing.statusView}</p>
+        <p className="text-xs text-ink-muted dark:text-moon-muted">{tr.sharing.statusView}</p>
       )}
       {!readOnly && !quickOpen ? (
         <button
           onClick={() => setQuickOpen(true)}
-          className="w-full desk-card p-3 flex items-center justify-center gap-2 text-sm text-sky-400 hover:text-sky-300 transition"
+          className="w-full card p-3 flex items-center justify-center gap-2 text-sm text-sage dark:text-sage-soft hover:text-sage transition"
         >
           <Zap size={14} strokeWidth={2} />
           {tr.quickLog}
         </button>
       ) : !readOnly ? (
-        <form onSubmit={addQuick} className="desk-card p-3 flex flex-wrap items-center gap-2">
+        <form onSubmit={addQuick} className="card p-3 flex flex-wrap items-center gap-2">
           <input
             autoFocus
             value={quick.symbol}
             onChange={(e) => setQuick({ ...quick, symbol: e.target.value })}
             placeholder={tr.symbol}
-            className="w-24 rounded-soft border border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sky-500 uppercase"
+            className="w-24 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sage uppercase"
           />
-          <div className="flex rounded-soft border border-white/10 overflow-hidden text-xs">
+          <div className="flex rounded-soft border border-black/10 dark:border-white/10 overflow-hidden text-xs">
             {["long", "short"].map((d) => (
               <button
                 key={d}
                 type="button"
                 onClick={() => setQuick({ ...quick, direction: d })}
-                className={`px-3 py-2 transition ${quick.direction === d ? "bg-sky-600 text-white" : "desk-muted hover:text-white"}`}
+                className={`px-3 py-2 transition ${quick.direction === d ? "bg-sage text-white" : "text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon"}`}
               >
                 {tr.direction[d]}
               </button>
@@ -148,7 +148,7 @@ export default function TradingJournalManager({ userId, initialTrades, strings, 
           <select
             value={quick.result}
             onChange={(e) => setQuick({ ...quick, result: e.target.value })}
-            className="rounded-soft border border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sky-500"
+            className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
           >
             {Object.entries(tr.resultOptions).map(([k, label]) => <option key={k} value={k}>{label}</option>)}
           </select>
@@ -157,23 +157,23 @@ export default function TradingJournalManager({ userId, initialTrades, strings, 
             value={quick.pnl}
             onChange={(e) => setQuick({ ...quick, pnl: e.target.value })}
             placeholder={tr.pnl}
-            className="w-24 rounded-soft border border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sky-500"
+            className="w-24 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
           />
           <input
             type="number" step="0.01"
             value={quick.fees}
             onChange={(e) => setQuick({ ...quick, fees: e.target.value })}
             placeholder={tr.fees}
-            className="w-20 rounded-soft border border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sky-500"
+            className="w-20 rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-2 py-2 text-sm outline-none focus:border-sage"
           />
           <button
             type="submit"
             disabled={saving || !quick.symbol.trim()}
-            className="rounded-soft bg-sky-600 text-white text-sm font-medium px-4 py-2 hover:brightness-110 transition disabled:opacity-50"
+            className="rounded-soft bg-sage text-white text-sm font-medium px-4 py-2 hover:brightness-110 transition disabled:opacity-50"
           >
             {tr.log}
           </button>
-          <button type="button" onClick={() => setQuickOpen(false)} className="text-xs desk-muted hover:text-white">
+          <button type="button" onClick={() => setQuickOpen(false)} className="text-xs text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon">
             {strings.quote.cancel}
           </button>
         </form>
@@ -183,72 +183,72 @@ export default function TradingJournalManager({ userId, initialTrades, strings, 
         <button
           onClick={() => setOpen(true)}
           className="w-full card card-hover p-4 flex items-center justify-center gap-2 text-sm
-                     desk-muted hover:text-sky-400 transition"
+                     text-ink-muted dark:text-moon-muted hover:text-sage dark:hover:text-sage-soft transition"
         >
           <Plus size={15} strokeWidth={2} />
           {tr.addTrade}
         </button>
       ) : !readOnly ? (
-        <form onSubmit={addTrade} className="desk-card p-4 space-y-2">
+        <form onSubmit={addTrade} className="card p-4 space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <input value={form.symbol} onChange={(e) => setForm({ ...form, symbol: e.target.value })}
               placeholder={tr.symbol} autoFocus
-              className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500 uppercase" />
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage uppercase" />
             <input type="date" value={form.trade_date} onChange={(e) => setForm({ ...form, trade_date: e.target.value })}
-              className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500" />
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage" />
             <input type="number" step="0.01" value={form.entry_price} onChange={(e) => setForm({ ...form, entry_price: e.target.value })}
               placeholder={tr.entryPrice}
-              className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500" />
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage" />
             <input type="number" step="0.01" value={form.exit_price} onChange={(e) => setForm({ ...form, exit_price: e.target.value })}
               placeholder={tr.exitPrice}
-              className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500" />
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage" />
             <input type="number" step="0.01" value={form.position_size} onChange={(e) => setForm({ ...form, position_size: e.target.value })}
               placeholder={tr.positionSize}
-              className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500" />
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage" />
             <input type="number" step="0.01" value={form.pnl} onChange={(e) => setForm({ ...form, pnl: e.target.value })}
               placeholder={tr.pnl}
-              className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500" />
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage" />
             <input type="number" step="0.01" value={form.fees} onChange={(e) => setForm({ ...form, fees: e.target.value })}
               placeholder={tr.fees}
-              className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500" />
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage" />
             <input type="number" step="0.01" value={form.stop_loss} onChange={(e) => setForm({ ...form, stop_loss: e.target.value })}
               placeholder={tr.stopLoss}
-              className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500" />
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage" />
             <input type="number" step="0.01" value={form.target} onChange={(e) => setForm({ ...form, target: e.target.value })}
               placeholder={tr.target}
-              className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500" />
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage" />
           </div>
           <input value={form.strategy} onChange={(e) => setForm({ ...form, strategy: e.target.value })}
             placeholder={tr.strategy}
-            className="w-full rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500" />
+            className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage" />
           <textarea value={form.reason_entry} onChange={(e) => setForm({ ...form, reason_entry: e.target.value })}
             placeholder={tr.reasonEntry} rows={2}
-            className="w-full rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500 resize-none" />
+            className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage resize-none" />
           <div className="flex gap-2 flex-wrap">
             <select value={form.result} onChange={(e) => setForm({ ...form, result: e.target.value })}
-              className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500">
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage">
               {Object.entries(tr.resultOptions).map(([k, label]) => <option key={k} value={k}>{label}</option>)}
             </select>
             <select value={form.direction} onChange={(e) => setForm({ ...form, direction: e.target.value })}
-              className="rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500">
+              className="rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage">
               <option value="">{tr.direction.unset}</option>
               <option value="long">{tr.direction.long}</option>
               <option value="short">{tr.direction.short}</option>
             </select>
             <input value={form.emotional_state} onChange={(e) => setForm({ ...form, emotional_state: e.target.value })}
               placeholder={tr.emotionalState}
-              className="flex-1 min-w-[140px] rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500" />
+              className="flex-1 min-w-[140px] rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage" />
           </div>
           <textarea value={form.lessons_learned} onChange={(e) => setForm({ ...form, lessons_learned: e.target.value })}
             placeholder={tr.lessonsLearned} rows={2}
-            className="w-full rounded-soft border border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sky-500 resize-none" />
+            className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-sage resize-none" />
           <div className="flex items-center gap-2">
             <button type="submit" disabled={saving || !form.symbol.trim()}
-              className="rounded-soft bg-sky-600 text-white text-sm font-medium px-4 py-2 hover:brightness-110 transition disabled:opacity-50">
+              className="rounded-soft bg-sage text-white text-sm font-medium px-4 py-2 hover:brightness-110 transition disabled:opacity-50">
               {saving ? tr.saving : tr.save}
             </button>
             <button type="button" onClick={() => setOpen(false)}
-              className="text-sm desk-muted hover:text-white">
+              className="text-sm text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon">
               {strings.quote.cancel}
             </button>
           </div>
@@ -256,21 +256,21 @@ export default function TradingJournalManager({ userId, initialTrades, strings, 
       ) : null}
 
       {sorted.length === 0 && !open && (
-        <p className="text-sm desk-muted text-center py-6">{tr.noTrades}</p>
+        <p className="text-sm text-ink-muted dark:text-moon-muted text-center py-6">{tr.noTrades}</p>
       )}
 
       <div className="space-y-2">
         {sorted.map((t) => (
-          <div key={t.id} className="desk-card overflow-hidden">
+          <div key={t.id} className="card overflow-hidden">
             <div className="p-4 flex items-center gap-3">
               <span className={`shrink-0 text-xs rounded-full px-2.5 py-1 font-medium ${RESULT_COLOR[t.result] || RESULT_COLOR.open}`}>
                 {tr.resultOptions[t.result] || tr.resultOptions.open}
               </span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium">
-                  {t.symbol} {t.direction && <span className="text-xs desk-muted">· {tr.direction[t.direction]}</span>}
+                  {t.symbol} {t.direction && <span className="text-xs text-ink-muted dark:text-moon-muted">· {tr.direction[t.direction]}</span>}
                 </p>
-                <p className="text-xs desk-muted">
+                <p className="text-xs text-ink-muted dark:text-moon-muted">
                   {t.trade_date}
                   {t.pnl != null && (() => {
                     const net = Number(t.pnl) - Number(t.fees || 0);
@@ -278,11 +278,11 @@ export default function TradingJournalManager({ userId, initialTrades, strings, 
                   })()}
                 </p>
               </div>
-              <button onClick={() => setExpanded(expanded === t.id ? null : t.id)} className="desk-muted hover:text-white transition shrink-0">
+              <button onClick={() => setExpanded(expanded === t.id ? null : t.id)} className="text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon transition shrink-0">
                 {expanded === t.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </button>
               {loggerId === userId && (
-                <button onClick={() => removeTrade(t.id)} aria-label={tr.delete} className="text-white/30 hover:text-red-500 transition shrink-0">
+                <button onClick={() => removeTrade(t.id)} aria-label={tr.delete} className="text-ink-muted/50 dark:text-moon-muted/40 hover:text-red-500 transition shrink-0">
                   <Trash2 size={14} strokeWidth={2} />
                 </button>
               )}
@@ -298,7 +298,7 @@ export default function TradingJournalManager({ userId, initialTrades, strings, 
                 {t.strategy && <p>{tr.strategy}: {t.strategy}</p>}
                 {t.reason_entry && <p>{tr.reasonEntry}: {t.reason_entry}</p>}
                 {t.emotional_state && <p>{tr.emotionalState}: {t.emotional_state}</p>}
-                {t.lessons_learned && <p className="desk-muted">{tr.lessonsLearned}: {t.lessons_learned}</p>}
+                {t.lessons_learned && <p className="text-ink-muted dark:text-moon-muted">{tr.lessonsLearned}: {t.lessons_learned}</p>}
               </div>
             )}
           </div>

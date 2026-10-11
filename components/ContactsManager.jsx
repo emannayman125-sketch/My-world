@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { useConfirm } from "./ConfirmProvider";
+import { useToast } from "./ToastProvider";
 import EmptyState from "./EmptyState";
 import { Plus, Trash2, User } from "lucide-react";
 
 export default function ContactsManager({ userId, initialContacts, projects, strings, defaultProjectId = "" }) {
   const supabase = createClient();
   const { confirm } = useConfirm();
+  const { showToast } = useToast();
   const b = strings.business;
   const [contacts, setContacts] = useState(initialContacts || []);
   const [open, setOpen] = useState(false);
@@ -43,7 +45,8 @@ export default function ContactsManager({ userId, initialContacts, projects, str
 
   async function removeContact(id) {
     if (!(await confirm(b.confirmDeleteContact))) return;
-    await supabase.from("business_contacts").delete().eq("id", id);
+    const { error } = await supabase.from("business_contacts").delete().eq("id", id);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     setContacts((list) => list.filter((c) => c.id !== id));
   }
 

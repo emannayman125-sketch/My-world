@@ -5,7 +5,7 @@ import TradingJournalManager from "@/components/TradingJournalManager";
 import TradingSessionPanel from "@/components/TradingSessionPanel";
 import TradingShareSettings from "@/components/TradingShareSettings";
 import TradingDayReflection from "@/components/TradingDayReflection";
-import DeskCollapsible from "@/components/DeskCollapsible";
+import Collapsible from "@/components/Collapsible";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
 import { todayISO, addDaysISO } from "@/lib/time";
@@ -39,7 +39,7 @@ export default async function JournalPage() {
   const todayTrades = (trades || []).filter((t) => t.trade_date === today);
 
   return (
-    <div className="desk-shell lg:ps-64">
+    <div className="min-h-screen bg-paper dark:bg-night lg:ps-64">
       <AppHeader />
       <main className="max-w-3xl mx-auto px-6 pb-16 space-y-6">
         <h1 className="font-display text-3xl">{strings.trading.journal}</h1>
@@ -51,8 +51,8 @@ export default async function JournalPage() {
           strings={strings.trading.reflection}
         />
 
-        <DeskCollapsible title={strings.trading.detailedOptional} defaultOpen={false}>
-          <div className="desk-card p-5">
+        <Collapsible title={strings.trading.detailedOptional} defaultOpen={false}>
+          <div className="card p-5">
             <h2 className="font-display text-lg mb-3">{strings.trading.sharing.title}</h2>
             <TradingShareSettings
               userId={user.id}
@@ -69,7 +69,7 @@ export default async function JournalPage() {
             strings={strings.trading}
           />
           <TradingJournalManager userId={user.id} initialTrades={trades || []} strings={strings} />
-        </DeskCollapsible>
+        </Collapsible>
       </main>
     </div>
   );

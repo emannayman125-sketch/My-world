@@ -13,10 +13,20 @@ export default async function MbaCoursesPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: courses }, { data: assignments }] = await Promise.all([
-    supabase.from("mba_courses").select("*").eq("user_id", user.id).eq("program", "mba").order("created_at", { ascending: false }),
-    supabase.from("mba_assignments").select("*").eq("user_id", user.id),
-  ]);
+  const { data: courses } = await supabase
+    .from("mba_courses")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("program", "mba")
+    .order("created_at", { ascending: false });
+
+  // Assignments belong to a course, so scope them to THIS program's courses only
+  // (otherwise institute assignments would leak into the MBA list, mislabeled
+  // since AssignmentsManager's courseName() only looks up MBA courses).
+  const courseIds = (courses || []).map((c) => c.id);
+  const { data: assignments } = courseIds.length
+    ? await supabase.from("mba_assignments").select("*").in("course_id", courseIds)
+    : { data: [] };
 
   return (
     <div className="min-h-screen bg-paper dark:bg-night lg:ps-64">

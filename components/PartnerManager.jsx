@@ -53,16 +53,18 @@ export default function PartnerManager({ userId, link, otherProfile }) {
 
   async function reject() {
     setBusy(true);
-    await supabase.from("partner_links").delete().eq("id", link.id);
+    const { error } = await supabase.from("partner_links").delete().eq("id", link.id);
     setBusy(false);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     router.refresh();
   }
 
   async function disconnect() {
     if (!(await confirm("متأكدة إنك عايزة تفصلي الشراكة؟"))) return;
     setBusy(true);
-    await supabase.from("partner_links").delete().eq("id", link.id);
+    const { error } = await supabase.from("partner_links").delete().eq("id", link.id);
     setBusy(false);
+    if (error) { showToast("حصلت مشكلة، جرّب تاني."); return; }
     router.refresh();
   }
 
