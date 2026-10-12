@@ -30,6 +30,34 @@ const COPPER = "#A9694D";
 const SAND = "#D8CCBC";
 const MUTED = "#68736E";
 
+// Real cover art, looked up live from Open Library (a free, no-key
+// catalog) by title/author, cached for a day per title so repeat visits
+// don't re-fetch. Deliberately skipped for Arabic-script titles: that
+// catalog is overwhelmingly English, so a "match" there is more likely
+// to be a wrong book's cover than a right one -- and a wrong cover is
+// worse than the plain fallback tile. On any failure (timeout, no
+// match, API down) this just returns null and the fallback tile shows,
+// exactly as before.
+async function fetchCoverUrl(title, author) {
+  if (/[؀-ۿ]/.test(title)) return null;
+  try {
+    const q = encodeURIComponent(`${title} ${author || ""}`.trim());
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const res = await fetch(`https://openlibrary.org/search.json?q=${q}&fields=cover_i&limit=1`, {
+      signal: controller.signal,
+      next: { revalidate: 60 * 60 * 24 },
+    });
+    clearTimeout(timeout);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const coverId = data?.docs?.[0]?.cover_i;
+    return coverId ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg` : null;
+  } catch {
+    return null;
+  }
+}
+
 const SOCIAL_LABELS = {
   instagram: "Instagram",
   facebook: "Facebook",
@@ -173,6 +201,13 @@ export default async function PublicProfilePage({ params }) {
     booksByCategory.get(cat).push(b);
   }
 
+  // Real cover art per book (see fetchCoverUrl above) -- fetched in
+  // parallel, falls back to the plain tile per-book on any miss.
+  const coverEntries = await Promise.all(
+    (worldByKind.book || []).map(async (b) => [b.id, await fetchCoverUrl(b.title, b.subtitle)])
+  );
+  const bookCovers = Object.fromEntries(coverEntries);
+
   const hasSocial = profile.social_links && Object.values(profile.social_links).some(Boolean);
   const firstName = (profile.display_name || "").trim().split(/\s+/)[0] || "Welcome";
 
@@ -239,23 +274,47 @@ export default async function PublicProfilePage({ params }) {
     ) : null,
 
     books: (
-      <Section id="books" title="From the Shelf" subtitle="A curated collection of books, ideas and perspectives.">
+      <Section
+        id="books"
+        title="From the Shelf"
+        subtitle={booksByCategory.size > 1 ? "A curated collection of books, ideas and perspectives. Tap a category to collapse it." : "A curated collection of books, ideas and perspectives."}
+      >
         {booksByCategory.size > 0 ? (
-          <div className="space-y-8">
+          <div className="space-y-3">
             {[...booksByCategory.entries()].map(([category, books]) => (
-              <div key={category}>
-                <span
-                  className="inline-block text-xs uppercase tracking-wide rounded-full px-3 py-1 mb-4"
-                  style={{ backgroundColor: SAND, color: INK }}
+              <details key={category} open className="group">
+                <summary
+                  className="list-none flex items-center gap-2 cursor-pointer select-none mb-4"
+                  style={{ color: INK }}
                 >
-                  {category}
-                </span>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke={INK}
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    className="transition-transform group-open:rotate-90 shrink-0"
+                  >
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                  <span
+                    className="inline-block text-xs uppercase tracking-wide rounded-full px-3 py-1"
+                    style={{ backgroundColor: SAND, color: INK }}
+                  >
+                    {category}
+                  </span>
+                  <span className="text-xs" style={{ color: MUTED }}>
+                    {books.length}
+                  </span>
+                </summary>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-x-5 gap-y-8">
                   {books.map((b) => (
-                    <BookCover key={b.id} book={b} />
+                    <BookCover key={b.id} book={b} coverUrl={bookCovers[b.id]} />
                   ))}
                 </div>
-              </div>
+              </details>
             ))}
           </div>
         ) : (
@@ -611,21 +670,30 @@ function hashTitle(str) {
 // A plain, server-rendered "book cover" tile — no client state needed,
 // so this stays part of the same file as the rest of the (server
 // component) page instead of a separate component file.
-function BookCover({ book }) {
+function BookCover({ book, coverUrl }) {
   const tone = SPINE_TONES[hashTitle(book.title) % SPINE_TONES.length];
   return (
     <div>
-      <div
-        className="aspect-[2/3] rounded-md shadow-[0_6px_16px_-6px_rgba(24,32,29,0.25)] flex items-end p-3"
-        style={{ backgroundColor: tone }}
-      >
-        <span className="font-display text-[13px] leading-tight" style={{ color: WHITE }}>
-          {book.title}
-        </span>
+      <div className="aspect-[2/3] rounded-md overflow-hidden shadow-[0_6px_16px_-6px_rgba(24,32,29,0.25)]">
+        {coverUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={coverUrl} alt={book.title} className="w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <div className="w-full h-full flex items-end p-3" style={{ backgroundColor: tone }}>
+            <span className="font-display text-[13px] leading-tight" style={{ color: WHITE }}>
+              {book.title}
+            </span>
+          </div>
+        )}
       </div>
       <p className="mt-2 text-xs truncate" style={{ color: MUTED }}>
         {book.subtitle || ""}
       </p>
+      {book.review && (
+        <p className="mt-1 text-xs italic leading-snug line-clamp-3" style={{ color: INK }}>
+          &ldquo;{book.review}&rdquo;
+        </p>
+      )}
     </div>
   );
 }
