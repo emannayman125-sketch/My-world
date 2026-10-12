@@ -219,6 +219,19 @@ export default async function PublicProfilePage({ params }) {
                   {c.subtitle}
                 </p>
               )}
+              {typeof c.progress_percent === "number" && (
+                <div className="mt-3">
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: SAND }}>
+                    <div
+                      className="h-full rounded-full"
+                      style={{ width: `${c.progress_percent}%`, backgroundColor: COPPER }}
+                    />
+                  </div>
+                  <p className="text-xs mt-1" style={{ color: MUTED }}>
+                    {c.progress_percent}%
+                  </p>
+                </div>
+              )}
             </Card>
           ))}
         </div>
