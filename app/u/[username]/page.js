@@ -84,6 +84,12 @@ const CURRENTLY_LABELS = {
   watching: "Currently Watching",
 };
 
+const CURRENTLY_ICON_PATHS = {
+  reading: "M4 5.5C4 4.7 4.7 4 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5v-13zM20 5.5c0-.8-.7-1.5-1.5-1.5H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5v-13z",
+  listening: "M4 13a8 8 0 0 1 16 0v4a2 2 0 0 1-2 2h-1v-6h3M4 17v-4h3v6H6a2 2 0 0 1-2-2z",
+  watching: "M8 5v14l11-7z",
+};
+
 // One section shell used by every module below so the page reads as
 // one deliberate system rather than several unrelated styles.
 function Section({ id, title, subtitle, action, children }) {
@@ -192,9 +198,19 @@ export default async function PublicProfilePage({ params }) {
         <div className="grid sm:grid-cols-3 gap-4">
           {currently.map((c) => (
             <Card key={c.id}>
-              <p className="text-xs uppercase tracking-wide mb-2" style={{ color: COPPER }}>
-                {CURRENTLY_LABELS[c.kind] || c.kind}
-              </p>
+              <div className="flex items-center gap-2 mb-3">
+                <span
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
+                  style={{ backgroundColor: SAND }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill={INK}>
+                    <path d={CURRENTLY_ICON_PATHS[c.kind] || CURRENTLY_ICON_PATHS.reading} />
+                  </svg>
+                </span>
+                <p className="text-xs uppercase tracking-wide" style={{ color: COPPER }}>
+                  {CURRENTLY_LABELS[c.kind] || c.kind}
+                </p>
+              </div>
               <p className="font-display text-lg leading-snug" style={{ color: INK }}>
                 {c.title}
               </p>
@@ -240,29 +256,10 @@ export default async function PublicProfilePage({ params }) {
     podcasts: (
       <Section id="podcasts" title="What I'm Listening To" subtitle="Podcasts, audiobooks and ideas worth hearing.">
         {worldByKind.podcast?.length > 0 ? (
-          <div className="grid sm:grid-cols-2 gap-3">
-            {worldByKind.podcast.map((w) => {
-              const href = w.link_url && /^https?:\/\//.test(w.link_url) ? w.link_url : null;
-              const Wrapper = href ? "a" : "div";
-              return (
-                <Wrapper
-                  key={w.id}
-                  {...(href ? { href, target: "_blank", rel: "noopener noreferrer nofollow" } : {})}
-                  className="block"
-                >
-                  <Card className={href ? "hover:border-[#A9694D] transition-colors" : ""}>
-                    <p className="font-display text-base leading-snug" style={{ color: INK }}>
-                      {w.title}
-                    </p>
-                    {w.subtitle && (
-                      <p className="text-sm mt-1" style={{ color: MUTED }}>
-                        {w.subtitle}
-                      </p>
-                    )}
-                  </Card>
-                </Wrapper>
-              );
-            })}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-x-5 gap-y-8">
+            {worldByKind.podcast.map((w) => (
+              <PodcastCover key={w.id} item={w} />
+            ))}
           </div>
         ) : (
           <Card className="text-center py-10">
@@ -300,10 +297,22 @@ export default async function PublicProfilePage({ params }) {
     ),
 
     about: hasContent.about ? (
-      <Section id="about" title="About">
-        <p className="font-letter text-lg sm:text-xl leading-[1.9] whitespace-pre-wrap max-w-[65ch]" style={{ color: INK }}>
-          {profile.bio}
-        </p>
+      <Section id="about" title="About Me">
+        <Card className="relative overflow-hidden">
+          <span
+            className="font-display text-6xl leading-none select-none"
+            style={{ color: SAND }}
+            aria-hidden="true"
+          >
+            &ldquo;
+          </span>
+          <p
+            className="font-letter text-lg sm:text-xl leading-[1.8] whitespace-pre-wrap max-w-[65ch] -mt-4"
+            style={{ color: INK }}
+          >
+            {profile.bio}
+          </p>
+        </Card>
       </Section>
     ) : null,
 
@@ -572,6 +581,39 @@ function BookCover({ book }) {
         {book.subtitle || ""}
       </p>
     </div>
+  );
+}
+
+// Same cover-tile treatment as the books, with a small play glyph badge
+// when the podcast has a real external link to open.
+function PodcastCover({ item }) {
+  const tone = SPINE_TONES[hashTitle(item.title) % SPINE_TONES.length];
+  const href = item.link_url && /^https?:\/\//.test(item.link_url) ? item.link_url : null;
+  const Wrapper = href ? "a" : "div";
+  return (
+    <Wrapper {...(href ? { href, target: "_blank", rel: "noopener noreferrer nofollow" } : {})} className="block group">
+      <div
+        className="relative aspect-square rounded-xl shadow-[0_6px_16px_-6px_rgba(24,32,29,0.25)] flex items-end p-3 transition-transform group-hover:-translate-y-1"
+        style={{ backgroundColor: tone }}
+      >
+        <span className="font-display text-[13px] leading-tight" style={{ color: WHITE }}>
+          {item.title}
+        </span>
+        {href && (
+          <span
+            className="absolute top-2.5 end-2.5 flex h-6 w-6 items-center justify-center rounded-full"
+            style={{ backgroundColor: `${WHITE}E6` }}
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill={INK}>
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </span>
+        )}
+      </div>
+      <p className="mt-2 text-xs truncate" style={{ color: MUTED }}>
+        {item.subtitle || ""}
+      </p>
+    </Wrapper>
   );
 }
 
