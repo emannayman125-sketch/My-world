@@ -369,19 +369,52 @@ export default async function PublicProfilePage({ params }) {
           <span className="font-display text-lg shrink-0" style={{ color: INK }}>
             {firstName}'s World
           </span>
+
           {navItems.length > 1 && (
-            <nav className="flex items-center gap-1 overflow-x-auto whitespace-nowrap">
-              {navItems.map((key) => (
-                <a
-                  key={key}
-                  href={`#${key}`}
-                  className="shrink-0 text-sm px-3 py-1.5 rounded-full hover:opacity-70 transition-opacity"
-                  style={{ color: MUTED }}
+            <>
+              {/* Desktop/tablet: inline pill nav. */}
+              <nav className="hidden sm:flex items-center gap-1">
+                {navItems.map((key) => (
+                  <a
+                    key={key}
+                    href={`#${key}`}
+                    className="shrink-0 text-sm px-3 py-1.5 rounded-full hover:opacity-70 transition-opacity"
+                    style={{ color: MUTED }}
+                  >
+                    {NAV_LABELS[key]}
+                  </a>
+                ))}
+              </nav>
+
+              {/* Mobile: a native <details> menu -- no client JS needed,
+                  so this page can stay a plain server component. */}
+              <details className="sm:hidden relative">
+                <summary
+                  className="list-none flex h-9 w-9 items-center justify-center rounded-full cursor-pointer"
+                  style={{ backgroundColor: SAND }}
+                  aria-label="Menu"
                 >
-                  {NAV_LABELS[key]}
-                </a>
-              ))}
-            </nav>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round">
+                    <path d="M4 7h16M4 12h16M4 17h16" />
+                  </svg>
+                </summary>
+                <nav
+                  className="absolute end-0 mt-2 w-48 rounded-xl p-2 shadow-lg"
+                  style={{ backgroundColor: WHITE, border: `1px solid ${SAND}` }}
+                >
+                  {navItems.map((key) => (
+                    <a
+                      key={key}
+                      href={`#${key}`}
+                      className="block text-sm px-3 py-2 rounded-lg hover:opacity-70 transition-opacity"
+                      style={{ color: INK }}
+                    >
+                      {NAV_LABELS[key]}
+                    </a>
+                  ))}
+                </nav>
+              </details>
+            </>
           )}
         </div>
       </header>
