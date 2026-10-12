@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import FadeIn from "@/components/FadeIn";
-import BookShelf from "@/components/public/BookShelf";
 
 // ============================================================
 // The public profile — "Quiet Editorial" redesign.
@@ -160,8 +159,7 @@ export default async function PublicProfilePage({ params }) {
   }
 
   // Books carry their category in `notes` (reusing the existing column
-  // — no schema change needed), grouped shelf-by-shelf for the filter
-  // pills in BookShelf.
+  // — no schema change needed), grouped shelf-by-shelf below.
   const booksByCategory = new Map();
   for (const b of worldByKind.book || []) {
     const cat = (b.notes || "").trim() || "Books";
@@ -213,7 +211,29 @@ export default async function PublicProfilePage({ params }) {
 
     books: (
       <Section id="books" title="From the Shelf" subtitle="A curated collection of books, ideas and perspectives.">
-        <BookShelf categories={[...booksByCategory.entries()]} emptyNote={EMPTY_NOTES.book} />
+        {booksByCategory.size > 0 ? (
+          <div className="space-y-8">
+            {[...booksByCategory.entries()].map(([category, books]) => (
+              <div key={category}>
+                <span
+                  className="inline-block text-xs uppercase tracking-wide rounded-full px-3 py-1 mb-4"
+                  style={{ backgroundColor: SAND, color: INK }}
+                >
+                  {category}
+                </span>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-x-5 gap-y-8">
+                  {books.map((b) => (
+                    <BookCover key={b.id} book={b} />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm italic" style={{ color: MUTED }}>
+            {EMPTY_NOTES.book}
+          </p>
+        )}
       </Section>
     ),
 
@@ -395,40 +415,64 @@ export default async function PublicProfilePage({ params }) {
               )}
             </div>
 
-            {/* Abstract editorial visual — no invented personal photo. */}
-            <div
-              className="relative rounded-3xl overflow-hidden aspect-[4/3] md:aspect-square"
-              style={{ background: `linear-gradient(145deg, ${TEAL} 0%, ${INK} 100%)` }}
-            >
-              <div
-                className="absolute inset-0 opacity-40"
-                style={{
-                  backgroundImage: `radial-gradient(circle at 25% 20%, ${COPPER}99, transparent 45%), radial-gradient(circle at 80% 75%, ${SAND}66, transparent 50%)`,
-                }}
-                aria-hidden="true"
-              />
-              <div className="absolute inset-0 flex items-end p-7">
-                <div className="flex items-end gap-2">
-                  {[0.55, 0.85, 0.4, 0.7].map((h, i) => (
-                    <div
-                      key={i}
-                      className="w-5 sm:w-6 rounded-sm"
-                      style={{
-                        height: `${h * 100}px`,
-                        backgroundColor: [SAND, WHITE, COPPER, SAND][i % 4],
-                        opacity: 0.9,
-                      }}
-                    />
-                  ))}
-                </div>
+            {/* His real photo when he's set one in Profile settings;
+                otherwise an abstract editorial composition rather than
+                an invented personal photo. */}
+            {profile.avatar_url ? (
+              <div className="relative rounded-3xl overflow-hidden aspect-[4/3] md:aspect-square">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.display_name || firstName}
+                  className="w-full h-full object-cover"
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{ background: `linear-gradient(0deg, ${INK}66 0%, transparent 35%)` }}
+                  aria-hidden="true"
+                />
+                <p
+                  className="absolute top-7 end-7 text-xs tracking-[0.15em]"
+                  style={{ color: `${WHITE}E6`, writingMode: "vertical-rl" }}
+                >
+                  Better Every Day
+                </p>
               </div>
-              <p
-                className="absolute top-7 end-7 text-xs tracking-[0.15em]"
-                style={{ color: `${WHITE}CC`, writingMode: "vertical-rl" }}
+            ) : (
+              <div
+                className="relative rounded-3xl overflow-hidden aspect-[4/3] md:aspect-square"
+                style={{ background: `linear-gradient(145deg, ${TEAL} 0%, ${INK} 100%)` }}
               >
-                Better Every Day
-              </p>
-            </div>
+                <div
+                  className="absolute inset-0 opacity-40"
+                  style={{
+                    backgroundImage: `radial-gradient(circle at 25% 20%, ${COPPER}99, transparent 45%), radial-gradient(circle at 80% 75%, ${SAND}66, transparent 50%)`,
+                  }}
+                  aria-hidden="true"
+                />
+                <div className="absolute inset-0 flex items-end p-7">
+                  <div className="flex items-end gap-2">
+                    {[0.55, 0.85, 0.4, 0.7].map((h, i) => (
+                      <div
+                        key={i}
+                        className="w-5 sm:w-6 rounded-sm"
+                        style={{
+                          height: `${h * 100}px`,
+                          backgroundColor: [SAND, WHITE, COPPER, SAND][i % 4],
+                          opacity: 0.9,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p
+                  className="absolute top-7 end-7 text-xs tracking-[0.15em]"
+                  style={{ color: `${WHITE}CC`, writingMode: "vertical-rl" }}
+                >
+                  Better Every Day
+                </p>
+              </div>
+            )}
           </div>
         </FadeIn>
 
@@ -501,6 +545,36 @@ export default async function PublicProfilePage({ params }) {
 
 // Minimal inline glyphs so the social row doesn't depend on importing a
 // whole icon library's worth of brand marks for six platforms.
+const SPINE_TONES = [TEAL, COPPER, INK, MUTED];
+
+function hashTitle(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+// A plain, server-rendered "book cover" tile — no client state needed,
+// so this stays part of the same file as the rest of the (server
+// component) page instead of a separate component file.
+function BookCover({ book }) {
+  const tone = SPINE_TONES[hashTitle(book.title) % SPINE_TONES.length];
+  return (
+    <div>
+      <div
+        className="aspect-[2/3] rounded-md shadow-[0_6px_16px_-6px_rgba(24,32,29,0.25)] flex items-end p-3"
+        style={{ backgroundColor: tone }}
+      >
+        <span className="font-display text-[13px] leading-tight" style={{ color: WHITE }}>
+          {book.title}
+        </span>
+      </div>
+      <p className="mt-2 text-xs truncate" style={{ color: MUTED }}>
+        {book.subtitle || ""}
+      </p>
+    </div>
+  );
+}
+
 function SocialGlyph({ platform }) {
   const common = { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: INK, strokeWidth: 1.8 };
   switch (platform) {
