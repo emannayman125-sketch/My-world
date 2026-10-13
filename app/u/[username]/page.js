@@ -29,6 +29,17 @@ const TEAL = "#3F706A";
 const COPPER = "#A9694D";
 const SAND = "#D8CCBC";
 const MUTED = "#68736E";
+const GOLD = "#C9A227"; // the one extra premium accent -- used sparingly, like lantern elsewhere in the app
+
+// Real scanned covers he sent for books the free cover catalog can't
+// match (Arabic titles). Checked before the live Open Library lookup.
+const BOOK_COVER_OVERRIDES = {
+  "مسلكيات": "/books/maslakiyat.jpg",
+  "علو الهمة": "/books/oluw-al-himma.jpg",
+  "رقائق القرآن": "/books/raqaiq-al-quran.jpg",
+  "الطريق إلى القرآن": "/books/tariq-ila-quran.jpg",
+  "الماجريات": "/books/al-majariyat.webp",
+};
 
 // Real cover art, looked up live from Open Library (a free, no-key
 // catalog) by title/author, cached for a day per title so repeat visits
@@ -125,6 +136,7 @@ function Section({ id, title, subtitle, action, children }) {
     <section id={id} className="scroll-mt-28">
       <div className="flex items-end justify-between gap-4 mb-6">
         <div>
+          <span className="block w-8 h-[2px] mb-3 rounded-full" style={{ backgroundColor: GOLD }} aria-hidden="true" />
           <h2 className="font-display text-2xl sm:text-[1.75rem] leading-tight" style={{ color: INK }}>
             {title}
           </h2>
@@ -144,7 +156,7 @@ function Section({ id, title, subtitle, action, children }) {
 function Card({ children, className = "" }) {
   return (
     <div
-      className={`rounded-2xl p-5 ${className}`}
+      className={`rounded-2xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_-14px_rgba(24,32,29,0.28)] ${className}`}
       style={{ backgroundColor: WHITE, border: `1px solid ${SAND}` }}
     >
       {children}
@@ -192,19 +204,17 @@ export default async function PublicProfilePage({ params }) {
     worldByKind[item.kind].push(item);
   }
 
-  // Books carry their category in `notes` (reusing the existing column
-  // — no schema change needed), grouped shelf-by-shelf below.
-  const booksByCategory = new Map();
-  for (const b of worldByKind.book || []) {
-    const cat = (b.notes || "").trim() || "Books";
-    if (!booksByCategory.has(cat)) booksByCategory.set(cat, []);
-    booksByCategory.get(cat).push(b);
-  }
+  // Shown as one flat, browsable shelf -- not grouped by category.
+  const allBooks = worldByKind.book || [];
 
-  // Real cover art per book (see fetchCoverUrl above) -- fetched in
-  // parallel, falls back to the plain tile per-book on any miss.
+  // Real cover art per book: a hand-picked scan first (see
+  // BOOK_COVER_OVERRIDES above), otherwise a live Open Library lookup
+  // (see fetchCoverUrl), otherwise the plain tile fallback.
   const coverEntries = await Promise.all(
-    (worldByKind.book || []).map(async (b) => [b.id, await fetchCoverUrl(b.title, b.subtitle)])
+    allBooks.map(async (b) => [
+      b.id,
+      BOOK_COVER_OVERRIDES[b.title] || (await fetchCoverUrl(b.title, b.subtitle)),
+    ])
   );
   const bookCovers = Object.fromEntries(coverEntries);
 
@@ -274,47 +284,11 @@ export default async function PublicProfilePage({ params }) {
     ) : null,
 
     books: (
-      <Section
-        id="books"
-        title="From the Shelf"
-        subtitle={booksByCategory.size > 1 ? "A curated collection of books, ideas and perspectives. Tap a category to collapse it." : "A curated collection of books, ideas and perspectives."}
-      >
-        {booksByCategory.size > 0 ? (
-          <div className="space-y-3">
-            {[...booksByCategory.entries()].map(([category, books]) => (
-              <details key={category} open className="group">
-                <summary
-                  className="list-none flex items-center gap-2 cursor-pointer select-none mb-4"
-                  style={{ color: INK }}
-                >
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke={INK}
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    className="transition-transform group-open:rotate-90 shrink-0"
-                  >
-                    <path d="M9 6l6 6-6 6" />
-                  </svg>
-                  <span
-                    className="inline-block text-xs uppercase tracking-wide rounded-full px-3 py-1"
-                    style={{ backgroundColor: SAND, color: INK }}
-                  >
-                    {category}
-                  </span>
-                  <span className="text-xs" style={{ color: MUTED }}>
-                    {books.length}
-                  </span>
-                </summary>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-x-5 gap-y-8">
-                  {books.map((b) => (
-                    <BookCover key={b.id} book={b} coverUrl={bookCovers[b.id]} />
-                  ))}
-                </div>
-              </details>
+      <Section id="books" title="From the Shelf" subtitle="Pages I keep returning to, and a few I'm just getting started with.">
+        {allBooks.length > 0 ? (
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-x-4 gap-y-7">
+            {allBooks.map((b) => (
+              <BookCover key={b.id} book={b} coverUrl={bookCovers[b.id]} />
             ))}
           </div>
         ) : (
@@ -326,7 +300,7 @@ export default async function PublicProfilePage({ params }) {
     ),
 
     podcasts: (
-      <Section id="podcasts" title="What I'm Listening To" subtitle="Podcasts, audiobooks and ideas worth hearing.">
+      <Section id="podcasts" title="What I'm Listening To" subtitle="Voices and ideas that keep me company.">
         {worldByKind.podcast?.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-x-5 gap-y-8">
             {worldByKind.podcast.map((w) => (
@@ -347,13 +321,13 @@ export default async function PublicProfilePage({ params }) {
     ),
 
     interests: (
-      <Section id="interests" title="A Few Things I Love" subtitle="The topics, hobbies and subjects that excite me.">
+      <Section id="interests" title="A Few Things I Love" subtitle="Threads that run through everything I do.">
         {interests && interests.length > 0 ? (
           <div className="flex flex-wrap gap-2.5">
             {interests.map((i) => (
               <span
                 key={i.id}
-                className="rounded-full text-sm px-4 py-2"
+                className="rounded-full text-sm px-4 py-2 transition-colors hover:brightness-95"
                 style={{ backgroundColor: SAND, color: INK }}
               >
                 {i.value}
@@ -373,7 +347,7 @@ export default async function PublicProfilePage({ params }) {
         <Card className="relative overflow-hidden">
           <span
             className="font-display text-6xl leading-none select-none"
-            style={{ color: SAND }}
+            style={{ color: GOLD, opacity: 0.55 }}
             aria-hidden="true"
           >
             &ldquo;
@@ -389,7 +363,7 @@ export default async function PublicProfilePage({ params }) {
     ) : null,
 
     social: (
-      <Section id="social" title="Find Me Elsewhere" subtitle="Let's connect.">
+      <Section id="social" title="Find Me Elsewhere" subtitle="Beyond this page, here's where else to find me.">
         {hasSocial ? (
           <div className="flex flex-wrap gap-6 sm:gap-8">
             {Object.entries(profile.social_links).map(([platform, value]) => {
@@ -503,7 +477,7 @@ export default async function PublicProfilePage({ params }) {
                 What I read. What I listen to. What I'm becoming.
               </h1>
               <p className="text-base mt-5 max-w-[42ch]" style={{ color: MUTED }}>
-                A small collection of the things that shape my world.
+                A small, carefully kept collection of the things that shape my world.
               </p>
 
               {hasSocial && (
@@ -557,26 +531,23 @@ export default async function PublicProfilePage({ params }) {
                 className="relative rounded-3xl overflow-hidden aspect-[4/3] md:aspect-square"
                 style={{ background: `linear-gradient(145deg, ${TEAL} 0%, ${INK} 100%)` }}
               >
+                {/* A quiet emblem, not a chart -- a radiant texture and a
+                    single gold ring around his initial. */}
                 <div
-                  className="absolute inset-0 opacity-40"
+                  className="absolute inset-0"
                   style={{
-                    backgroundImage: `radial-gradient(circle at 25% 20%, ${COPPER}99, transparent 45%), radial-gradient(circle at 80% 75%, ${SAND}66, transparent 50%)`,
+                    backgroundImage: `radial-gradient(circle at 20% 15%, ${GOLD}33, transparent 40%), radial-gradient(circle at 85% 85%, ${COPPER}44, transparent 45%)`,
                   }}
                   aria-hidden="true"
                 />
-                <div className="absolute inset-0 flex items-end p-7">
-                  <div className="flex items-end gap-2">
-                    {[0.55, 0.85, 0.4, 0.7].map((h, i) => (
-                      <div
-                        key={i}
-                        className="w-5 sm:w-6 rounded-sm"
-                        style={{
-                          height: `${h * 100}px`,
-                          backgroundColor: [SAND, WHITE, COPPER, SAND][i % 4],
-                          opacity: 0.9,
-                        }}
-                      />
-                    ))}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div
+                    className="flex h-28 w-28 sm:h-36 sm:w-36 items-center justify-center rounded-full"
+                    style={{ border: `1px solid ${GOLD}88` }}
+                  >
+                    <span className="font-display text-5xl sm:text-6xl" style={{ color: `${WHITE}F2` }}>
+                      {firstName.charAt(0)}
+                    </span>
                   </div>
                 </div>
                 <p
@@ -634,7 +605,7 @@ export default async function PublicProfilePage({ params }) {
               {firstName}'s World
             </p>
             <p className="text-sm mt-1" style={{ color: `${WHITE}99` }}>
-              A personal space for interests, ideas, and everyday life.
+              A quiet corner of the internet, kept for the things I love.
             </p>
           </div>
           {navItems.length > 0 && (
@@ -673,24 +644,24 @@ function hashTitle(str) {
 function BookCover({ book, coverUrl }) {
   const tone = SPINE_TONES[hashTitle(book.title) % SPINE_TONES.length];
   return (
-    <div>
-      <div className="aspect-[2/3] rounded-md overflow-hidden shadow-[0_6px_16px_-6px_rgba(24,32,29,0.25)]">
+    <div className="group">
+      <div className="aspect-[2/3] rounded-md overflow-hidden shadow-[0_6px_16px_-6px_rgba(24,32,29,0.25)] transition-transform duration-300 group-hover:-translate-y-1">
         {coverUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={coverUrl} alt={book.title} className="w-full h-full object-cover" loading="lazy" />
         ) : (
-          <div className="w-full h-full flex items-end p-3" style={{ backgroundColor: tone }}>
-            <span className="font-display text-[13px] leading-tight" style={{ color: WHITE }}>
+          <div className="w-full h-full flex items-end p-2.5" style={{ backgroundColor: tone }}>
+            <span className="font-display text-[11px] leading-tight" style={{ color: WHITE }}>
               {book.title}
             </span>
           </div>
         )}
       </div>
-      <p className="mt-2 text-xs truncate" style={{ color: MUTED }}>
+      <p className="mt-1.5 text-[11px] truncate" style={{ color: MUTED }}>
         {book.subtitle || ""}
       </p>
       {book.review && (
-        <p className="mt-1 text-xs italic leading-snug line-clamp-3" style={{ color: INK }}>
+        <p className="mt-0.5 text-[11px] italic leading-snug line-clamp-2" style={{ color: INK }}>
           &ldquo;{book.review}&rdquo;
         </p>
       )}
