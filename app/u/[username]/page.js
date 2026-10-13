@@ -163,6 +163,7 @@ const T = {
       currentlySubtitle: "Where my attention lives this week.",
       booksTitle: "From the Shelf",
       booksSubtitle: "Stories I return to like old friends, and a few new ones I'm just getting to know.",
+      booksAllLabel: "All",
       podcastsTitle: "What I'm Listening To",
       podcastsSubtitle: "The voices that keep me company on long days and quiet drives.",
       podcastsEmptyTitle: "No listening items published yet.",
@@ -199,6 +200,7 @@ const T = {
       currentlySubtitle: "اللي شاغل بالي الفترة دي.",
       booksTitle: "من على الرف",
       booksSubtitle: "صفحات بارجعلها زي ما بارجع لصاحب قديم، وشوية لسه بتعرّف عليهم.",
+      booksAllLabel: "الكل",
       podcastsTitle: "إيه اللي بسمعه",
       podcastsSubtitle: "أصوات بتونسني في طريق طويل أو لحظة هدوء.",
       podcastsEmptyTitle: "لسه مفيش حاجة اتنشرت هنا.",
@@ -328,6 +330,15 @@ export default async function PublicProfilePage({ params, searchParams }) {
   );
   const bookCovers = Object.fromEntries(coverEntries);
 
+  // Real categories only -- the "notes" field he actually picked for
+  // each book when it was added (e.g. "الإيمان والتأمل", "تركيز ونمو"),
+  // never invented. Turned into CSS-only tabs below (no client JS):
+  // each tab is a plain #hash link, and a few generated :target rules
+  // show the matching panel -- the same safe-HTML-trick family as the
+  // mobile menu and book-review disclosure elsewhere on this page.
+  const bookCategories = Array.from(new Set(allBooks.map((b) => b.notes).filter(Boolean)));
+  const bookCategorySlug = (cat) => `bc${bookCategories.indexOf(cat)}`;
+
   const hasSocial = profile.social_links && Object.values(profile.social_links).some(Boolean);
   // Use the English name he set in Settings when viewing the English
   // page (so the hero doesn't read "Hello, I'm أحمد" in English), and
@@ -410,11 +421,53 @@ export default async function PublicProfilePage({ params, searchParams }) {
     books: (
       <Section id="books" title={t.sections.booksTitle} subtitle={t.sections.booksSubtitle}>
         {allBooks.length > 0 ? (
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-x-4 gap-y-7">
-            {allBooks.map((b) => (
-              <BookCover key={b.id} book={b} coverUrl={bookCovers[b.id]} />
-            ))}
-          </div>
+          <>
+            {bookCategories.length > 1 && (
+              <>
+                {/* Real categories only (his own "notes" field on each
+                    book) -- plain #hash tabs, shown/hidden by the
+                    generated :target rules below. No client JS. */}
+                <style>{`
+                  .book-tab-panel { display: none; }
+                  #book-cat-all { display: block; }
+                  .book-tab-panel:target { display: block; }
+                  ${bookCategories
+                    .map((cat) => `#book-cat-${bookCategorySlug(cat)}:target ~ #book-cat-all { display: none; }`)
+                    .join("\n")}
+                `}</style>
+                <nav className="flex flex-wrap items-center gap-1 mb-5 -mt-1">
+                  <a
+                    href="#book-cat-all"
+                    className="text-xs sm:text-sm px-3 py-1.5 rounded-full transition-colors hover:bg-[color:var(--sand)]"
+                    style={{ color: MUTED, "--sand": SAND }}
+                  >
+                    {t.sections.booksAllLabel}
+                  </a>
+                  {bookCategories.map((cat) => (
+                    <a
+                      key={cat}
+                      href={`#book-cat-${bookCategorySlug(cat)}`}
+                      className="text-xs sm:text-sm px-3 py-1.5 rounded-full transition-colors hover:bg-[color:var(--sand)]"
+                      style={{ color: MUTED, "--sand": SAND }}
+                    >
+                      {cat}
+                    </a>
+                  ))}
+                </nav>
+              </>
+            )}
+
+            <div className="relative">
+              <div id="book-cat-all" className="book-tab-panel">
+                <BookRow books={allBooks} covers={bookCovers} />
+              </div>
+              {bookCategories.map((cat) => (
+                <div key={cat} id={`book-cat-${bookCategorySlug(cat)}`} className="book-tab-panel">
+                  <BookRow books={allBooks.filter((b) => b.notes === cat)} covers={bookCovers} />
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
           <EmptyState>{t.emptyNotes.book}</EmptyState>
         )}
@@ -541,6 +594,10 @@ export default async function PublicProfilePage({ params, searchParams }) {
       <style>{`
         @keyframes ahmedworld-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes ahmedworld-fill { from { width: 0%; } to { width: var(--target-width); } }
+        @keyframes ahmedworld-steam {
+          0%, 100% { transform: translateY(0); opacity: 0.55; }
+          50% { transform: translateY(-6px); opacity: 1; }
+        }
       `}</style>
 
       {/* Header */}
@@ -680,39 +737,56 @@ export default async function PublicProfilePage({ params, searchParams }) {
                 className="relative rounded-3xl overflow-hidden aspect-[4/3] md:aspect-square"
                 style={{ background: `linear-gradient(145deg, ${TEAL} 0%, ${INK} 100%)` }}
               >
-                {/* A quiet emblem, not a chart, and no literal letter --
-                    a radiant texture behind a fine hand-drawn rosette,
-                    the kind of restrained geometric ornament that sits
-                    comfortably next to the Arabic titles on this page. */}
+                {/* No invented personal photo -- an original, drawn
+                    scene instead (a stack of books, a plant, a cup),
+                    not a photograph of him or his actual desk, so it
+                    reads as an editorial illustration rather than a
+                    fabricated memory. */}
                 <div
                   className="absolute inset-0"
                   style={{
-                    backgroundImage: `radial-gradient(circle at 20% 15%, ${GOLD}33, transparent 40%), radial-gradient(circle at 85% 85%, ${COPPER}44, transparent 45%)`,
+                    backgroundImage: `radial-gradient(circle at 18% 12%, ${GOLD}2e, transparent 42%), radial-gradient(circle at 88% 20%, ${COPPER}3a, transparent 48%)`,
                   }}
                   aria-hidden="true"
                 />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <svg
-                    width="168"
-                    height="168"
-                    viewBox="0 0 168 168"
+                <svg
+                  viewBox="0 0 300 300"
+                  preserveAspectRatio="xMidYMax slice"
+                  className="absolute inset-0 w-full h-full"
+                  aria-hidden="true"
+                >
+                  {/* sun */}
+                  <circle cx="235" cy="70" r="46" fill={`${GOLD}26`} />
+                  <circle cx="235" cy="70" r="24" fill={`${GOLD}40`} />
+                  {/* book stack */}
+                  <g transform="rotate(-2 95 226)">
+                    <rect x="30" y="214" width="160" height="24" rx="3" fill={COPPER} />
+                  </g>
+                  <g transform="rotate(1.5 95 198)">
+                    <rect x="38" y="188" width="142" height="24" rx="3" fill={WHITE} opacity="0.92" />
+                    <rect x="50" y="196" width="100" height="3" rx="1.5" fill={INK} opacity="0.35" />
+                  </g>
+                  <g transform="rotate(-1 95 172)">
+                    <rect x="28" y="162" width="150" height="24" rx="3" fill={GOLD} opacity="0.85" />
+                  </g>
+                  {/* plant */}
+                  <path d="M208 160 Q198 118 214 96 Q222 124 214 160 Z" fill={`${TEAL}`} opacity="0.9" />
+                  <path d="M214 160 Q214 110 236 92 Q232 126 218 160 Z" fill={`${TEAL}`} opacity="0.7" />
+                  <path d="M214 160 Q222 120 246 108 Q234 134 218 160 Z" fill={`${TEAL}`} opacity="0.55" />
+                  <path d="M196 160 h40 l-5 18 a2 2 0 0 1 -2 2 h-26 a2 2 0 0 1 -2 -2 Z" fill={SAND} />
+                  {/* cup */}
+                  <ellipse cx="258" cy="168" rx="20" ry="7" fill={INK} opacity="0.18" />
+                  <rect x="240" y="146" width="36" height="24" rx="6" fill={PAPER} opacity="0.95" />
+                  <path d="M276 150 q14 2 10 14 q-3 9 -12 8" fill="none" stroke={PAPER} strokeWidth="4" opacity="0.95" />
+                  <path
+                    d="M248 138 q4 -8 0 -14 M258 138 q4 -8 0 -14 M268 138 q4 -8 0 -14"
                     fill="none"
-                    aria-hidden="true"
-                    className="w-32 h-32 sm:w-40 sm:h-40"
-                    style={{ animation: "ahmedworld-spin 90s linear infinite" }}
-                  >
-                    <circle cx="84" cy="84" r="58" stroke={`${GOLD}99`} strokeWidth="1" />
-                    {Array.from({ length: 8 }).map((_, i) => {
-                      const angle = (i * Math.PI) / 4;
-                      const x = 84 + 58 * Math.cos(angle);
-                      const y = 84 + 58 * Math.sin(angle);
-                      return (
-                        <circle key={i} cx={x} cy={y} r="27" stroke={`${GOLD}55`} strokeWidth="0.75" />
-                      );
-                    })}
-                    <circle cx="84" cy="84" r="4" fill={`${GOLD}CC`} />
-                  </svg>
-                </div>
+                    stroke={`${WHITE}AA`}
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    style={{ animation: "ahmedworld-steam 3.5s ease-in-out infinite" }}
+                  />
+                </svg>
                 <p
                   className="absolute top-7 end-7 text-xs tracking-[0.15em]"
                   style={{ color: `${WHITE}CC`, writingMode: "vertical-rl" }}
@@ -804,6 +878,42 @@ function hashTitle(str) {
 // A plain, server-rendered "book cover" tile — no client state needed,
 // so this stays part of the same file as the rest of the (server
 // component) page instead of a separate component file.
+// A horizontally-scrolling shelf with a round arrow at the end -- a
+// visual hint that there's more to see, swipeable on touch and
+// scrollable with a trackpad/shift+wheel on desktop (plain CSS
+// overflow, no JS needed to make it work).
+function BookRow({ books, covers }) {
+  return (
+    <div className="relative">
+      <div className="flex gap-4 overflow-x-auto pb-2 pe-14 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {books.map((b) => (
+          <div key={b.id} className="w-[108px] shrink-0 snap-start">
+            <BookCover book={b} coverUrl={covers[b.id]} />
+          </div>
+        ))}
+      </div>
+      {books.length > 5 && (
+        <span
+          aria-hidden="true"
+          className="hidden sm:flex absolute end-0 top-0 h-[162px] w-12 items-center justify-center rounded-full"
+          style={{
+            background: `linear-gradient(90deg, transparent 0%, ${PAPER} 55%)`,
+          }}
+        >
+          <span
+            className="flex h-8 w-8 items-center justify-center rounded-full shadow-[0_4px_10px_-4px_rgba(24,32,29,0.35)]"
+            style={{ backgroundColor: WHITE, border: `1px solid ${SAND}` }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          </span>
+        </span>
+      )}
+    </div>
+  );
+}
+
 function BookCover({ book, coverUrl }) {
   const tone = SPINE_TONES[hashTitle(book.title) % SPINE_TONES.length];
   return (
@@ -827,12 +937,16 @@ function BookCover({ book, coverUrl }) {
         // A native <details> trick, same family as the mobile menu: the
         // quote shows clamped to 2 lines, and clicking it opens to the
         // full review -- no JS needed for the click-to-expand feel.
-        <details className="mt-0.5 [&[open]_summary]:line-clamp-none">
-          <summary
-            className="text-[11px] italic leading-snug line-clamp-2 cursor-pointer list-none marker:content-none"
-            style={{ color: INK }}
-          >
-            &ldquo;{book.review}&rdquo;
+        // Styled as a small quote callout (gold mark + hairline rule)
+        // rather than plain italic text.
+        <details className="mt-1.5 ps-2 [&[open]_summary]:line-clamp-none" style={{ borderInlineStart: `2px solid ${GOLD}66` }}>
+          <summary className="list-none cursor-pointer marker:content-none">
+            <span className="font-display text-sm leading-none align-top" style={{ color: GOLD }}>
+              &ldquo;
+            </span>{" "}
+            <span className="text-[11px] italic leading-snug line-clamp-2" style={{ color: INK }}>
+              {book.review}
+            </span>
           </summary>
         </details>
       )}
