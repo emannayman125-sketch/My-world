@@ -39,6 +39,14 @@ const BOOK_COVER_OVERRIDES = {
   "رقائق القرآن": "/books/raqaiq-al-quran.jpg",
   "الطريق إلى القرآن": "/books/tariq-ila-quran.jpg",
   "الماجريات": "/books/al-majariyat.webp",
+  "سلطة الثقافة الغالبة": "/books/sultat-al-thaqafa-al-ghaliba.jpg",
+  "مدارج السالكين": "/books/madarij-al-salikin.jpg",
+  "الداء والدواء": "/books/al-daa-wal-dawaa.jpg",
+  "The Personal MBA": "/books/personal-mba.png",
+  "Digital Minimalism": "/books/digital-minimalism.jpg",
+  "The E-Myth Revisited": "/books/e-myth-revisited.jpg",
+  "The Essays of Warren Buffett": "/books/essays-of-warren-buffett.jpg",
+  "Warren Buffett and the Interpretation of Financial Statements": "/books/warren-buffett-interpretation.jpg",
 };
 
 // Real cover art, looked up live from two free, no-key catalogs by
