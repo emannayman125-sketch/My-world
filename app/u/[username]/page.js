@@ -353,7 +353,12 @@ export default async function PublicProfilePage({ params, searchParams }) {
                   <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: SAND }}>
                     <div
                       className="h-full rounded-full"
-                      style={{ width: `${c.progress_percent}%`, backgroundColor: COPPER }}
+                      style={{
+                        "--target-width": `${c.progress_percent}%`,
+                        width: 0,
+                        backgroundColor: COPPER,
+                        animation: "ahmedworld-fill 1.1s ease-out forwards",
+                      }}
                     />
                   </div>
                   <p className="text-xs mt-1" style={{ color: MUTED }}>
@@ -417,7 +422,7 @@ export default async function PublicProfilePage({ params, searchParams }) {
             {interests.map((i) => (
               <span
                 key={i.id}
-                className="rounded-full text-sm px-4 py-2 transition-colors hover:brightness-95"
+                className="rounded-full text-sm px-4 py-2 transition-all duration-300 hover:brightness-95 hover:-translate-y-0.5 hover:shadow-[0_6px_14px_-8px_rgba(24,32,29,0.35)]"
                 style={{ backgroundColor: SAND, color: INK }}
               >
                 {i.value}
@@ -464,11 +469,11 @@ export default async function PublicProfilePage({ params, searchParams }) {
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
-                  className="flex items-center gap-2 text-sm hover:opacity-70 transition-opacity"
+                  className="group/social flex items-center gap-2 text-sm hover:opacity-80 transition-opacity"
                   style={{ color: INK }}
                 >
                   <span
-                    className="flex h-9 w-9 items-center justify-center rounded-full"
+                    className="flex h-9 w-9 items-center justify-center rounded-full transition-transform duration-300 group-hover/social:scale-110 group-hover/social:-rotate-6"
                     style={{ backgroundColor: SAND }}
                   >
                     <SocialGlyph platform={platform} />
@@ -495,6 +500,14 @@ export default async function PublicProfilePage({ params, searchParams }) {
       className="min-h-screen"
       style={{ backgroundColor: PAPER, color: INK, fontFamily: "var(--font-body), sans-serif" }}
     >
+      {/* Small, purely-CSS motion -- no client JS, same safe pattern as
+          the rest of this page. Keeps the page feeling alive: the hero
+          ornament turns slowly, and progress bars fill in on load. */}
+      <style>{`
+        @keyframes ahmedworld-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes ahmedworld-fill { from { width: 0%; } to { width: var(--target-width); } }
+      `}</style>
+
       {/* Header */}
       <header
         className="sticky top-0 z-10 backdrop-blur-md"
@@ -514,8 +527,8 @@ export default async function PublicProfilePage({ params, searchParams }) {
                     <a
                       key={key}
                       href={`#${key}`}
-                      className="shrink-0 text-sm px-3 py-1.5 rounded-full hover:opacity-70 transition-opacity"
-                      style={{ color: MUTED }}
+                      className="shrink-0 text-sm px-3 py-1.5 rounded-full transition-all duration-300 hover:text-[color:var(--ink)] hover:bg-[color:var(--sand)]"
+                      style={{ color: MUTED, "--ink": INK, "--sand": SAND }}
                     >
                       {t.nav[key]}
                     </a>
@@ -593,7 +606,7 @@ export default async function PublicProfilePage({ params, searchParams }) {
                         target="_blank"
                         rel="noopener noreferrer nofollow"
                         aria-label={SOCIAL_LABELS[platform] ?? platform}
-                        className="flex h-9 w-9 items-center justify-center rounded-full hover:opacity-70 transition-opacity"
+                        className="flex h-9 w-9 items-center justify-center rounded-full transition-all duration-300 hover:opacity-80 hover:scale-110 hover:-rotate-6"
                         style={{ backgroundColor: SAND }}
                       >
                         <SocialGlyph platform={platform} />
@@ -651,6 +664,7 @@ export default async function PublicProfilePage({ params, searchParams }) {
                     fill="none"
                     aria-hidden="true"
                     className="w-32 h-32 sm:w-40 sm:h-40"
+                    style={{ animation: "ahmedworld-spin 90s linear infinite" }}
                   >
                     <circle cx="84" cy="84" r="82" stroke={`${GOLD}66`} strokeWidth="1" />
                     <circle cx="84" cy="84" r="58" stroke={`${GOLD}99`} strokeWidth="1" />
@@ -729,7 +743,7 @@ export default async function PublicProfilePage({ params, searchParams }) {
                 <a
                   key={key}
                   href={`#${key}`}
-                  className="text-sm hover:opacity-70 transition-opacity"
+                  className="relative text-sm after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-0 after:bg-current after:transition-all after:duration-300 hover:opacity-100 hover:after:w-full transition-opacity"
                   style={{ color: `${WHITE}CC` }}
                 >
                   {t.nav[key]}
@@ -776,9 +790,17 @@ function BookCover({ book, coverUrl }) {
         {book.subtitle || ""}
       </p>
       {book.review && (
-        <p className="mt-0.5 text-[11px] italic leading-snug line-clamp-2" style={{ color: INK }}>
-          &ldquo;{book.review}&rdquo;
-        </p>
+        // A native <details> trick, same family as the mobile menu: the
+        // quote shows clamped to 2 lines, and clicking it opens to the
+        // full review -- no JS needed for the click-to-expand feel.
+        <details className="mt-0.5 [&[open]_summary]:line-clamp-none">
+          <summary
+            className="text-[11px] italic leading-snug line-clamp-2 cursor-pointer list-none marker:content-none"
+            style={{ color: INK }}
+          >
+            &ldquo;{book.review}&rdquo;
+          </summary>
+        </details>
       )}
     </div>
   );
