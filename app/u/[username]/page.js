@@ -94,39 +94,89 @@ function toHref(platform, value) {
   return (bases[platform] || "https://") + value.replace(/^@/, "");
 }
 
-const KIND_SECTION = {
-  music: { title: "Also on Repeat" },
-  movie: { title: "Watching" },
-  place: { title: "Places on My Mind" },
-  hobby: { title: "What I'm Into" },
-};
-
-const EMPTY_NOTES = {
-  book: "The shelf is still taking shape.",
-  podcast: "No listening items published yet.",
-  interests: "A few favorites, coming soon.",
-  social: "No links shared yet.",
-};
-
-const NAV_LABELS = {
-  currently: "Currently",
-  books: "Reading",
-  podcasts: "Listening",
-  interests: "Interests",
-  about: "About",
-  social: "Links",
-};
-
-const CURRENTLY_LABELS = {
-  reading: "Currently Reading",
-  listening: "Currently Listening",
-  watching: "Currently Watching",
-};
-
 const CURRENTLY_ICON_PATHS = {
   reading: "M4 5.5C4 4.7 4.7 4 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5v-13zM20 5.5c0-.8-.7-1.5-1.5-1.5H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5v-13z",
   listening: "M4 13a8 8 0 0 1 16 0v4a2 2 0 0 1-2 2h-1v-6h3M4 17v-4h3v6H6a2 2 0 0 1-2-2z",
   watching: "M8 5v14l11-7z",
+};
+
+// All of this page's own chrome (not his data -- his bio, book titles,
+// interests etc. stay exactly as he wrote them) in both languages.
+// Picked by a plain ?lang=ar query param, server-rendered, no client
+// JS -- the same safe pattern as the mobile menu and shelf accordion.
+const T = {
+  en: {
+    dir: "ltr",
+    menu: "Menu",
+    langToggle: { en: "EN", ar: "AR" },
+    nav: { currently: "Currently", books: "Reading", podcasts: "Listening", interests: "Interests", about: "About", social: "Links" },
+    currentlyLabels: { reading: "Currently Reading", listening: "Currently Listening", watching: "Currently Watching" },
+    kindSection: { music: "Also on Repeat", movie: "Watching", place: "Places on My Mind", hobby: "What I'm Into" },
+    emptyNotes: {
+      book: "The shelf is still taking shape.",
+      interests: "A few favorites, coming soon.",
+      social: "No links shared yet.",
+    },
+    hero: {
+      eyebrow: (name) => `Hello, I'm ${name}`,
+      headline: "What I read. What I listen to. What I'm becoming.",
+      subtitle: "A small, carefully kept collection of the things that shape my world.",
+      betterEveryDay: "Better Every Day",
+    },
+    sections: {
+      currentlyTitle: "Currently",
+      currentlySubtitle: "What I'm focused on right now.",
+      booksTitle: "From the Shelf",
+      booksSubtitle: "Pages I keep returning to, and a few I'm just getting started with.",
+      podcastsTitle: "What I'm Listening To",
+      podcastsSubtitle: "Voices and ideas that keep me company.",
+      podcastsEmptyTitle: "No listening items published yet.",
+      podcastsEmptySubtitle: "Check back soon for podcasts and audio recommendations.",
+      interestsTitle: "A Few Things I Love",
+      interestsSubtitle: "Threads that run through everything I do.",
+      aboutTitle: "About Me",
+      socialTitle: "Find Me Elsewhere",
+      socialSubtitle: "Beyond this page, here's where else to find me.",
+    },
+    footer: { tagline: "A quiet corner of the internet, kept for the things I love." },
+    worldName: (name) => `${name}'s World`,
+  },
+  ar: {
+    dir: "rtl",
+    menu: "القائمة",
+    langToggle: { en: "EN", ar: "عربي" },
+    nav: { currently: "حاليًا", books: "القراءة", podcasts: "الاستماع", interests: "الاهتمامات", about: "نبذة", social: "روابط" },
+    currentlyLabels: { reading: "بيقرأ دلوقتي", listening: "بيسمع دلوقتي", watching: "بيتفرج دلوقتي" },
+    kindSection: { music: "كمان بسمعه", movie: "بيتفرج عليه", place: "أماكن في باله", hobby: "حاجات بيحبها" },
+    emptyNotes: {
+      book: "الرف لسه بيتجهز.",
+      interests: "شوية حاجات بيحبها، قريبًا.",
+      social: "لسه مفيش روابط.",
+    },
+    hero: {
+      eyebrow: (name) => `أهلًا، أنا ${name}`,
+      headline: "اللي بقراه. اللي بسمعه. اللي ببقى عليه.",
+      subtitle: "مجموعة صغيرة، اتجمعت بعناية، من الحاجات اللي بتشكّل عالمي.",
+      betterEveryDay: "كل يوم أحسن من اللي قبله",
+    },
+    sections: {
+      currentlyTitle: "حاليًا",
+      currentlySubtitle: "اللي شاغل باله دلوقتي.",
+      booksTitle: "من على الرف",
+      booksSubtitle: "صفحات بيرجعلها باستمرار، وشوية لسه بادي فيها.",
+      podcastsTitle: "إيه اللي بسمعه",
+      podcastsSubtitle: "أصوات وأفكار بتونسه.",
+      podcastsEmptyTitle: "لسه مفيش حاجة اتنشرت هنا.",
+      podcastsEmptySubtitle: "تابعوا، هيبقى فيه بودكاست وتوصيات صوتية قريبًا.",
+      interestsTitle: "حاجات بيحبها",
+      interestsSubtitle: "خيوط بتمشي في كل حاجة بيعملها.",
+      aboutTitle: "نبذة عني",
+      socialTitle: "تلاقيني كمان هنا",
+      socialSubtitle: "غير الصفحة دي، تقدر تلاقيني هنا كمان.",
+    },
+    footer: { tagline: "ركن هادي في الإنترنت، محفوظ للحاجات اللي بيحبها." },
+    worldName: (name) => `عالم ${name}`,
+  },
 };
 
 // One section shell used by every module below so the page reads as
@@ -187,7 +237,10 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function PublicProfilePage({ params }) {
+export default async function PublicProfilePage({ params, searchParams }) {
+  const locale = searchParams?.lang === "ar" ? "ar" : "en";
+  const t = T[locale];
+
   const supabase = createServerSupabase();
   const profile = await getProfile(params.username);
   if (!profile) notFound();
@@ -239,7 +292,7 @@ export default async function PublicProfilePage({ params }) {
 
   const sections = {
     currently: hasContent.currently ? (
-      <Section id="currently" title="Currently" subtitle="What I'm focused on right now.">
+      <Section id="currently" title={t.sections.currentlyTitle} subtitle={t.sections.currentlySubtitle}>
         <div className="grid sm:grid-cols-3 gap-4">
           {currently.map((c) => (
             <Card key={c.id}>
@@ -253,7 +306,7 @@ export default async function PublicProfilePage({ params }) {
                   </svg>
                 </span>
                 <p className="text-xs uppercase tracking-wide" style={{ color: COPPER }}>
-                  {CURRENTLY_LABELS[c.kind] || c.kind}
+                  {t.currentlyLabels[c.kind] || c.kind}
                 </p>
               </div>
               <p className="font-display text-lg leading-snug" style={{ color: INK }}>
@@ -284,7 +337,7 @@ export default async function PublicProfilePage({ params }) {
     ) : null,
 
     books: (
-      <Section id="books" title="From the Shelf" subtitle="Pages I keep returning to, and a few I'm just getting started with.">
+      <Section id="books" title={t.sections.booksTitle} subtitle={t.sections.booksSubtitle}>
         {allBooks.length > 0 ? (
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-x-4 gap-y-7">
             {allBooks.map((b) => (
@@ -293,14 +346,14 @@ export default async function PublicProfilePage({ params }) {
           </div>
         ) : (
           <p className="text-sm italic" style={{ color: MUTED }}>
-            {EMPTY_NOTES.book}
+            {t.emptyNotes.book}
           </p>
         )}
       </Section>
     ),
 
     podcasts: (
-      <Section id="podcasts" title="What I'm Listening To" subtitle="Voices and ideas that keep me company.">
+      <Section id="podcasts" title={t.sections.podcastsTitle} subtitle={t.sections.podcastsSubtitle}>
         {worldByKind.podcast?.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-x-5 gap-y-8">
             {worldByKind.podcast.map((w) => (
@@ -310,10 +363,10 @@ export default async function PublicProfilePage({ params }) {
         ) : (
           <Card className="text-center py-10">
             <p className="text-sm" style={{ color: INK }}>
-              No listening items published yet.
+              {t.sections.podcastsEmptyTitle}
             </p>
             <p className="text-xs mt-1" style={{ color: MUTED }}>
-              Check back soon for podcasts and audio recommendations.
+              {t.sections.podcastsEmptySubtitle}
             </p>
           </Card>
         )}
@@ -321,7 +374,7 @@ export default async function PublicProfilePage({ params }) {
     ),
 
     interests: (
-      <Section id="interests" title="A Few Things I Love" subtitle="Threads that run through everything I do.">
+      <Section id="interests" title={t.sections.interestsTitle} subtitle={t.sections.interestsSubtitle}>
         {interests && interests.length > 0 ? (
           <div className="flex flex-wrap gap-2.5">
             {interests.map((i) => (
@@ -336,14 +389,14 @@ export default async function PublicProfilePage({ params }) {
           </div>
         ) : (
           <p className="text-sm italic" style={{ color: MUTED }}>
-            {EMPTY_NOTES.interests}
+            {t.emptyNotes.interests}
           </p>
         )}
       </Section>
     ),
 
     about: hasContent.about ? (
-      <Section id="about" title="About Me">
+      <Section id="about" title={t.sections.aboutTitle}>
         <Card className="relative overflow-hidden">
           <span
             className="font-display text-6xl leading-none select-none"
@@ -363,13 +416,13 @@ export default async function PublicProfilePage({ params }) {
     ) : null,
 
     social: (
-      <Section id="social" title="Find Me Elsewhere" subtitle="Beyond this page, here's where else to find me.">
+      <Section id="social" title={t.sections.socialTitle} subtitle={t.sections.socialSubtitle}>
         {hasSocial ? (
           <div className="flex flex-wrap gap-6 sm:gap-8">
             {Object.entries(profile.social_links).map(([platform, value]) => {
               const href = toHref(platform, value);
               if (!href) return null;
-              const label = SOCIAL_LABELS[platform] ?? platform;
+              const label = platform === "website" ? (locale === "ar" ? "الموقع" : "Website") : SOCIAL_LABELS[platform] ?? platform;
               return (
                 <a
                   key={platform}
@@ -392,17 +445,20 @@ export default async function PublicProfilePage({ params }) {
           </div>
         ) : (
           <p className="text-sm italic" style={{ color: MUTED }}>
-            {EMPTY_NOTES.social}
+            {t.emptyNotes.social}
           </p>
         )}
       </Section>
     ),
   };
 
+  // Toggle keeps whatever section the person is already looking at.
+  const otherLocale = locale === "ar" ? "en" : "ar";
+
   return (
     <main
-      dir="ltr"
-      lang="en"
+      dir={t.dir}
+      lang={locale}
       className="min-h-screen"
       style={{ backgroundColor: PAPER, color: INK, fontFamily: "var(--font-body), sans-serif" }}
     >
@@ -413,55 +469,67 @@ export default async function PublicProfilePage({ params }) {
       >
         <div className="max-w-5xl mx-auto px-6 flex items-center justify-between gap-6 py-4">
           <span className="font-display text-lg shrink-0" style={{ color: INK }}>
-            {firstName}'s World
+            {t.worldName(firstName)}
           </span>
 
-          {navItems.length > 1 && (
-            <>
-              {/* Desktop/tablet: inline pill nav. */}
-              <nav className="hidden sm:flex items-center gap-1">
-                {navItems.map((key) => (
-                  <a
-                    key={key}
-                    href={`#${key}`}
-                    className="shrink-0 text-sm px-3 py-1.5 rounded-full hover:opacity-70 transition-opacity"
-                    style={{ color: MUTED }}
-                  >
-                    {NAV_LABELS[key]}
-                  </a>
-                ))}
-              </nav>
-
-              {/* Mobile: a native <details> menu -- no client JS needed,
-                  so this page can stay a plain server component. */}
-              <details className="sm:hidden relative">
-                <summary
-                  className="list-none flex h-9 w-9 items-center justify-center rounded-full cursor-pointer"
-                  style={{ backgroundColor: SAND }}
-                  aria-label="Menu"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round">
-                    <path d="M4 7h16M4 12h16M4 17h16" />
-                  </svg>
-                </summary>
-                <nav
-                  className="absolute end-0 mt-2 w-48 rounded-xl p-2 shadow-lg"
-                  style={{ backgroundColor: WHITE, border: `1px solid ${SAND}` }}
-                >
+          <div className="flex items-center gap-3">
+            {navItems.length > 1 && (
+              <>
+                {/* Desktop/tablet: inline pill nav. */}
+                <nav className="hidden sm:flex items-center gap-1">
                   {navItems.map((key) => (
                     <a
                       key={key}
                       href={`#${key}`}
-                      className="block text-sm px-3 py-2 rounded-lg hover:opacity-70 transition-opacity"
-                      style={{ color: INK }}
+                      className="shrink-0 text-sm px-3 py-1.5 rounded-full hover:opacity-70 transition-opacity"
+                      style={{ color: MUTED }}
                     >
-                      {NAV_LABELS[key]}
+                      {t.nav[key]}
                     </a>
                   ))}
                 </nav>
-              </details>
-            </>
-          )}
+
+                {/* Mobile: a native <details> menu -- no client JS needed,
+                    so this page can stay a plain server component. */}
+                <details className="sm:hidden relative">
+                  <summary
+                    className="list-none flex h-9 w-9 items-center justify-center rounded-full cursor-pointer"
+                    style={{ backgroundColor: SAND }}
+                    aria-label={t.menu}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round">
+                      <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                  </summary>
+                  <nav
+                    className="absolute end-0 mt-2 w-48 rounded-xl p-2 shadow-lg"
+                    style={{ backgroundColor: WHITE, border: `1px solid ${SAND}` }}
+                  >
+                    {navItems.map((key) => (
+                      <a
+                        key={key}
+                        href={`#${key}`}
+                        className="block text-sm px-3 py-2 rounded-lg hover:opacity-70 transition-opacity"
+                        style={{ color: INK }}
+                      >
+                        {t.nav[key]}
+                      </a>
+                    ))}
+                  </nav>
+                </details>
+              </>
+            )}
+
+            {/* Language toggle -- a plain link, no client JS: the whole
+                page re-renders server-side in the other language. */}
+            <a
+              href={`?lang=${otherLocale}`}
+              className="shrink-0 text-xs font-medium rounded-full px-3 py-1.5 transition-colors"
+              style={{ backgroundColor: SAND, color: INK }}
+            >
+              {T[otherLocale].langToggle[otherLocale]}
+            </a>
+          </div>
         </div>
       </header>
 
@@ -471,13 +539,13 @@ export default async function PublicProfilePage({ params }) {
           <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-10 items-center py-14 sm:py-20">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] mb-4" style={{ color: COPPER }}>
-                Hello, I'm {firstName}
+                {t.hero.eyebrow(firstName)}
               </p>
               <h1 className="font-display text-4xl sm:text-5xl leading-[1.2] max-w-[16ch]" style={{ color: INK }}>
-                What I read. What I listen to. What I'm becoming.
+                {t.hero.headline}
               </h1>
               <p className="text-base mt-5 max-w-[42ch]" style={{ color: MUTED }}>
-                A small, carefully kept collection of the things that shape my world.
+                {t.hero.subtitle}
               </p>
 
               {hasSocial && (
@@ -523,7 +591,7 @@ export default async function PublicProfilePage({ params }) {
                   className="absolute top-7 end-7 text-xs tracking-[0.15em]"
                   style={{ color: `${WHITE}E6`, writingMode: "vertical-rl" }}
                 >
-                  Better Every Day
+                  {t.hero.betterEveryDay}
                 </p>
               </div>
             ) : (
@@ -554,7 +622,7 @@ export default async function PublicProfilePage({ params }) {
                   className="absolute top-7 end-7 text-xs tracking-[0.15em]"
                   style={{ color: `${WHITE}CC`, writingMode: "vertical-rl" }}
                 >
-                  Better Every Day
+                  {t.hero.betterEveryDay}
                 </p>
               </div>
             )}
@@ -572,7 +640,7 @@ export default async function PublicProfilePage({ params }) {
           )}
 
           {otherKinds.map(([kind, items], idx) => {
-            const meta = KIND_SECTION[kind] || { title: kind };
+            const meta = { title: t.kindSection[kind] || kind };
             return (
               <FadeIn key={kind} delay={0.3 + idx * 0.04}>
                 <Section title={meta.title}>
@@ -602,10 +670,10 @@ export default async function PublicProfilePage({ params }) {
         <div className="max-w-5xl mx-auto px-6 py-10 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="font-display text-base" style={{ color: WHITE }}>
-              {firstName}'s World
+              {t.worldName(firstName)}
             </p>
             <p className="text-sm mt-1" style={{ color: `${WHITE}99` }}>
-              A quiet corner of the internet, kept for the things I love.
+              {t.footer.tagline}
             </p>
           </div>
           {navItems.length > 0 && (
@@ -617,7 +685,7 @@ export default async function PublicProfilePage({ params }) {
                   className="text-sm hover:opacity-70 transition-opacity"
                   style={{ color: `${WHITE}CC` }}
                 >
-                  {NAV_LABELS[key]}
+                  {t.nav[key]}
                 </a>
               ))}
             </nav>
