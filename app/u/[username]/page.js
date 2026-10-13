@@ -203,6 +203,28 @@ function Section({ id, title, subtitle, action, children }) {
   );
 }
 
+// A deliberately designed "nothing here yet" state -- a dashed-edge
+// card rather than bare italic text sitting on the page background,
+// so a section with no content yet still reads as finished, not
+// unbuilt. Used for the books/interests/social sections.
+function EmptyState({ children }) {
+  return (
+    <div
+      className="rounded-2xl px-6 py-9 text-center"
+      style={{ border: `1px dashed ${SAND}`, backgroundColor: `${WHITE}80` }}
+    >
+      <span
+        className="block w-6 h-[2px] mx-auto mb-3 rounded-full"
+        style={{ backgroundColor: SAND }}
+        aria-hidden="true"
+      />
+      <p className="text-sm italic" style={{ color: MUTED }}>
+        {children}
+      </p>
+    </div>
+  );
+}
+
 function Card({ children, className = "" }) {
   return (
     <div
@@ -218,7 +240,7 @@ async function getProfile(username) {
   const supabase = createServerSupabase();
   const { data } = await supabase
     .from("public_profiles")
-    .select("id, display_name, bio, avatar_url, social_links, public_section_order")
+    .select("id, display_name, display_name_en, bio, avatar_url, social_links, public_section_order")
     .eq("username", username)
     .maybeSingle();
   return data;
@@ -227,7 +249,7 @@ async function getProfile(username) {
 export async function generateMetadata({ params }) {
   const profile = await getProfile(params.username);
   if (!profile) return { title: "This page doesn't exist" };
-  const name = profile.display_name || "my";
+  const name = profile.display_name_en || profile.display_name || "my";
   const description = profile.bio ? profile.bio.slice(0, 150) : `A personal space for ${name}'s interests, ideas, and everyday life.`;
   return {
     title: `${name}`,
@@ -272,7 +294,16 @@ export default async function PublicProfilePage({ params, searchParams }) {
   const bookCovers = Object.fromEntries(coverEntries);
 
   const hasSocial = profile.social_links && Object.values(profile.social_links).some(Boolean);
-  const firstName = (profile.display_name || "").trim().split(/\s+/)[0] || "Welcome";
+  // Use the English name he set in Settings when viewing the English
+  // page (so the hero doesn't read "Hello, I'm أحمد" in English), and
+  // his main name on the Arabic page. Falls back to whichever name
+  // exists if only one was ever set.
+  const rawName =
+    (locale === "en" && profile.display_name_en) ||
+    profile.display_name ||
+    profile.display_name_en ||
+    "";
+  const firstName = rawName.trim().split(/\s+/)[0] || (locale === "ar" ? "صديقي" : "Welcome");
 
   const DEFAULT_ORDER = ["currently", "books", "podcasts", "interests", "about", "social"];
   const configured = (profile.public_section_order || []).filter((k) => DEFAULT_ORDER.includes(k));
@@ -345,9 +376,7 @@ export default async function PublicProfilePage({ params, searchParams }) {
             ))}
           </div>
         ) : (
-          <p className="text-sm italic" style={{ color: MUTED }}>
-            {t.emptyNotes.book}
-          </p>
+          <EmptyState>{t.emptyNotes.book}</EmptyState>
         )}
       </Section>
     ),
@@ -361,14 +390,22 @@ export default async function PublicProfilePage({ params, searchParams }) {
             ))}
           </div>
         ) : (
-          <Card className="text-center py-10">
+          <div
+            className="rounded-2xl px-6 py-9 text-center"
+            style={{ border: `1px dashed ${SAND}`, backgroundColor: `${WHITE}80` }}
+          >
+            <span
+              className="block w-6 h-[2px] mx-auto mb-3 rounded-full"
+              style={{ backgroundColor: SAND }}
+              aria-hidden="true"
+            />
             <p className="text-sm" style={{ color: INK }}>
               {t.sections.podcastsEmptyTitle}
             </p>
             <p className="text-xs mt-1" style={{ color: MUTED }}>
               {t.sections.podcastsEmptySubtitle}
             </p>
-          </Card>
+          </div>
         )}
       </Section>
     ),
@@ -388,9 +425,7 @@ export default async function PublicProfilePage({ params, searchParams }) {
             ))}
           </div>
         ) : (
-          <p className="text-sm italic" style={{ color: MUTED }}>
-            {t.emptyNotes.interests}
-          </p>
+          <EmptyState>{t.emptyNotes.interests}</EmptyState>
         )}
       </Section>
     ),
@@ -444,9 +479,7 @@ export default async function PublicProfilePage({ params, searchParams }) {
             })}
           </div>
         ) : (
-          <p className="text-sm italic" style={{ color: MUTED }}>
-            {t.emptyNotes.social}
-          </p>
+          <EmptyState>{t.emptyNotes.social}</EmptyState>
         )}
       </Section>
     ),
