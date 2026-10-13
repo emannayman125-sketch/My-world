@@ -104,6 +104,30 @@ async function fetchCoverUrl(title, author) {
   return (await fetchFromOpenLibrary(title, author)) || (await fetchFromGoogleBooks(title, author));
 }
 
+// Real podcast/show artwork from Apple's free, no-key search API. Same
+// rules as the book covers: skipped for Arabic titles (too likely to
+// match the wrong show), null on any failure, never a guess.
+async function fetchPodcastArt(title) {
+  if (/[؀-ۿ]/.test(title)) return null;
+  const q = encodeURIComponent(title);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3000);
+  try {
+    const res = await fetch(`https://itunes.apple.com/search?term=${q}&media=podcast&limit=1`, {
+      signal: controller.signal,
+      next: { revalidate: 60 * 60 * 24 },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const art = data?.results?.[0]?.artworkUrl600 || data?.results?.[0]?.artworkUrl100;
+    return art || null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 const SOCIAL_LABELS = {
   instagram: "Instagram",
   facebook: "Facebook",
@@ -112,6 +136,19 @@ const SOCIAL_LABELS = {
   tiktok: "TikTok",
   x: "X",
   website: "Website",
+};
+
+// A distinct accent (from the page's own palette, not a brand color)
+// per platform, so the social cards read as a lively set rather than
+// one repeated grey tile.
+const SOCIAL_ACCENTS = {
+  instagram: COPPER,
+  facebook: TEAL,
+  linkedin: INK,
+  youtube: COPPER,
+  tiktok: INK,
+  x: TEAL,
+  website: GOLD,
 };
 
 function toHref(platform, value) {
@@ -174,6 +211,15 @@ const T = {
       socialTitle: "Find Me Elsewhere",
       socialSubtitle: "If this page isn't enough, here's where the rest of me lives.",
     },
+    socialDescriptors: {
+      instagram: "Photos & moments",
+      facebook: "Updates & posts",
+      linkedin: "Professional network",
+      youtube: "Videos & ideas",
+      tiktok: "Short clips",
+      x: "Thoughts & updates",
+      website: "More, in one place",
+    },
     footer: { tagline: "A small corner of the internet, kept just for the things I love." },
     worldName: (name) => `${name}'s World`,
   },
@@ -211,6 +257,15 @@ const T = {
       socialTitle: "تلاقيني كمان هنا",
       socialSubtitle: "لو الصفحة دي مش كفاية، هنا تقدر تلاقي باقي حكايتي.",
     },
+    socialDescriptors: {
+      instagram: "صور ولحظات",
+      facebook: "أخبار ومنشورات",
+      linkedin: "شبكتي المهنية",
+      youtube: "فيديوهات وأفكار",
+      tiktok: "مقاطع قصيرة",
+      x: "أفكار وتحديثات",
+      website: "كل حاجة في مكان واحد",
+    },
     footer: { tagline: "ركن صغير في الإنترنت، محفوظ بس للحاجات اللي بحبها." },
     worldName: (name) => `عالم ${name}`,
   },
@@ -223,7 +278,11 @@ function Section({ id, title, subtitle, action, children }) {
     <section id={id} className="scroll-mt-28">
       <div className="flex items-end justify-between gap-4 mb-6">
         <div>
-          <span className="block w-8 h-[2px] mb-3 rounded-full" style={{ backgroundColor: GOLD }} aria-hidden="true" />
+          <span
+            className="block w-10 h-[3px] mb-3 rounded-full"
+            style={{ backgroundImage: `linear-gradient(90deg, ${GOLD} 0%, ${COPPER} 100%)` }}
+            aria-hidden="true"
+          />
           <h2 className="font-display text-2xl sm:text-[1.75rem] leading-tight" style={{ color: INK }}>
             {title}
           </h2>
@@ -338,6 +397,13 @@ export default async function PublicProfilePage({ params, searchParams }) {
   // mobile menu and book-review disclosure elsewhere on this page.
   const bookCategories = Array.from(new Set(allBooks.map((b) => b.notes).filter(Boolean)));
   const bookCategorySlug = (cat) => `bc${bookCategories.indexOf(cat)}`;
+
+  // Real podcast artwork, same real-source-only rule as the books.
+  const podcastList = worldByKind.podcast || [];
+  const podcastCoverEntries = await Promise.all(
+    podcastList.map(async (p) => [p.id, await fetchPodcastArt(p.title)])
+  );
+  const podcastCovers = Object.fromEntries(podcastCoverEntries);
 
   const hasSocial = profile.social_links && Object.values(profile.social_links).some(Boolean);
   // Use the English name he set in Settings when viewing the English
@@ -476,12 +542,13 @@ export default async function PublicProfilePage({ params, searchParams }) {
 
     podcasts: (
       <Section id="podcasts" title={t.sections.podcastsTitle} subtitle={t.sections.podcastsSubtitle}>
-        {worldByKind.podcast?.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-x-5 gap-y-8">
-            {worldByKind.podcast.map((w) => (
-              <PodcastCover key={w.id} item={w} />
-            ))}
-          </div>
+        {podcastList.length > 0 ? (
+          <ScrollRow
+            items={podcastList}
+            itemWidth={132}
+            rowHeight={158}
+            renderItem={(w) => <PodcastCover item={w} coverUrl={podcastCovers[w.id]} />}
+          />
         ) : (
           <div
             className="rounded-2xl px-6 py-9 text-center"
@@ -546,27 +613,36 @@ export default async function PublicProfilePage({ params, searchParams }) {
     social: (
       <Section id="social" title={t.sections.socialTitle} subtitle={t.sections.socialSubtitle}>
         {hasSocial ? (
-          <div className="flex flex-wrap gap-6 sm:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {Object.entries(profile.social_links).map(([platform, value]) => {
               const href = toHref(platform, value);
               if (!href) return null;
               const label = platform === "website" ? (locale === "ar" ? "الموقع" : "Website") : SOCIAL_LABELS[platform] ?? platform;
+              const accent = SOCIAL_ACCENTS[platform] || INK;
+              const descriptor = t.socialDescriptors[platform] || t.socialDescriptors.website;
               return (
                 <a
                   key={platform}
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
-                  className="group/social flex items-center gap-2 text-sm hover:opacity-80 transition-opacity"
-                  style={{ color: INK }}
+                  className="group/social flex items-center gap-3 rounded-2xl p-3.5 transition-all duration-300 hover:-translate-y-0.5"
+                  style={{ backgroundColor: WHITE, border: `1px solid ${SAND}` }}
                 >
                   <span
-                    className="flex h-9 w-9 items-center justify-center rounded-full transition-transform duration-300 group-hover/social:scale-110 group-hover/social:-rotate-6"
-                    style={{ backgroundColor: SAND }}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover/social:scale-110 group-hover/social:-rotate-6"
+                    style={{ backgroundColor: accent }}
                   >
-                    <SocialGlyph platform={platform} />
+                    <SocialGlyph platform={platform} color={WHITE} />
                   </span>
-                  {label}
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium truncate" style={{ color: INK }}>
+                      {label}
+                    </span>
+                    <span className="block text-[11px] truncate" style={{ color: MUTED }}>
+                      {descriptor}
+                    </span>
+                  </span>
                 </a>
               );
             })}
@@ -867,7 +943,7 @@ export default async function PublicProfilePage({ params, searchParams }) {
 
 // Minimal inline glyphs so the social row doesn't depend on importing a
 // whole icon library's worth of brand marks for six platforms.
-const SPINE_TONES = [TEAL, COPPER, INK, MUTED];
+const SPINE_TONES = [TEAL, COPPER, INK, GOLD];
 
 function hashTitle(str) {
   let h = 0;
@@ -882,21 +958,28 @@ function hashTitle(str) {
 // visual hint that there's more to see, swipeable on touch and
 // scrollable with a trackpad/shift+wheel on desktop (plain CSS
 // overflow, no JS needed to make it work).
-function BookRow({ books, covers }) {
+// A horizontally-scrolling row with a round arrow at the end -- a
+// visual hint that there's more to see, swipeable on touch and
+// scrollable with a trackpad/shift+wheel on desktop (plain CSS
+// overflow, no JS needed to make it work). Shared by the books shelf
+// and the podcast row.
+function ScrollRow({ items, itemWidth, rowHeight, renderItem }) {
   return (
     <div className="relative">
       <div className="flex gap-4 overflow-x-auto pb-2 pe-14 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {books.map((b) => (
-          <div key={b.id} className="w-[108px] shrink-0 snap-start">
-            <BookCover book={b} coverUrl={covers[b.id]} />
+        {items.map((item) => (
+          <div key={item.id} className="shrink-0 snap-start" style={{ width: itemWidth }}>
+            {renderItem(item)}
           </div>
         ))}
       </div>
-      {books.length > 5 && (
+      {items.length > 5 && (
         <span
           aria-hidden="true"
-          className="hidden sm:flex absolute end-0 top-0 h-[162px] w-12 items-center justify-center rounded-full"
+          className="hidden sm:flex absolute end-0 top-0 items-center justify-center rounded-full"
           style={{
+            height: rowHeight,
+            width: 48,
             background: `linear-gradient(90deg, transparent 0%, ${PAPER} 55%)`,
           }}
         >
@@ -911,6 +994,17 @@ function BookRow({ books, covers }) {
         </span>
       )}
     </div>
+  );
+}
+
+function BookRow({ books, covers }) {
+  return (
+    <ScrollRow
+      items={books}
+      itemWidth={108}
+      rowHeight={162}
+      renderItem={(b) => <BookCover book={b} coverUrl={covers[b.id]} />}
+    />
   );
 }
 
@@ -954,24 +1048,32 @@ function BookCover({ book, coverUrl }) {
   );
 }
 
-// Same cover-tile treatment as the books, with a small play glyph badge
-// when the podcast has a real external link to open.
-function PodcastCover({ item }) {
+// Real artwork (see fetchPodcastArt) when there's a match, otherwise a
+// gradient tile in one of the richer accent tones -- same play glyph
+// badge when the podcast has a real external link to open.
+function PodcastCover({ item, coverUrl }) {
   const tone = SPINE_TONES[hashTitle(item.title) % SPINE_TONES.length];
   const href = item.link_url && /^https?:\/\//.test(item.link_url) ? item.link_url : null;
   const Wrapper = href ? "a" : "div";
   return (
     <Wrapper {...(href ? { href, target: "_blank", rel: "noopener noreferrer nofollow" } : {})} className="block group">
       <div
-        className="relative aspect-square rounded-xl shadow-[0_6px_16px_-6px_rgba(24,32,29,0.25)] flex items-end p-3 transition-transform group-hover:-translate-y-1"
-        style={{ backgroundColor: tone }}
+        className="relative aspect-square rounded-xl overflow-hidden shadow-[0_6px_16px_-6px_rgba(24,32,29,0.25)] flex items-end p-3 transition-transform group-hover:-translate-y-1"
+        style={coverUrl ? undefined : { backgroundImage: `linear-gradient(155deg, ${tone} 0%, ${INK} 130%)` }}
       >
-        <span className="font-display text-[13px] leading-tight" style={{ color: WHITE }}>
+        {coverUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={coverUrl} alt={item.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+        ) : null}
+        {coverUrl && (
+          <span className="absolute inset-0" style={{ background: `linear-gradient(0deg, ${INK}99 0%, transparent 45%)` }} aria-hidden="true" />
+        )}
+        <span className="relative font-display text-[13px] leading-tight" style={{ color: WHITE }}>
           {item.title}
         </span>
         {href && (
           <span
-            className="absolute top-2.5 end-2.5 flex h-6 w-6 items-center justify-center rounded-full"
+            className="absolute top-2.5 end-2.5 flex h-6 w-6 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-110"
             style={{ backgroundColor: `${WHITE}E6` }}
           >
             <svg width="10" height="10" viewBox="0 0 24 24" fill={INK}>
@@ -987,21 +1089,21 @@ function PodcastCover({ item }) {
   );
 }
 
-function SocialGlyph({ platform }) {
-  const common = { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: INK, strokeWidth: 1.8 };
+function SocialGlyph({ platform, color = INK }) {
+  const common = { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: 1.8 };
   switch (platform) {
     case "instagram":
       return (
         <svg {...common}>
           <rect x="3" y="3" width="18" height="18" rx="5" />
           <circle cx="12" cy="12" r="4" />
-          <circle cx="17.5" cy="6.5" r="1" fill={INK} stroke="none" />
+          <circle cx="17.5" cy="6.5" r="1" fill={color} stroke="none" />
         </svg>
       );
     case "facebook":
       return (
         <svg {...common}>
-          <path d="M14 21v-7h2.5l.5-3H14V9c0-.9.3-1.5 1.7-1.5H17V4.8c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V11H8v3h2.8v7H14z" fill={INK} stroke="none" />
+          <path d="M14 21v-7h2.5l.5-3H14V9c0-.9.3-1.5 1.7-1.5H17V4.8c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4V11H8v3h2.8v7H14z" fill={color} stroke="none" />
         </svg>
       );
     case "linkedin":
@@ -1015,13 +1117,13 @@ function SocialGlyph({ platform }) {
       return (
         <svg {...common}>
           <rect x="3" y="6" width="18" height="12" rx="4" />
-          <path d="M10.5 9.5l5 2.5-5 2.5z" fill={INK} stroke="none" />
+          <path d="M10.5 9.5l5 2.5-5 2.5z" fill={color} stroke="none" />
         </svg>
       );
     case "tiktok":
       return (
         <svg {...common}>
-          <path d="M14 4v10.5a3 3 0 1 1-2.5-3V9a5.3 5.3 0 0 0 2.5 7.5 5.3 5.3 0 0 0 5.3-5.3V7.6A6 6 0 0 0 17 4h-3z" fill={INK} stroke="none" />
+          <path d="M14 4v10.5a3 3 0 1 1-2.5-3V9a5.3 5.3 0 0 0 2.5 7.5 5.3 5.3 0 0 0 5.3-5.3V7.6A6 6 0 0 0 17 4h-3z" fill={color} stroke="none" />
         </svg>
       );
     case "x":
