@@ -120,25 +120,25 @@ const T = {
     hero: {
       eyebrow: (name) => `Hello, I'm ${name}`,
       headline: "What I read. What I listen to. What I'm becoming.",
-      subtitle: "A small, carefully kept collection of the things that shape my world.",
+      subtitle: "A living notebook of the pages, voices, and ideas quietly shaping who I'm becoming.",
       betterEveryDay: "Better Every Day",
     },
     sections: {
       currentlyTitle: "Currently",
-      currentlySubtitle: "What I'm focused on right now.",
+      currentlySubtitle: "Where my attention lives this week.",
       booksTitle: "From the Shelf",
-      booksSubtitle: "Pages I keep returning to, and a few I'm just getting started with.",
+      booksSubtitle: "Stories I return to like old friends, and a few new ones I'm just getting to know.",
       podcastsTitle: "What I'm Listening To",
-      podcastsSubtitle: "Voices and ideas that keep me company.",
+      podcastsSubtitle: "The voices that keep me company on long days and quiet drives.",
       podcastsEmptyTitle: "No listening items published yet.",
       podcastsEmptySubtitle: "Check back soon for podcasts and audio recommendations.",
       interestsTitle: "A Few Things I Love",
-      interestsSubtitle: "Threads that run through everything I do.",
+      interestsSubtitle: "The quiet threads woven through everything I build, read, and chase.",
       aboutTitle: "About Me",
       socialTitle: "Find Me Elsewhere",
-      socialSubtitle: "Beyond this page, here's where else to find me.",
+      socialSubtitle: "If this page isn't enough, here's where the rest of me lives.",
     },
-    footer: { tagline: "A quiet corner of the internet, kept for the things I love." },
+    footer: { tagline: "A small corner of the internet, kept just for the things I love." },
     worldName: (name) => `${name}'s World`,
   },
   ar: {
@@ -147,34 +147,34 @@ const T = {
     langToggle: { en: "EN", ar: "عربي" },
     nav: { currently: "حاليًا", books: "القراءة", podcasts: "الاستماع", interests: "الاهتمامات", about: "نبذة", social: "روابط" },
     currentlyLabels: { reading: "بيقرأ دلوقتي", listening: "بيسمع دلوقتي", watching: "بيتفرج دلوقتي" },
-    kindSection: { music: "كمان بسمعه", movie: "بيتفرج عليه", place: "أماكن في باله", hobby: "حاجات بيحبها" },
+    kindSection: { music: "كمان بسمعه", movie: "بتفرج عليه", place: "أماكن في بالي", hobby: "حاجات بحبها" },
     emptyNotes: {
       book: "الرف لسه بيتجهز.",
-      interests: "شوية حاجات بيحبها، قريبًا.",
+      interests: "شوية حاجات بحبها، جاية قريبًا.",
       social: "لسه مفيش روابط.",
     },
     hero: {
       eyebrow: (name) => `أهلًا، أنا ${name}`,
       headline: "اللي بقراه. اللي بسمعه. اللي ببقى عليه.",
-      subtitle: "مجموعة صغيرة، اتجمعت بعناية، من الحاجات اللي بتشكّل عالمي.",
+      subtitle: "دفتر صغير بيتجدد، فيه الصفحات والأصوات والأفكار اللي بتشكّلني يوم ورا يوم.",
       betterEveryDay: "كل يوم أحسن من اللي قبله",
     },
     sections: {
       currentlyTitle: "حاليًا",
-      currentlySubtitle: "اللي شاغل باله دلوقتي.",
+      currentlySubtitle: "اللي شاغل بالي الفترة دي.",
       booksTitle: "من على الرف",
-      booksSubtitle: "صفحات بيرجعلها باستمرار، وشوية لسه بادي فيها.",
+      booksSubtitle: "صفحات بارجعلها زي ما بارجع لصاحب قديم، وشوية لسه بتعرّف عليهم.",
       podcastsTitle: "إيه اللي بسمعه",
-      podcastsSubtitle: "أصوات وأفكار بتونسه.",
+      podcastsSubtitle: "أصوات بتونسني في طريق طويل أو لحظة هدوء.",
       podcastsEmptyTitle: "لسه مفيش حاجة اتنشرت هنا.",
       podcastsEmptySubtitle: "تابعوا، هيبقى فيه بودكاست وتوصيات صوتية قريبًا.",
-      interestsTitle: "حاجات بيحبها",
-      interestsSubtitle: "خيوط بتمشي في كل حاجة بيعملها.",
+      interestsTitle: "حاجات بحبها",
+      interestsSubtitle: "خيوط هادية ماشية في كل حاجة باعملها وباقراها وبالحقها.",
       aboutTitle: "نبذة عني",
       socialTitle: "تلاقيني كمان هنا",
-      socialSubtitle: "غير الصفحة دي، تقدر تلاقيني هنا كمان.",
+      socialSubtitle: "لو الصفحة دي مش كفاية، هنا تقدر تلاقي باقي حكايتي.",
     },
-    footer: { tagline: "ركن هادي في الإنترنت، محفوظ للحاجات اللي بيحبها." },
+    footer: { tagline: "ركن صغير في الإنترنت، محفوظ بس للحاجات اللي بحبها." },
     worldName: (name) => `عالم ${name}`,
   },
 };
@@ -632,8 +632,10 @@ export default async function PublicProfilePage({ params, searchParams }) {
                 className="relative rounded-3xl overflow-hidden aspect-[4/3] md:aspect-square"
                 style={{ background: `linear-gradient(145deg, ${TEAL} 0%, ${INK} 100%)` }}
               >
-                {/* A quiet emblem, not a chart -- a radiant texture and a
-                    single gold ring around his initial. */}
+                {/* A quiet emblem, not a chart, and no literal letter --
+                    a radiant texture behind a fine hand-drawn rosette,
+                    the kind of restrained geometric ornament that sits
+                    comfortably next to the Arabic titles on this page. */}
                 <div
                   className="absolute inset-0"
                   style={{
@@ -642,14 +644,26 @@ export default async function PublicProfilePage({ params, searchParams }) {
                   aria-hidden="true"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div
-                    className="flex h-28 w-28 sm:h-36 sm:w-36 items-center justify-center rounded-full"
-                    style={{ border: `1px solid ${GOLD}88` }}
+                  <svg
+                    width="168"
+                    height="168"
+                    viewBox="0 0 168 168"
+                    fill="none"
+                    aria-hidden="true"
+                    className="w-32 h-32 sm:w-40 sm:h-40"
                   >
-                    <span className="font-display text-5xl sm:text-6xl" style={{ color: `${WHITE}F2` }}>
-                      {firstName.charAt(0)}
-                    </span>
-                  </div>
+                    <circle cx="84" cy="84" r="82" stroke={`${GOLD}66`} strokeWidth="1" />
+                    <circle cx="84" cy="84" r="58" stroke={`${GOLD}99`} strokeWidth="1" />
+                    {Array.from({ length: 8 }).map((_, i) => {
+                      const angle = (i * Math.PI) / 4;
+                      const x = 84 + 58 * Math.cos(angle);
+                      const y = 84 + 58 * Math.sin(angle);
+                      return (
+                        <circle key={i} cx={x} cy={y} r="27" stroke={`${GOLD}55`} strokeWidth="0.75" />
+                      );
+                    })}
+                    <circle cx="84" cy="84" r="4" fill={`${GOLD}CC`} />
+                  </svg>
                 </div>
                 <p
                   className="absolute top-7 end-7 text-xs tracking-[0.15em]"
