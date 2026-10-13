@@ -41,32 +41,59 @@ const BOOK_COVER_OVERRIDES = {
   "الماجريات": "/books/al-majariyat.webp",
 };
 
-// Real cover art, looked up live from Open Library (a free, no-key
-// catalog) by title/author, cached for a day per title so repeat visits
-// don't re-fetch. Deliberately skipped for Arabic-script titles: that
-// catalog is overwhelmingly English, so a "match" there is more likely
-// to be a wrong book's cover than a right one -- and a wrong cover is
-// worse than the plain fallback tile. On any failure (timeout, no
-// match, API down) this just returns null and the fallback tile shows,
-// exactly as before.
-async function fetchCoverUrl(title, author) {
-  if (/[؀-ۿ]/.test(title)) return null;
+// Real cover art, looked up live from two free, no-key catalogs by
+// title/author, cached for a day per title so repeat visits don't
+// re-fetch. Deliberately skipped for Arabic-script titles: both
+// catalogs are overwhelmingly English, so a "match" there is more
+// likely to be a wrong book's cover than a right one -- and a wrong
+// cover is worse than the plain fallback tile. On any failure (timeout,
+// no match, API down) this just returns null and the fallback tile
+// shows, exactly as before.
+async function fetchFromOpenLibrary(title, author) {
+  const q = encodeURIComponent(`${title} ${author || ""}`.trim());
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3000);
   try {
-    const q = encodeURIComponent(`${title} ${author || ""}`.trim());
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3000);
     const res = await fetch(`https://openlibrary.org/search.json?q=${q}&fields=cover_i&limit=1`, {
       signal: controller.signal,
       next: { revalidate: 60 * 60 * 24 },
     });
-    clearTimeout(timeout);
     if (!res.ok) return null;
     const data = await res.json();
     const coverId = data?.docs?.[0]?.cover_i;
     return coverId ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg` : null;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
+}
+
+// Second source for titles Open Library doesn't have -- real covers
+// only, same rule as above (never a guessed/fabricated image).
+async function fetchFromGoogleBooks(title, author) {
+  const q = encodeURIComponent(`intitle:${title}${author ? ` inauthor:${author}` : ""}`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3000);
+  try {
+    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1`, {
+      signal: controller.signal,
+      next: { revalidate: 60 * 60 * 24 },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const thumb = data?.items?.[0]?.volumeInfo?.imageLinks?.thumbnail;
+    return thumb ? thumb.replace(/^http:/, "https:") : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchCoverUrl(title, author) {
+  if (/[؀-ۿ]/.test(title)) return null;
+  return (await fetchFromOpenLibrary(title, author)) || (await fetchFromGoogleBooks(title, author));
 }
 
 const SOCIAL_LABELS = {
@@ -666,7 +693,6 @@ export default async function PublicProfilePage({ params, searchParams }) {
                     className="w-32 h-32 sm:w-40 sm:h-40"
                     style={{ animation: "ahmedworld-spin 90s linear infinite" }}
                   >
-                    <circle cx="84" cy="84" r="82" stroke={`${GOLD}66`} strokeWidth="1" />
                     <circle cx="84" cy="84" r="58" stroke={`${GOLD}99`} strokeWidth="1" />
                     {Array.from({ length: 8 }).map((_, i) => {
                       const angle = (i * Math.PI) / 4;
