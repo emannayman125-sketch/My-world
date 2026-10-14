@@ -172,6 +172,11 @@ const CURRENTLY_ICON_PATHS = {
   watching: "M8 5v14l11-7z",
 };
 
+// A distinct accent per kind, same family as SOCIAL_ACCENTS -- so the
+// three "Currently" cards read as a lively set instead of one repeated
+// neutral badge.
+const CURRENTLY_ACCENTS = { reading: TEAL, listening: COPPER, watching: GOLD };
+
 // All of this page's own chrome (not his data -- his bio, book titles,
 // interests etc. stay exactly as he wrote them) in both languages.
 // Picked by a plain ?lang=ar query param, server-rendered, no client
@@ -442,9 +447,9 @@ export default async function PublicProfilePage({ params, searchParams }) {
               <div className="flex items-center gap-2 mb-3">
                 <span
                   className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-                  style={{ backgroundColor: SAND }}
+                  style={{ backgroundColor: CURRENTLY_ACCENTS[c.kind] || TEAL }}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill={INK}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill={WHITE}>
                     <path d={CURRENTLY_ICON_PATHS[c.kind] || CURRENTLY_ICON_PATHS.reading} />
                   </svg>
                 </span>
