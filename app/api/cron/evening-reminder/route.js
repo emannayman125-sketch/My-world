@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import webpush from "web-push";
 import { cairoNow } from "@/lib/time";
+import { pickQuote } from "@/lib/quotes/pickQuote";
+
+// Push notification bodies get cut off by the OS well before this, but
+// keep a hard ceiling so a long quote never breaks the payload.
+const MAX_BODY = 160;
+function clip(s, n) {
+  const str = String(s || "").trim();
+  return str.length > n ? str.slice(0, n - 1).trimEnd() + "…" : str;
+}
 
 // Vercel Hobby plan only allows one daily cron trigger at a fixed UTC
 // time (see vercel.json), so this runs once a day already -- the
@@ -36,10 +45,20 @@ export async function GET(request) {
 
   const { data: subs } = await admin.from("push_subscriptions").select("*");
 
+  // Same deterministic "quote of the day" the dashboard card shows --
+  // broadcast, so no per-user mood/personal-quote lookup here, just the
+  // same quiet-evening theme everyone sees if they open the app now.
+  const quote = pickQuote({ hour: TARGET_HOUR });
+  const quoteLine = quote.isPersonal
+    ? quote.text
+    : quote.author
+    ? `${quote.text} — ${quote.author}`
+    : quote.text;
+
   const payload = JSON.stringify({
-    title: "عالمك الخاص",
-    body: "راجعت يومك النهاردة؟ 🌙",
-    url: "/tasks",
+    title: "عالمك الخاص 🌙",
+    body: clip(quoteLine, MAX_BODY),
+    url: "/dashboard",
   });
 
   let sent = 0;
