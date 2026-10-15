@@ -11,5 +11,21 @@
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "shortcuts": [
+    {
+      "name": "جدولي (يوم / أسبوع / شهر / سنة)",
+      "short_name": "جدولي",
+      "description": "يفتح على طول في التقويم وخطة اليوم.",
+      "url": "/tasks?tab=calendar",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "حمزاوي",
+      "short_name": "حمزاوي",
+      "description": "يفتح على طول في محادثة حمزاوي.",
+      "url": "/ai",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
   ]
 }
