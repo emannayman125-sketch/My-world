@@ -10,9 +10,10 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
 }
 
-// Entirely opt-in: nothing subscribes on its own. One evening reminder
-// a day at most ("did you review your day today?") -- never more than
-// that without Ahmed explicitly asking for more later.
+// Entirely opt-in: nothing subscribes on its own. One evening
+// notification a day at most, carrying the same "quote of the day"
+// shown on the dashboard -- never more than that without Ahmed
+// explicitly asking for more later.
 export default function NotificationOptIn({ userId }) {
   const supabase = createClient();
   const [status, setStatus] = useState("checking"); // checking | unsupported | off | on
@@ -98,7 +99,7 @@ export default function NotificationOptIn({ userId }) {
   return (
     <div className="space-y-2">
       <label className="flex items-center justify-between gap-3 text-sm">
-        <span>تذكير مسائي بسيط ("راجعت يومك النهاردة؟") — مرة واحدة بس في اليوم</span>
+        <span>إشعار مسائي باقتباس حلو من "عالمك" — مرة واحدة بس في اليوم</span>
         <input
           type="checkbox"
           checked={status === "on"}
