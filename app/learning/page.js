@@ -30,9 +30,9 @@ export default async function LearningHubPage() {
   // Secondary: still fully there and addable any time, just not fighting
   // for attention when they sit empty between visits.
   const primaryCards = [
-    { href: "/quran", icon: BookOpenCheck, accent: "#2E8B63", title: l.quran, desc: l.quranDesc, count: (quranPortions || []).length },
+    { href: "/quran", icon: BookOpenCheck, accent: "#1F7A5C", title: l.quran, desc: l.quranDesc, count: (quranPortions || []).length },
     { href: "/mba", icon: GraduationCap, accent: "#547DA5", title: l.mba, desc: l.mbaDesc, count: (courses || []).length },
-    { href: "/institute", icon: BookMarked, accent: "#6F4FC4", title: l.institute, desc: l.instituteDesc, count: (instituteCourses || []).length },
+    { href: "/institute", icon: BookMarked, accent: "#5B3FA0", title: l.institute, desc: l.instituteDesc, count: (instituteCourses || []).length },
   ];
   const secondaryCards = [
     { href: "/library", icon: LibraryIcon, title: l.library, desc: l.libraryDesc, count: (books || []).length },
