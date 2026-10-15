@@ -42,7 +42,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#D6870F",
+  themeColor: "#C2922F",
   viewportFit: "cover", // lets the PWA use the full screen; safe-area padding keeps content clear
 };
 
