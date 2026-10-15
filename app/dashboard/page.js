@@ -172,7 +172,7 @@ export default async function DashboardPage({ searchParams }) {
       <ReminderNotifier todayEvents={todayEvents || []} contentDueToday={contentDueToday || []} strings={strings} />
       {isBirthdayToday && <BirthdayCelebration userId={user.id} name={name} year={currentYear} strings={strings} preview={previewBirthday} nextHref={needsSetup || previewBirthday ? "/onboarding" : undefined} />}
 
-      <main className="max-w-2xl mx-auto px-6 pt-4 lg:pt-10 pb-20 space-y-8">
+      <main className="max-w-2xl mx-auto px-6 pt-4 lg:pt-10 pb-20 space-y-6">
         {dueMessage && (
           <FadeIn>
             <SurpriseMessage message={dueMessage} strings={strings} />
@@ -222,12 +222,7 @@ export default async function DashboardPage({ searchParams }) {
           </FadeIn>
         )}
 
-        {/* 1a — the overall daily streak: quiet, no pressure, one rest day allowed */}
-        <FadeIn delay={0.01}>
-          <StreakCard streak={activityStreak} locale={locale} strings={d.streak} />
-        </FadeIn>
-
-        {/* 1b — Hamzawi's daily brief: suggests, never adds anything by itself */}
+        {/* 1a — Hamzawi's daily brief: suggests, never adds anything by itself */}
         <FadeIn delay={0.02}>
           <DailyBrief
             locale={locale}
@@ -237,17 +232,13 @@ export default async function DashboardPage({ searchParams }) {
           />
         </FadeIn>
 
-        {/* 1c — the day's quote, moved up front so it's seen, not buried at the bottom */}
-        <FadeIn delay={0.025}>
-          <QuoteOfTheDay quote={quote} userId={user.id} strings={strings} />
-        </FadeIn>
-
-        {/* 3 — the ONE thing that gets the full lantern fill */}
+        {/* 3 — the ONE thing that gets the full gold-leaf fill: one hero
+            moment instead of another card among equals */}
         <FadeIn delay={0.05}>
           <section>
             <p className="mb-2 text-xs text-ink-muted dark:text-moon-muted">{d.mattersNow}</p>
             {nextPriority ? (
-              <div className="rounded-card bg-lantern p-6 shadow-lantern">
+              <div className="rounded-card bg-gilded p-6 shadow-lantern">
                 <p className="font-display text-2xl leading-snug text-lantern-ink">{nextPriority.title}</p>
               </div>
             ) : top3List.length > 0 ? (
@@ -262,15 +253,13 @@ export default async function DashboardPage({ searchParams }) {
           </section>
         </FadeIn>
 
-        {/* 4 — glanceable row, max 3, only what exists, all calm */}
+        {/* 4 — glanceable row, max 3, only what exists, all calm — one card
+            with internal dividers instead of three separate boxes */}
         {chips.length > 0 && (
           <FadeIn delay={0.07}>
-            <section className="grid grid-cols-3 gap-3">
+            <section className={`${cardBase} grid grid-cols-3 divide-x divide-hairline dark:divide-hairline-dark rtl:divide-x-reverse`}>
               {chips.slice(0, 3).map((chip) => (
-                <div
-                  key={chip.key}
-                  className={`${cardBase} !rounded-chip p-4 flex flex-col items-center gap-1.5 text-center min-w-0`}
-                >
+                <div key={chip.key} className="p-4 flex flex-col items-center gap-1.5 text-center min-w-0">
                   <chip.icon size={18} strokeWidth={2} className="text-ink-muted dark:text-moon-muted" />
                   <span className="text-sm font-medium truncate max-w-full">{chip.value}</span>
                   {chip.label && (
@@ -318,6 +307,9 @@ export default async function DashboardPage({ searchParams }) {
                 <ShareDayButton name={name} top3={top3List} events={todayEvents || []} strings={strings} />
               </div>
             </section>
+
+            <StreakCard streak={activityStreak} locale={locale} strings={d.streak} />
+            <QuoteOfTheDay quote={quote} userId={user.id} strings={strings} />
 
             {eventsCount > 0 && (
               <div className={`${cardBase} p-6`}>
