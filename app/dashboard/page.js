@@ -14,8 +14,7 @@ import ProgressRing from "@/components/ProgressRing";
 import FadeIn from "@/components/FadeIn";
 import MoodCheckin from "@/components/MoodCheckin";
 import HabitsToday from "@/components/HabitsToday";
-import QuoteOfTheDay from "@/components/QuoteOfTheDay";
-import HeroSunrise from "@/components/HeroSunrise";
+import HeroPhoto from "@/components/HeroPhoto";
 import GettingStarted from "@/components/GettingStarted";
 import TodayPanel from "@/components/TodayPanel";
 import Collapsible from "@/components/Collapsible";
@@ -197,14 +196,16 @@ export default async function DashboardPage({ searchParams }) {
           </FadeIn>
         )}
 
-        {/* 1 — the banner: sunrise over the mountains, greeting on top */}
+        {/* 1 — the banner: the photo, greeting and the day's quote on top */}
         <FadeIn>
-          <HeroSunrise
+          <HeroPhoto
             greeting={`${greeting}${locale === "ar" ? "،" : ","}`}
             name={name}
             dateLabel={dateLabel}
-            subtitle={d.keepGoing}
             avatarUrl={profile?.avatar_url}
+            quote={quote}
+            userId={user.id}
+            strings={strings}
           />
         </FadeIn>
 
@@ -252,15 +253,8 @@ export default async function DashboardPage({ searchParams }) {
             (quote, today, the rest); on large screens it becomes a main
             column plus a side column. */}
         <div className="grid lg:grid-cols-12 gap-6 items-start">
-          {/* the day's quote, framed */}
-          <div className="lg:col-span-4 lg:col-start-9 lg:row-start-1">
-            <FadeIn delay={0.04}>
-              <QuoteOfTheDay quote={quote} userId={user.id} strings={strings} />
-            </FadeIn>
-          </div>
-
           {/* main column: what matters today */}
-          <div className="lg:col-span-8 lg:col-start-1 lg:row-start-1 lg:row-span-2 space-y-6 min-w-0">
+          <div className="lg:col-span-8 lg:col-start-1 lg:row-start-1 space-y-6 min-w-0">
             <FadeIn delay={0.05}>
               <section>
                 <p className="mb-2 text-xs text-ink-muted dark:text-moon-muted">{d.mattersNow}</p>
@@ -325,7 +319,7 @@ export default async function DashboardPage({ searchParams }) {
           </div>
 
           {/* side column */}
-          <div className="lg:col-span-4 lg:col-start-9 lg:row-start-2 space-y-6 min-w-0">
+          <div className="lg:col-span-4 lg:col-start-9 lg:row-start-1 space-y-6 min-w-0">
             <FadeIn delay={0.06}>
               <StreakCard streak={activityStreak} locale={locale} strings={d.streak} />
             </FadeIn>
