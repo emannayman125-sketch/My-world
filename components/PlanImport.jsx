@@ -1,16 +1,15 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { officeFileToText, isOfficeFile } from "@/lib/officeText";
 import { Upload, Image as ImageIcon, FileText, Loader2, Sparkles } from "lucide-react";
 
 const MAX_IMAGE_MB = 8;
 
 // "Hand Hamzawi your plan" — type it, or send a photo of it (handwritten or
 // printed), and he turns every item he can find into real tasks/habits/goals.
-// A real .docx/.xlsx isn't parsed here (see the API route's comment on why),
-// so a non-image file is read as plain text client-side with FileReader —
-// works well for .txt/.csv and for a .docx pasted-as-text, not a true binary
-// Word parse. The hint under the upload button says this plainly.
+// .docx and .xlsx are read right in the browser (lib/officeText.js); other
+// non-image files are read as plain text.
 export default function PlanImport({ strings: s }) {
   const [mode, setMode] = useState("text"); // "text" | "file"
   const [text, setText] = useState("");
@@ -37,6 +36,21 @@ export default function PlanImport({ strings: s }) {
       setStatus("error");
       setErrorDetail(s.imageTooBig);
       resetFile();
+      return;
+    }
+
+    if (isOfficeFile(file)) {
+      officeFileToText(file)
+        .then((txt) => {
+          if (!txt) throw new Error("empty");
+          setFileInfo({ name: file.name, kind: "text", data: txt });
+          setStatus("idle");
+        })
+        .catch(() => {
+          setStatus("error");
+          setErrorDetail(s.officeError);
+          resetFile();
+        });
       return;
     }
 
@@ -138,7 +152,7 @@ export default function PlanImport({ strings: s }) {
       ) : (
         <div className="space-y-2">
           <label className="flex flex-col items-center justify-center gap-2 rounded-soft border-2 border-dashed border-black/15 dark:border-white/15 py-8 cursor-pointer hover:border-sage transition">
-            <input ref={fileInputRef} type="file" accept="image/*,.txt,.csv" onChange={handleFile} className="hidden" />
+            <input ref={fileInputRef} type="file" accept="image/*,.txt,.csv,.docx,.xlsx" onChange={handleFile} className="hidden" />
             {fileInfo?.kind === "image" ? <ImageIcon size={22} className="text-sage dark:text-sage-soft" /> : <Upload size={22} className="text-sage dark:text-sage-soft" />}
             <span className="text-sm text-ink-muted dark:text-moon-muted">{fileInfo ? fileInfo.name : s.dropHint}</span>
           </label>
