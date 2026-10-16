@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { Sparkles, Flame, CalendarDays, Headphones, MoreHorizontal } from "lucide-react";
+import { Sparkles, Flame, CalendarDays, Headphones, MoreHorizontal, Globe, GraduationCap, Building2, LineChart, ArrowLeft, ArrowRight } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabaseServer";
 import { getDueHiddenMessage } from "@/lib/hiddenMessages";
 import AppHeader from "@/components/AppHeader";
@@ -16,6 +16,7 @@ import FadeIn from "@/components/FadeIn";
 import MoodCheckin from "@/components/MoodCheckin";
 import HabitsToday from "@/components/HabitsToday";
 import QuoteOfTheDay from "@/components/QuoteOfTheDay";
+import HeroSunrise from "@/components/HeroSunrise";
 import GettingStarted from "@/components/GettingStarted";
 import DailyBrief from "@/components/DailyBrief";
 import Collapsible from "@/components/Collapsible";
@@ -166,66 +167,46 @@ export default async function DashboardPage({ searchParams }) {
   if (firstCurrently) restSummaryParts.push(firstCurrently.title);
   const restSummary = restSummaryParts.filter(Boolean).join(" · ");
 
+  const Arrow = locale === "ar" ? ArrowLeft : ArrowRight;
+  const dateLabel = new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+    timeZone: "Africa/Cairo",
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
+  // The four doors into the rest of the app, as cards with a colored
+  // header (original gradients -- no stock photos).
+  const n = strings.nav;
+  const quickCards = [
+    { href: "/world", icon: Globe, label: n.world, bg: "linear-gradient(135deg,#AE4F2E 0%,#C2922F 100%)" },
+    { href: "/learning", icon: GraduationCap, label: n.learning, bg: "linear-gradient(135deg,#1F7A5C 0%,#0F2B26 100%)" },
+    { href: "/business-operations", icon: Building2, label: n.businessOps, bg: "linear-gradient(135deg,#5B3FA0 0%,#2B1F5C 100%)" },
+    { href: "/trading", icon: LineChart, label: n.trading, bg: "linear-gradient(135deg,#C2922F 0%,#6B4A12 100%)" },
+  ];
+
   return (
     <div className="min-h-screen bg-paper dark:bg-night lg:ps-64">
       <AppHeader />
       <ReminderNotifier todayEvents={todayEvents || []} contentDueToday={contentDueToday || []} strings={strings} />
       {isBirthdayToday && <BirthdayCelebration userId={user.id} name={name} year={currentYear} strings={strings} preview={previewBirthday} nextHref={needsSetup || previewBirthday ? "/onboarding" : undefined} />}
 
-      <main className="max-w-2xl mx-auto px-6 pt-4 lg:pt-10 pb-20 space-y-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 lg:pt-8 pb-20 space-y-6">
         {dueMessage && (
           <FadeIn>
             <SurpriseMessage message={dueMessage} strings={strings} />
           </FadeIn>
         )}
 
-        {/* 1 — greeting: calm, personal, first thing on screen. A soft
-            "window light" wash and a quiet leaf motif give it the warm,
-            sunlit feel of a reading corner, without using a photo. */}
+        {/* 1 — the banner: sunrise over the mountains, greeting on top */}
         <FadeIn>
-          <header className="relative overflow-hidden rounded-card px-5 py-6 flex items-center gap-4"
-            style={{
-              backgroundImage:
-                "radial-gradient(360px circle at 100% 0%, rgba(232,196,104,0.28), transparent 62%), radial-gradient(260px circle at 0% 100%, rgba(31,122,92,0.14), transparent 60%)",
-            }}
-          >
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 120 120"
-              className="absolute -bottom-4 end-2 h-28 w-28 text-sage/25 dark:text-sage-soft/20 rtl:-scale-x-100"
-              fill="currentColor"
-            >
-              <path d="M60 112C58 80 40 62 14 56c4 26 20 42 46 56z" />
-              <path d="M62 100c4-28 22-46 48-50-2 26-18 44-48 50z" />
-              <path d="M60 70C58 44 44 28 22 22c2 22 14 38 38 48z" />
-            </svg>
-            {profile?.avatar_url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={profile.avatar_url}
-                alt={name}
-                className="relative w-12 h-12 rounded-full object-cover shrink-0"
-              />
-            )}
-            <div className="relative">
-              <p className="text-sm text-ink-muted dark:text-moon-muted">
-                {new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
-                  timeZone: "Africa/Cairo",
-                  weekday: "long",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </p>
-              <h1 className="font-display text-4xl leading-tight">
-                {greeting}{locale === "ar" ? "،" : ","} {name}
-              </h1>
-            </div>
-          </header>
-        </FadeIn>
-
-        {/* 1b — the day's quote, framed right under the greeting */}
-        <FadeIn delay={0.02}>
-          <QuoteOfTheDay quote={quote} userId={user.id} strings={strings} />
+          <HeroSunrise
+            greeting={`${greeting}${locale === "ar" ? "،" : ","}`}
+            name={name}
+            dateLabel={dateLabel}
+            subtitle={d.keepGoing}
+            avatarUrl={profile?.avatar_url}
+          />
         </FadeIn>
 
         {/* Only one "let's get started" nudge at a time, never both stacked */}
@@ -244,138 +225,183 @@ export default async function DashboardPage({ searchParams }) {
           </FadeIn>
         )}
 
-        {/* 1a — Hamzawi's daily brief: suggests, never adds anything by itself */}
-        <FadeIn delay={0.02}>
-          <DailyBrief
-            locale={locale}
-            strings={d.brief}
-            top3Titles={top3List.map((x) => x.title)}
-            top3Count={top3List.length}
-          />
-        </FadeIn>
-
-        {/* 3 — the ONE thing that gets the full gold-leaf fill: one hero
-            moment instead of another card among equals */}
-        <FadeIn delay={0.05}>
-          <section>
-            <p className="mb-2 text-xs text-ink-muted dark:text-moon-muted">{d.mattersNow}</p>
-            {nextPriority ? (
-              <div className="rounded-card bg-gilded p-6 shadow-lantern">
-                <p className="font-display text-2xl leading-snug text-lantern-ink">{nextPriority.title}</p>
-              </div>
-            ) : top3List.length > 0 ? (
-              <div className={`${cardBase} p-5 text-sm text-ink-muted dark:text-moon-muted`}>
-                {d.allDoneToday}
-              </div>
-            ) : (
-              <div className="rounded-card border border-dashed border-hairline dark:border-hairline-dark p-5 text-sm text-ink-muted dark:text-moon-muted">
-                {d.noPriorityYet}
-              </div>
-            )}
+        {/* 2 — four doors into the app */}
+        <FadeIn delay={0.03}>
+          <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {quickCards.map((c) => (
+              <Link
+                key={c.href}
+                href={c.href}
+                className={`${cardBase} group overflow-hidden shadow-card dark:shadow-cardDark hover:-translate-y-0.5 hover:shadow-glow transition`}
+              >
+                <div
+                  className="h-20 flex items-center justify-center text-white/90"
+                  style={{ backgroundImage: c.bg }}
+                >
+                  <c.icon size={30} strokeWidth={1.6} />
+                </div>
+                <div className="flex items-center justify-between gap-2 px-4 py-3">
+                  <span className="text-sm font-medium truncate">{c.label}</span>
+                  <Arrow size={15} className="shrink-0 text-ink-muted dark:text-moon-muted group-hover:text-lantern transition" />
+                </div>
+              </Link>
+            ))}
           </section>
         </FadeIn>
 
-        {/* 4 — glanceable row, max 3, only what exists, all calm — one card
-            with internal dividers instead of three separate boxes */}
-        {chips.length > 0 && (
-          <FadeIn delay={0.07}>
-            <section className={`${cardBase} grid grid-cols-3 divide-x divide-hairline dark:divide-hairline-dark rtl:divide-x-reverse`}>
-              {chips.slice(0, 3).map((chip) => (
-                <div key={chip.key} className="p-4 flex flex-col items-center gap-1.5 text-center min-w-0">
-                  <chip.icon size={18} strokeWidth={2} className="text-ink-muted dark:text-moon-muted" />
-                  <span className="text-sm font-medium truncate max-w-full">{chip.value}</span>
-                  {chip.label && (
-                    <span className="text-[11px] text-ink-muted dark:text-moon-muted">{chip.label}</span>
-                  )}
-                </div>
-              ))}
-            </section>
-          </FadeIn>
-        )}
+        {/* 3 — the working area. Mobile reads top to bottom in DOM order
+            (quote, today, the rest); on large screens it becomes a main
+            column plus a side column. */}
+        <div className="grid lg:grid-cols-12 gap-6 items-start">
+          {/* the day's quote, framed */}
+          <div className="lg:col-span-4 lg:col-start-9 lg:row-start-1">
+            <FadeIn delay={0.04}>
+              <QuoteOfTheDay quote={quote} userId={user.id} strings={strings} />
+            </FadeIn>
+          </div>
 
-        {/* 5 — the working list: add / check off today's important things */}
-        <FadeIn delay={0.09}>
-          <TopThree userId={user.id} initialTasks={top3List} strings={strings} />
-        </FadeIn>
+          {/* main column: what matters today */}
+          <div className="lg:col-span-8 lg:col-start-1 lg:row-start-1 lg:row-span-2 space-y-6 min-w-0">
+            <FadeIn delay={0.05}>
+              <section>
+                <p className="mb-2 text-xs text-ink-muted dark:text-moon-muted">{d.mattersNow}</p>
+                {nextPriority ? (
+                  <div className="rounded-card bg-gilded p-6 shadow-lantern">
+                    <p className="font-display text-2xl leading-snug text-lantern-ink">{nextPriority.title}</p>
+                  </div>
+                ) : top3List.length > 0 ? (
+                  <div className={`${cardBase} p-5 text-sm text-ink-muted dark:text-moon-muted`}>
+                    {d.allDoneToday}
+                  </div>
+                ) : (
+                  <div className="rounded-card border border-dashed border-hairline dark:border-hairline-dark p-5 text-sm text-ink-muted dark:text-moon-muted">
+                    {d.noPriorityYet}
+                  </div>
+                )}
+              </section>
+            </FadeIn>
 
-        {contentDueToday && contentDueToday.length > 0 && (
-          <FadeIn delay={0.1}>
-            <ContentDueToday items={contentDueToday} strings={strings} />
-          </FadeIn>
-        )}
+            {chips.length > 0 && (
+              <FadeIn delay={0.06}>
+                <section className={`${cardBase} grid grid-cols-3 divide-x divide-hairline dark:divide-hairline-dark rtl:divide-x-reverse`}>
+                  {chips.slice(0, 3).map((chip) => (
+                    <div key={chip.key} className="p-4 flex flex-col items-center gap-1.5 text-center min-w-0">
+                      <chip.icon size={18} strokeWidth={2} className="text-ink-muted dark:text-moon-muted" />
+                      <span className="text-sm font-medium truncate max-w-full">{chip.value}</span>
+                      {chip.label && (
+                        <span className="text-[11px] text-ink-muted dark:text-moon-muted">{chip.label}</span>
+                      )}
+                    </div>
+                  ))}
+                </section>
+              </FadeIn>
+            )}
 
-        {/* 6 — everything else, folded into one row instead of six stacked cards */}
-        <FadeIn delay={0.05}>
-          <Collapsible
-            title={d.moreForToday}
-            summary={restSummary}
-            icon={
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/5 dark:bg-white/10 text-ink-muted dark:text-moon-muted">
-                <MoreHorizontal size={15} />
-              </span>
-            }
-          >
-            <section className={`${cardBase} p-5 flex flex-wrap items-center gap-5`}>
-              <ProgressRing percent={progressPercent} size={64} stroke={5} />
-              <div className="min-w-0">
-                <p className="text-sm">
-                  {d.doneOfTotal
-                    .replace("{done}", String(doneCount))
-                    .replace("{total}", String(top3List.length))}
-                </p>
-                <p className="mt-1 text-xs text-ink-muted dark:text-moon-muted">{d.keepGoing}</p>
-              </div>
-              <div className="ms-auto shrink-0">
-                <ShareDayButton name={name} top3={top3List} events={todayEvents || []} strings={strings} />
-              </div>
-            </section>
+            <FadeIn delay={0.07}>
+              <TopThree userId={user.id} initialTasks={top3List} strings={strings} />
+            </FadeIn>
 
-            <StreakCard streak={activityStreak} locale={locale} strings={d.streak} />
             {eventsCount > 0 && (
-              <div className={`${cardBase} p-6`}>
-                <h2 className="font-display text-xl mb-3">{d.todayEvents}</h2>
-                <ul className="space-y-1 text-sm">
-                  {todayEvents.map((ev) => (
-                    <li key={ev.id}>
-                      {ev.event_time && <span className="text-ink-muted dark:text-moon-muted">{ev.event_time} — </span>}
-                      {ev.title}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <HabitsToday userId={user.id} habits={habits || []} initialLogsToday={habitLogsToday || []} strings={strings} />
-            <MoodCheckin userId={user.id} initialMood={todayMood?.mood} strings={strings} />
-            <CurrentlySection userId={user.id} initialItems={currentlyItems || []} strings={strings} />
-
-            {onThisDay.length > 0 && (
-              <div className={`${cardBase} p-6`}>
-                <h2 className="font-display text-xl mb-3">{d.onThisDay}</h2>
-                <div className="space-y-3">
-                  {onThisDay.map((n, i) => (
-                    <p key={i} className="text-sm leading-7">
-                      <span className="text-ink-muted dark:text-moon-muted">
-                        {n.kind === "treasure" && "⭐ "}{new Date(n.created_at).getFullYear()} —{" "}
-                      </span>
-                      {n.content}
-                    </p>
-                  ))}
+              <FadeIn delay={0.08}>
+                <div className={`${cardBase} p-6`}>
+                  <h2 className="font-display text-xl mb-3">{d.todayEvents}</h2>
+                  <ul className="space-y-1.5 text-sm">
+                    {todayEvents.map((ev) => (
+                      <li key={ev.id}>
+                        {ev.event_time && <span className="text-ink-muted dark:text-moon-muted">{ev.event_time} — </span>}
+                        {ev.title}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
+              </FadeIn>
             )}
 
-            <Link
-              href="/ai"
-              className={`${cardBase} p-4 flex items-center gap-3 hover:border-sage/40 transition`}
-            >
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-dusk/15 text-dusk dark:text-dusk-soft shrink-0">
-                <Sparkles size={16} strokeWidth={2} />
-              </span>
-              <span className="text-sm">{d.askHamzawi}</span>
-            </Link>
-          </Collapsible>
-        </FadeIn>
+            {contentDueToday && contentDueToday.length > 0 && (
+              <FadeIn delay={0.09}>
+                <ContentDueToday items={contentDueToday} strings={strings} />
+              </FadeIn>
+            )}
+
+            <FadeIn delay={0.1}>
+              <DailyBrief
+                locale={locale}
+                strings={d.brief}
+                top3Titles={top3List.map((x) => x.title)}
+                top3Count={top3List.length}
+              />
+            </FadeIn>
+          </div>
+
+          {/* side column */}
+          <div className="lg:col-span-4 lg:col-start-9 lg:row-start-2 space-y-6 min-w-0">
+            <FadeIn delay={0.06}>
+              <StreakCard streak={activityStreak} locale={locale} strings={d.streak} />
+            </FadeIn>
+
+            <FadeIn delay={0.07}>
+              <HabitsToday userId={user.id} habits={habits || []} initialLogsToday={habitLogsToday || []} strings={strings} />
+            </FadeIn>
+
+            <FadeIn delay={0.08}>
+              <Link
+                href="/ai"
+                className={`${cardBase} p-4 flex items-center gap-3 hover:border-sage/40 transition`}
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-dusk/15 text-dusk dark:text-dusk-soft shrink-0">
+                  <Sparkles size={16} strokeWidth={2} />
+                </span>
+                <span className="text-sm">{d.askHamzawi}</span>
+              </Link>
+            </FadeIn>
+
+            <FadeIn delay={0.09}>
+              <Collapsible
+                title={d.moreForToday}
+                summary={restSummary}
+                icon={
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/5 dark:bg-white/10 text-ink-muted dark:text-moon-muted">
+                    <MoreHorizontal size={15} />
+                  </span>
+                }
+              >
+                <section className={`${cardBase} p-5 flex flex-wrap items-center gap-5`}>
+                  <ProgressRing percent={progressPercent} size={64} stroke={5} />
+                  <div className="min-w-0">
+                    <p className="text-sm">
+                      {d.doneOfTotal
+                        .replace("{done}", String(doneCount))
+                        .replace("{total}", String(top3List.length))}
+                    </p>
+                    <p className="mt-1 text-xs text-ink-muted dark:text-moon-muted">{d.keepGoing}</p>
+                  </div>
+                  <div className="ms-auto shrink-0">
+                    <ShareDayButton name={name} top3={top3List} events={todayEvents || []} strings={strings} />
+                  </div>
+                </section>
+
+                <MoodCheckin userId={user.id} initialMood={todayMood?.mood} strings={strings} />
+                <CurrentlySection userId={user.id} initialItems={currentlyItems || []} strings={strings} />
+
+                {onThisDay.length > 0 && (
+                  <div className={`${cardBase} p-6`}>
+                    <h2 className="font-display text-xl mb-3">{d.onThisDay}</h2>
+                    <div className="space-y-3">
+                      {onThisDay.map((n2, i) => (
+                        <p key={i} className="text-sm leading-7">
+                          <span className="text-ink-muted dark:text-moon-muted">
+                            {n2.kind === "treasure" && "⭐ "}{new Date(n2.created_at).getFullYear()} —{" "}
+                          </span>
+                          {n2.content}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </Collapsible>
+            </FadeIn>
+          </div>
+        </div>
       </main>
     </div>
   );
