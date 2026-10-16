@@ -1,34 +1,70 @@
-import { redirect } from "next/navigation";
-import { createServerSupabase } from "@/lib/supabaseServer";
+import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { createServerSupabase } from "@/lib/supabaseServer";
 import AppHeader from "@/components/AppHeader";
-import LibraryManager from "@/components/LibraryManager";
+import BookNotes from "@/components/BookNotes";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
 
-export default async function LibraryPage() {
+export default async function BookReaderPage({ params }) {
   const locale = getLocale();
   const strings = t(locale);
+  const Arrow = locale === "ar" ? ArrowRight : ArrowLeft;
+
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: books } = await supabase
+  const { data: book } = await supabase
     .from("library_books")
     .select("*")
+    .eq("id", params.id)
     .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+    .single();
+
+  if (!book) notFound();
+
+  let signedUrl = null;
+  if (book.file_path) {
+    const { data } = await supabase.storage
+      .from("library")
+      .createSignedUrl(book.file_path, 60 * 60);
+    signedUrl = data?.signedUrl || null;
+  }
 
   return (
     <div className="min-h-screen bg-paper dark:bg-night lg:ps-64">
       <AppHeader />
-      <main className="max-w-4xl mx-auto px-6 pb-16 space-y-6">
+      <main className="max-w-4xl mx-auto px-6 pb-16 space-y-4">
+        <Link href="/library" className="inline-flex items-center gap-1.5 text-sm text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon">
+          <Arrow size={14} strokeWidth={2} />
+          {strings.library.back}
+        </Link>
+
         <div>
-          <Link href="/learning" className="text-xs text-ink-muted dark:text-moon-muted hover:text-ink dark:hover:text-moon inline-flex items-center gap-1 mb-1">‹ {strings.nav.learning}</Link>
-          <h1 className="font-display text-3xl">{strings.library.title}</h1>
-          <p className="text-ink-muted dark:text-moon-muted mt-1">{strings.library.subtitle}</p>
+          <h1 className="font-display text-2xl">{book.title}</h1>
+          {book.author && <p className="text-ink-muted dark:text-moon-muted">{book.author}</p>}
         </div>
-        <LibraryManager userId={user.id} initialBooks={books || []} strings={strings} />
+
+        {signedUrl ? (
+          <div className="card overflow-hidden" style={{ height: "75vh" }}>
+            <iframe src={signedUrl} title={book.title} className="w-full h-full" />
+          </div>
+        ) : (
+          <p className="text-sm text-ink-muted dark:text-moon-muted">
+            {locale === "ar" ? "مفيش ملف مرفوع للكتاب ده لسه." : "No file uploaded for this book yet."}
+          </p>
+        )}
+
+        <BookNotes
+          bookId={book.id}
+          initialNotes={book.notes}
+          initialSummary={book.summary}
+          initialReview={book.review}
+          strings={strings}
+          locale={locale}
+        />
       </main>
     </div>
   );
