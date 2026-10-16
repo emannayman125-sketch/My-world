@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
-import { Globe, Lock } from "lucide-react";
+import { Globe, Lock, Pencil, ChevronDown } from "lucide-react";
 
 const KIND_EMOJI = { music: "🎵", movie: "🎬", podcast: "🎙️", book: "📚", place: "✈️", hobby: "🎮" };
 const CURRENTLY_EMOJI = { listening: "🎧", watching: "🎬", reading: "📚" };
@@ -31,7 +31,105 @@ function Row({ label, sub, isPublic, onToggle, strings: s }) {
   );
 }
 
-export default function PublicProfileManager({ userId, initialWorld, initialCurrently, initialInterests, strings: s, worldKindLabels, currentlyKindLabels }) {
+const BOOK_L = {
+  rtl: {
+    button: "ملخص وريفيو",
+    summary: "الملخص",
+    summaryPh: "اكتبي ملخص الكتاب بكلماتك: أهم الأفكار والدروس…",
+    review: "رأيي في الكتاب",
+    reviewPh: "إيه رأيك؟ إيه اللي عجبك وتنصحي بيه لمين؟",
+    save: "حفظ",
+    saved: "اتحفظ ✓",
+    err: "حصلت مشكلة في الحفظ، جرّب تاني.",
+    hint: "بيظهر تحت الكتاب في صفحتك العامة (لو الكتاب عام).",
+  },
+  ltr: {
+    button: "Summary & review",
+    summary: "Summary",
+    summaryPh: "Write the book's key ideas and lessons in your own words…",
+    review: "My review",
+    reviewPh: "What did you think, and who would you recommend it to?",
+    save: "Save",
+    saved: "Saved ✓",
+    err: "Couldn't save. Try again.",
+    hint: "Shows under the book on your public page (if the book is public).",
+  },
+};
+
+// A "summary & review" editor under each book: opens in place, saves
+// both fields on the world_items row.
+function BookNotesEditor({ book, supabase, onSaved, dir }) {
+  const L = BOOK_L[dir] || BOOK_L.rtl;
+  const [open, setOpen] = useState(false);
+  const [summary, setSummary] = useState(book.summary || "");
+  const [review, setReview] = useState(book.review || "");
+  const [state, setState] = useState("idle"); // idle | saving | saved | error
+  const has = !!(book.summary || book.review);
+
+  async function save() {
+    setState("saving");
+    const patch = { summary: summary.trim() || null, review: review.trim() || null };
+    const { error } = await supabase.from("world_items").update(patch).eq("id", book.id);
+    if (error) { setState("error"); return; }
+    onSaved(patch);
+    setState("saved");
+    setTimeout(() => setState("idle"), 2000);
+  }
+
+  return (
+    <div className="pb-2.5">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="inline-flex items-center gap-1.5 rounded-full bg-lantern/15 text-lantern-ink dark:text-lantern-soft text-xs px-3 py-1.5 hover:bg-lantern/25 transition"
+      >
+        <Pencil size={12} /> {L.button}
+        {has && <span className="h-1.5 w-1.5 rounded-full bg-lantern" aria-hidden="true" />}
+        <ChevronDown size={12} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="mt-2 space-y-3 rounded-soft border border-black/10 dark:border-white/10 p-3">
+          <div className="space-y-1">
+            <label className="text-xs font-medium">{L.summary}</label>
+            <textarea
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              placeholder={L.summaryPh}
+              rows={5}
+              className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm leading-7 outline-none focus:border-sage resize-y"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium">{L.review}</label>
+            <textarea
+              value={review}
+              onChange={(e) => setReview(e.target.value)}
+              placeholder={L.reviewPh}
+              rows={3}
+              className="w-full rounded-soft border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm leading-7 outline-none focus:border-sage resize-y"
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={save}
+              disabled={state === "saving"}
+              className="rounded-soft bg-lantern text-night text-xs font-medium px-4 py-1.5 hover:brightness-105 transition disabled:opacity-50"
+            >
+              {L.save}
+            </button>
+            {state === "saved" && <span className="text-xs text-sage dark:text-sage-soft">{L.saved}</span>}
+            {state === "error" && <span className="text-xs text-red-500">{L.err}</span>}
+          </div>
+          <p className="text-[11px] text-ink-muted dark:text-moon-muted">{L.hint}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function PublicProfileManager({ userId, initialWorld, initialCurrently, initialInterests, strings: s, worldKindLabels, currentlyKindLabels, dir = "rtl" }) {
   const supabase = createClient();
   const [world, setWorld] = useState(initialWorld || []);
   const [currently, setCurrently] = useState(initialCurrently || []);
@@ -80,14 +178,23 @@ export default function PublicProfileManager({ userId, initialWorld, initialCurr
           </p>
           <div className="divide-y divide-black/5 dark:divide-white/10">
             {items.map((w) => (
-              <Row
-                key={w.id}
-                label={w.title}
-                sub={w.subtitle}
-                isPublic={w.is_public}
-                onToggle={() => toggle("world_items", w, world, setWorld)}
-                strings={s}
-              />
+              <div key={w.id}>
+                <Row
+                  label={w.title}
+                  sub={w.subtitle}
+                  isPublic={w.is_public}
+                  onToggle={() => toggle("world_items", w, world, setWorld)}
+                  strings={s}
+                />
+                {kind === "book" && (
+                  <BookNotesEditor
+                    book={w}
+                    supabase={supabase}
+                    dir={dir}
+                    onSaved={(patch) => setWorld((l) => l.map((x) => (x.id === w.id ? { ...x, ...patch } : x)))}
+                  />
+                )}
+              </div>
             ))}
           </div>
         </section>
