@@ -6,6 +6,7 @@ import TasksManager from "./TasksManager";
 import MatrixBoard from "./MatrixBoard";
 import CalendarView from "./CalendarView";
 import DailyResetManager from "./DailyResetManager";
+import WeekGoals from "./WeekGoals";
 
 const TAB_KEYS = ["tasks", "matrix", "calendar", "reset"];
 
@@ -58,6 +59,10 @@ export default function ProductivityHubTabs({ userId, strings, locale, data }) {
           </button>
         ))}
       </div>
+
+      {(tab === "tasks" || tab === "calendar") && (
+        <WeekGoals userId={userId} initialGoals={data.weekGoals || []} locale={locale} />
+      )}
 
       {tab === "tasks" && (
         <TasksManager userId={userId} initialTasks={data.tasks} strings={strings} />
