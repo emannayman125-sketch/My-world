@@ -179,18 +179,35 @@ export default async function DashboardPage({ searchParams }) {
           </FadeIn>
         )}
 
-        {/* 1 — greeting: calm, personal, first thing on screen */}
+        {/* 1 — greeting: calm, personal, first thing on screen. A soft
+            "window light" wash and a quiet leaf motif give it the warm,
+            sunlit feel of a reading corner, without using a photo. */}
         <FadeIn>
-          <header className="flex items-center gap-4">
+          <header className="relative overflow-hidden rounded-card px-5 py-6 flex items-center gap-4"
+            style={{
+              backgroundImage:
+                "radial-gradient(360px circle at 100% 0%, rgba(232,196,104,0.28), transparent 62%), radial-gradient(260px circle at 0% 100%, rgba(31,122,92,0.14), transparent 60%)",
+            }}
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 120 120"
+              className="absolute -bottom-4 end-2 h-28 w-28 text-sage/25 dark:text-sage-soft/20 rtl:-scale-x-100"
+              fill="currentColor"
+            >
+              <path d="M60 112C58 80 40 62 14 56c4 26 20 42 46 56z" />
+              <path d="M62 100c4-28 22-46 48-50-2 26-18 44-48 50z" />
+              <path d="M60 70C58 44 44 28 22 22c2 22 14 38 38 48z" />
+            </svg>
             {profile?.avatar_url && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={profile.avatar_url}
                 alt={name}
-                className="w-12 h-12 rounded-full object-cover shrink-0"
+                className="relative w-12 h-12 rounded-full object-cover shrink-0"
               />
             )}
-            <div>
+            <div className="relative">
               <p className="text-sm text-ink-muted dark:text-moon-muted">
                 {new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
                   timeZone: "Africa/Cairo",
@@ -204,6 +221,11 @@ export default async function DashboardPage({ searchParams }) {
               </h1>
             </div>
           </header>
+        </FadeIn>
+
+        {/* 1b — the day's quote, framed right under the greeting */}
+        <FadeIn delay={0.02}>
+          <QuoteOfTheDay quote={quote} userId={user.id} strings={strings} />
         </FadeIn>
 
         {/* Only one "let's get started" nudge at a time, never both stacked */}
@@ -309,8 +331,6 @@ export default async function DashboardPage({ searchParams }) {
             </section>
 
             <StreakCard streak={activityStreak} locale={locale} strings={d.streak} />
-            <QuoteOfTheDay quote={quote} userId={user.id} strings={strings} />
-
             {eventsCount > 0 && (
               <div className={`${cardBase} p-6`}>
                 <h2 className="font-display text-xl mb-3">{d.todayEvents}</h2>
