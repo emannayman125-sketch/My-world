@@ -1032,21 +1032,25 @@ function BookCover({ book, coverUrl }) {
       <p className="mt-1.5 text-[11px] truncate" style={{ color: MUTED }}>
         {book.subtitle || ""}
       </p>
-      {book.review && (
-        // A native <details> trick, same family as the mobile menu: the
-        // quote shows clamped to 2 lines, and clicking it opens to the
-        // full review -- no JS needed for the click-to-expand feel.
-        // Styled as a small quote callout (gold mark + hairline rule)
-        // rather than plain italic text.
-        <details className="mt-1.5 ps-2 [&[open]_summary]:line-clamp-none" style={{ borderInlineStart: `2px solid ${GOLD}66` }}>
+      {(book.summary || book.review) && (
+        // A native <details> trick, same family as the mobile menu: it
+        // shows the review clamped to 2 lines (or the start of the
+        // summary), and clicking opens the full summary and review --
+        // no JS needed for the click-to-expand feel.
+        <details className="mt-1.5 ps-2 [&[open]_summary]:line-clamp-none [&[open]_.bk-more]:block" style={{ borderInlineStart: `2px solid ${GOLD}66` }}>
           <summary className="list-none cursor-pointer marker:content-none">
             <span className="font-display text-sm leading-none align-top" style={{ color: GOLD }}>
               &ldquo;
             </span>{" "}
             <span className="text-[11px] italic leading-snug line-clamp-2" style={{ color: INK }}>
-              {book.review}
+              {book.review || book.summary}
             </span>
           </summary>
+          {book.summary && book.review && (
+            <p className="bk-more hidden mt-1.5 text-[11px] leading-relaxed whitespace-pre-line" style={{ color: MUTED }}>
+              {book.summary}
+            </p>
+          )}
         </details>
       )}
     </div>
