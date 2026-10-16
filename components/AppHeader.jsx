@@ -6,6 +6,7 @@ import ThemeToggle from "./ThemeToggle";
 import SignOutButton from "./SignOutButton";
 import HeaderMore from "./HeaderMore";
 import BottomNav from "./BottomNav";
+import HamzawiFab from "./HamzawiFab";
 import LanguageToggle from "./LanguageToggle";
 import SuggestionsBadge from "./SuggestionsBadge";
 import { getLocale } from "@/lib/i18n/getLocale";
@@ -48,6 +49,7 @@ export default async function AppHeader() {
       </header>
 
       <BottomNav strings={strings} />
+      <HamzawiFab label={strings.nav.ai} />
     </>
   );
 }
