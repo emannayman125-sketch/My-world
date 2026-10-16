@@ -5,7 +5,6 @@ import { Sparkles, Flame, CalendarDays, Headphones, MoreHorizontal, Globe, Gradu
 import { createServerSupabase } from "@/lib/supabaseServer";
 import { getDueHiddenMessage } from "@/lib/hiddenMessages";
 import AppHeader from "@/components/AppHeader";
-import TopThree from "@/components/TopThree";
 import CurrentlySection from "@/components/CurrentlySection";
 import SurpriseMessage from "@/components/SurpriseMessage";
 import BirthdayCelebration from "@/components/BirthdayCelebration";
@@ -18,7 +17,7 @@ import HabitsToday from "@/components/HabitsToday";
 import QuoteOfTheDay from "@/components/QuoteOfTheDay";
 import HeroSunrise from "@/components/HeroSunrise";
 import GettingStarted from "@/components/GettingStarted";
-import DailyBrief from "@/components/DailyBrief";
+import TodayPanel from "@/components/TodayPanel";
 import Collapsible from "@/components/Collapsible";
 import StreakCard from "@/components/StreakCard";
 import ContentDueToday from "@/components/ContentDueToday";
@@ -298,7 +297,7 @@ export default async function DashboardPage({ searchParams }) {
             )}
 
             <FadeIn delay={0.07}>
-              <TopThree userId={user.id} initialTasks={top3List} strings={strings} />
+              <TodayPanel userId={user.id} strings={strings} locale={locale} initialTasks={top3List} />
             </FadeIn>
 
             {eventsCount > 0 && (
@@ -323,14 +322,6 @@ export default async function DashboardPage({ searchParams }) {
               </FadeIn>
             )}
 
-            <FadeIn delay={0.1}>
-              <DailyBrief
-                locale={locale}
-                strings={d.brief}
-                top3Titles={top3List.map((x) => x.title)}
-                top3Count={top3List.length}
-              />
-            </FadeIn>
           </div>
 
           {/* side column */}
