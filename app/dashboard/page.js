@@ -174,13 +174,13 @@ export default async function DashboardPage({ searchParams }) {
   });
 
   // The four doors into the rest of the app, as cards with a colored
-  // header (original gradients -- no stock photos).
+  // header (photo headers from /public/cards).
   const n = strings.nav;
   const quickCards = [
-    { href: "/world", icon: Globe, label: n.world, bg: "linear-gradient(135deg,#AE4F2E 0%,#C2922F 100%)" },
-    { href: "/learning", icon: GraduationCap, label: n.learning, bg: "linear-gradient(135deg,#1F7A5C 0%,#0F2B26 100%)" },
-    { href: "/business-operations", icon: Building2, label: n.businessOps, bg: "linear-gradient(135deg,#5B3FA0 0%,#2B1F5C 100%)" },
-    { href: "/trading", icon: LineChart, label: n.trading, bg: "linear-gradient(135deg,#C2922F 0%,#6B4A12 100%)" },
+    { href: "/world", icon: Globe, label: n.world, img: "/cards/world.jpg", tint: "rgba(120,60,20,0.35)" },
+    { href: "/learning", icon: GraduationCap, label: n.learning, img: "/cards/learning.jpg", tint: "rgba(15,43,38,0.45)" },
+    { href: "/business-operations", icon: Building2, label: n.businessOps, img: "/cards/business.jpg", tint: "rgba(60,30,10,0.30)" },
+    { href: "/trading", icon: LineChart, label: n.trading, img: "/cards/trading.jpg", tint: "rgba(8,20,30,0.40)" },
   ];
 
   return (
@@ -235,10 +235,12 @@ export default async function DashboardPage({ searchParams }) {
                 className={`${cardBase} group overflow-hidden shadow-card dark:shadow-cardDark hover:-translate-y-0.5 hover:shadow-glow transition`}
               >
                 <div
-                  className="h-20 flex items-center justify-center text-white/90"
-                  style={{ backgroundImage: c.bg }}
+                  className="relative h-28 sm:h-32 flex items-center justify-center text-white overflow-hidden"
+                  style={{ backgroundImage: `linear-gradient(${c.tint}, ${c.tint}), url(${c.img})`, backgroundSize: "cover", backgroundPosition: "center" }}
                 >
-                  <c.icon size={30} strokeWidth={1.6} />
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/30 backdrop-blur-sm ring-1 ring-white/30 transition group-hover:scale-110">
+                    <c.icon size={22} strokeWidth={1.7} />
+                  </span>
                 </div>
                 <div className="flex items-center justify-between gap-2 px-4 py-3">
                   <span className="text-sm font-medium truncate">{c.label}</span>
