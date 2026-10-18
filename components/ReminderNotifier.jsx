@@ -2,8 +2,25 @@
 
 import { useEffect } from "react";
 
+// Study blocks (category "دراسة") get their own wording, plus a second
+// nudge right at the start time. Everything else keeps the usual
+// "10 minutes ahead" reminder.
+const STUDY = {
+  rtl: {
+    title: "وقت المذاكرة 📚",
+    soon: "{title} بعد ١٠ دقايق — جهّزي نفسك",
+    now: "يلا نبدأ: {title}",
+  },
+  ltr: {
+    title: "Study time 📚",
+    soon: "{title} in 10 minutes — get ready",
+    now: "Let's begin: {title}",
+  },
+};
+
 export default function ReminderNotifier({ todayEvents, contentDueToday, strings }) {
   const tr = strings.dashboard.reminder;
+  const study = STUDY[strings.dir] || STUDY.rtl;
   const platformLabels = strings.creator.platforms;
 
   useEffect(() => {
@@ -26,17 +43,30 @@ export default function ReminderNotifier({ todayEvents, contentDueToday, strings
       const eventTime = new Date();
       eventTime.setHours(h, m, 0, 0);
 
+      const isStudy = ev.category === "دراسة";
       const msUntil = eventTime - now - 10 * 60 * 1000; // notify 10 minutes ahead
       if (msUntil > 0 && msUntil < 1000 * 60 * 60 * 12) {
         const timer = setTimeout(() => {
-          new Notification(tr.title, { body: tr.body.replace("{title}", ev.title) });
+          new Notification(isStudy ? study.title : tr.title, {
+            body: (isStudy ? study.soon : tr.body).replace("{title}", ev.title),
+          });
         }, msUntil);
         timers.push(timer);
+      }
+      if (isStudy) {
+        const msStart = eventTime - now;
+        if (msStart > 0 && msStart < 1000 * 60 * 60 * 12) {
+          timers.push(
+            setTimeout(() => {
+              new Notification(study.title, { body: study.now.replace("{title}", ev.title) });
+            }, msStart)
+          );
+        }
       }
     }
 
     return () => timers.forEach(clearTimeout);
-  }, [todayEvents, tr]);
+  }, [todayEvents, tr, study]);
 
   // Same mechanism as events above, but for content_items he flagged
   // "remind me" on (publish_time, not 10 minutes early -- the point here
