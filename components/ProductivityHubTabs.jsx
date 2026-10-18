@@ -6,9 +6,10 @@ import TasksManager from "./TasksManager";
 import MatrixBoard from "./MatrixBoard";
 import CalendarView from "./CalendarView";
 import DailyResetManager from "./DailyResetManager";
-import WeekGoals from "./WeekGoals";
+import PlansPanel from "./PlansPanel";
+import ProgressCharts from "./ProgressCharts";
 
-const TAB_KEYS = ["tasks", "matrix", "calendar", "reset"];
+const TAB_KEYS = ["tasks", "matrix", "calendar", "progress", "reset"];
 
 // Consolidates what used to be four separate sidebar links (Tasks,
 // Priority Matrix, Planner, Reset the day) into one hub with internal
@@ -39,6 +40,7 @@ export default function ProductivityHubTabs({ userId, strings, locale, data }) {
     { key: "tasks", label: `✅ ${strings.nav.tasks}` },
     { key: "matrix", label: strings.nav.matrix },
     { key: "calendar", label: `📅 ${strings.nav.calendar}` },
+    { key: "progress", label: locale === "ar" ? "📊 تقدّمي" : "📊 Progress" },
     { key: "reset", label: `🧹 ${strings.nav.reset}` },
   ];
 
@@ -61,7 +63,7 @@ export default function ProductivityHubTabs({ userId, strings, locale, data }) {
       </div>
 
       {(tab === "tasks" || tab === "calendar") && (
-        <WeekGoals userId={userId} initialGoals={data.weekGoals || []} locale={locale} />
+        <PlansPanel userId={userId} initialPlans={data.plans || []} locale={locale} />
       )}
 
       {tab === "tasks" && (
@@ -77,6 +79,10 @@ export default function ProductivityHubTabs({ userId, strings, locale, data }) {
 
       {tab === "calendar" && (
         <CalendarView userId={userId} initialEvents={data.events} strings={strings} locale={locale} />
+      )}
+
+      {tab === "progress" && (
+        <ProgressCharts plans={data.plans || []} top3History={data.top3History || []} locale={locale} />
       )}
 
       {tab === "reset" && (
