@@ -8,6 +8,7 @@ import HeaderMore from "./HeaderMore";
 import BottomNav from "./BottomNav";
 import HamzawiFab from "./HamzawiFab";
 import LanguageToggle from "./LanguageToggle";
+import InstallApp from "./InstallApp";
 import SuggestionsBadge from "./SuggestionsBadge";
 import { getLocale } from "@/lib/i18n/getLocale";
 import { t } from "@/lib/i18n/dictionaries";
@@ -41,6 +42,7 @@ export default async function AppHeader() {
               <LanguageToggle locale={locale} ariaLabel={strings.switchLanguageAria} variant="compact" />
               <ThemeToggle />
             </div>
+            <InstallApp locale={locale} variant="menu" className="px-2 py-1.5" />
             <div className="border-t border-black/[0.06] dark:border-white/[0.08] mt-1 pt-1 px-2 py-1.5">
               <SignOutButton label={strings.signOut} />
             </div>
