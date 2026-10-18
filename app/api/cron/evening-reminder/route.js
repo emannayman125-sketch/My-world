@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import webpush from "web-push";
-import { cairoNow } from "@/lib/time";
+import { cairoNow, addDaysISO } from "@/lib/time";
 import { pickQuote } from "@/lib/quotes/pickQuote";
 
 // Push notification bodies get cut off by the OS well before this, but
@@ -55,11 +55,41 @@ export async function GET(request) {
     ? `${quote.text} — ${quote.author}`
     : quote.text;
 
-  const payload = JSON.stringify({
+  const quotePayload = JSON.stringify({
     title: "عالمك الخاص 🌙",
     body: clip(quoteLine, MAX_BODY),
     url: "/dashboard",
   });
+
+  // Tomorrow's appointments, per person: if there are any, the evening
+  // notification says so (study blocks first) instead of the quote.
+  const tomorrow = addDaysISO(1);
+  const tomorrowByUser = {};
+  const userIds = Array.from(new Set((subs || []).map((x) => x.user_id).filter(Boolean)));
+  if (userIds.length) {
+    const { data: evs } = await admin
+      .from("events")
+      .select("user_id, title, event_time, category")
+      .in("user_id", userIds)
+      .eq("event_date", tomorrow)
+      .order("event_time", { ascending: true });
+    for (const ev of evs || []) (tomorrowByUser[ev.user_id] = tomorrowByUser[ev.user_id] || []).push(ev);
+  }
+  function payloadFor(userId) {
+    const list = tomorrowByUser[userId] || [];
+    if (!list.length) return quotePayload;
+    const sorted = [...list].sort((a, b) => (b.category === "دراسة") - (a.category === "دراسة"));
+    const parts = sorted.slice(0, 3).map((ev) => {
+      const t = ev.event_time ? ` ${String(ev.event_time).slice(0, 5)}` : "";
+      return `${ev.category === "دراسة" ? "📚 " : ""}${ev.title}${t}`;
+    });
+    const more = list.length > 3 ? ` +${list.length - 3}` : "";
+    return JSON.stringify({
+      title: "بكرة عندك 🗓️",
+      body: clip(parts.join(" · ") + more, MAX_BODY),
+      url: "/tasks?tab=calendar",
+    });
+  }
 
   let sent = 0;
   let removed = 0;
@@ -67,7 +97,7 @@ export async function GET(request) {
     try {
       await webpush.sendNotification(
         { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } },
-        payload
+        payloadFor(sub.user_id)
       );
       sent++;
     } catch (err) {
