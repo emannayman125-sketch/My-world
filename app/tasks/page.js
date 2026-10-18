@@ -19,9 +19,8 @@ export default async function TasksPage() {
 
   const todayISO = todayCairo();
   const yesterdayISO = addDaysISO(-1);
-  // the week starts on Saturday (Cairo time)
-  const [ty, tm, td] = todayISO.split("-").map(Number);
-  const weekStart = addDaysISO(-((new Date(Date.UTC(ty, tm - 1, td)).getUTCDay() + 1) % 7));
+  const yearStart = `${todayISO.slice(0, 4)}-01-01`;
+  const historyStart = addDaysISO(-13);
 
   const [
     tasksRes,
@@ -30,7 +29,8 @@ export default async function TasksPage() {
     yesterdayTasksRes,
     todayTasksRes,
     todayEventsRes,
-    weekGoalsRes,
+    plansRes,
+    historyRes,
   ] = await Promise.all([
     supabase.from("tasks").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     supabase.from("tasks").select("*").eq("user_id", user.id).eq("is_done", false).order("created_at", { ascending: false }),
@@ -38,7 +38,8 @@ export default async function TasksPage() {
     supabase.from("top3_tasks").select("*").eq("user_id", user.id).eq("for_date", yesterdayISO),
     supabase.from("top3_tasks").select("id").eq("user_id", user.id).eq("for_date", todayISO),
     supabase.from("events").select("*").eq("user_id", user.id).eq("event_date", todayISO).order("event_time", { ascending: true }),
-    supabase.from("goals").select("*").eq("user_id", user.id).eq("period", "weekly").gte("created_at", weekStart).order("created_at", { ascending: true }).limit(3),
+    supabase.from("goals").select("*").eq("user_id", user.id).in("period", ["daily", "weekly", "monthly", "yearly"]).gte("created_at", yearStart).order("created_at", { ascending: true }).limit(500),
+    supabase.from("top3_tasks").select("for_date, is_done").eq("user_id", user.id).gte("for_date", historyStart).lte("for_date", todayISO),
   ]);
 
   return (
@@ -58,7 +59,8 @@ export default async function TasksPage() {
               yesterdayTasks: yesterdayTasksRes.data || [],
               todayCount: (todayTasksRes.data || []).length,
               todayEvents: todayEventsRes.data || [],
-              weekGoals: weekGoalsRes.data || [],
+              plans: plansRes.data || [],
+              top3History: historyRes.data || [],
             }}
           />
         </Suspense>
