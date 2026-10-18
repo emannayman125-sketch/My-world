@@ -31,6 +31,7 @@ export default async function TasksPage() {
     todayEventsRes,
     plansRes,
     historyRes,
+    stepsRes,
   ] = await Promise.all([
     supabase.from("tasks").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     supabase.from("tasks").select("*").eq("user_id", user.id).eq("is_done", false).order("created_at", { ascending: false }),
@@ -40,6 +41,7 @@ export default async function TasksPage() {
     supabase.from("events").select("*").eq("user_id", user.id).eq("event_date", todayISO).order("event_time", { ascending: true }),
     supabase.from("goals").select("*").eq("user_id", user.id).in("period", ["daily", "weekly", "monthly", "yearly"]).gte("created_at", yearStart).order("created_at", { ascending: true }).limit(500),
     supabase.from("top3_tasks").select("for_date, is_done").eq("user_id", user.id).gte("for_date", historyStart).lte("for_date", todayISO),
+    supabase.from("plan_steps").select("*").eq("user_id", user.id).order("position", { ascending: true }).order("created_at", { ascending: true }).limit(2000),
   ]);
 
   return (
@@ -60,6 +62,7 @@ export default async function TasksPage() {
               todayCount: (todayTasksRes.data || []).length,
               todayEvents: todayEventsRes.data || [],
               plans: plansRes.data || [],
+              planSteps: stepsRes.error ? [] : stepsRes.data || [],
               top3History: historyRes.data || [],
             }}
           />
