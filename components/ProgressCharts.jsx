@@ -32,10 +32,10 @@ const L = {
 
 // Pure SVG/CSS charts (no chart library): completion by period, and a
 // 14-day column chart of the Top-3 tasks.
-export default function ProgressCharts({ plans = [], top3History = [], locale = "ar" }) {
+export default function ProgressCharts({ plans = [], planSteps = [], top3History = [], locale = "ar" }) {
   const T = L[locale] || L.ar;
 
-  const rows = PERIODS.map((p) => ({ p, ...stats(plansInPeriod(plans, p)) }));
+  const rows = PERIODS.map((p) => ({ p, ...stats(plansInPeriod(plans, p), planSteps) }));
   const withPlans = rows.filter((r) => r.total > 0);
   const overall = withPlans.length
     ? Math.round(withPlans.reduce((a, r) => a + r.pct, 0) / withPlans.length)
