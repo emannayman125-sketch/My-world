@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { getNavGroups } from "@/lib/navSections";
 import CommandPalette from "./CommandPalette";
 import ThemeToggle from "./ThemeToggle";
+import InstallApp from "./InstallApp";
 import SignOutButton from "./SignOutButton";
 import LanguageToggle from "./LanguageToggle";
 
@@ -67,6 +68,8 @@ export default function Sidebar({ locale, strings }) {
           </div>
         ))}
       </nav>
+
+      <InstallApp locale={locale} className="shrink-0 px-4 pb-3" />
 
       <div className="shrink-0 border-t border-black/[0.06] dark:border-white/[0.06] px-4 py-3 flex items-center justify-between">
         <SignOutButton label={strings.signOut} />
