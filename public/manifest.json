@@ -22,6 +22,30 @@
   ],
   "shortcuts": [
     {
+      "name": "مهامي وخططي",
+      "short_name": "مهامي",
+      "description": "يفتح على طول في المهام والخطط.",
+      "url": "/tasks?tab=tasks",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "تقدّمي",
+      "short_name": "تقدّمي",
+      "description": "يفتح على طول في شارت الإنجاز.",
+      "url": "/tasks?tab=progress",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
       "name": "جدولي (يوم / أسبوع / شهر / سنة)",
       "short_name": "جدولي",
       "description": "يفتح على طول في التقويم وخطة اليوم.",
@@ -60,5 +84,6 @@
         }
       ]
     }
-  ]
+  ],
+  "id": "/dashboard"
 }
