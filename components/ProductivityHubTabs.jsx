@@ -63,7 +63,7 @@ export default function ProductivityHubTabs({ userId, strings, locale, data }) {
       </div>
 
       {(tab === "tasks" || tab === "calendar") && (
-        <PlansPanel userId={userId} initialPlans={data.plans || []} locale={locale} />
+        <PlansPanel userId={userId} initialPlans={data.plans || []} initialSteps={data.planSteps || []} locale={locale} />
       )}
 
       {tab === "tasks" && (
@@ -82,7 +82,7 @@ export default function ProductivityHubTabs({ userId, strings, locale, data }) {
       )}
 
       {tab === "progress" && (
-        <ProgressCharts plans={data.plans || []} top3History={data.top3History || []} locale={locale} />
+        <ProgressCharts plans={data.plans || []} planSteps={data.planSteps || []} top3History={data.top3History || []} locale={locale} />
       )}
 
       {tab === "reset" && (
